@@ -1,0 +1,129 @@
+<!doctype html>
+<html lang="hu">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#f7f5ef">
+  <meta name="description" content="Matematikai játékok 8. osztályosoknak.">
+  <title>Matematikai játékok – 8. osztály</title>
+  <style>
+    :root {
+      color-scheme: light;
+      --ink: #1f292d;
+      --muted: #536268;
+      --paper: #fff;
+      --line: #e4e2db;
+      --accent: #16695f;
+      --accent-soft: #e5f2ef;
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      background: #f7f5ef;
+      color: var(--ink);
+      font-family: system-ui, -apple-system, "Segoe UI", sans-serif;
+    }
+
+    main {
+      width: min(920px, calc(100% - 32px));
+      margin: 0 auto;
+      padding-block: clamp(44px, 8vw, 90px) 56px;
+    }
+
+    header { margin-bottom: 30px; }
+
+    .grade {
+      margin: 0 0 10px;
+      color: var(--accent);
+      font-size: .85rem;
+      font-weight: 750;
+    }
+
+    h1 {
+      margin: 0;
+      font: 800 clamp(2.25rem, 7vw, 4.5rem) / 1.02 Georgia, serif;
+      letter-spacing: -.045em;
+    }
+
+    .games {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(min(100%, 320px), 445px));
+      gap: 18px;
+    }
+
+    .card {
+      display: flex;
+      flex-direction: column;
+      align-items: flex-start;
+      padding: clamp(20px, 4vw, 28px);
+      border: 1px solid var(--line);
+      border-radius: 20px;
+      background: var(--paper);
+      box-shadow: 0 8px 24px #1f292d0a;
+      color: inherit;
+      text-decoration: none;
+    }
+
+    .card:hover { border-color: var(--accent); }
+    .card:focus-visible { outline: 3px solid var(--accent); outline-offset: 4px; }
+
+    .card-top {
+      display: flex;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 12px;
+      margin-bottom: 16px;
+    }
+
+    .icon {
+      display: grid;
+      width: 49px;
+      height: 49px;
+      place-items: center;
+      border-radius: 13px;
+      background: #f5e9df;
+      font-size: 1.55rem;
+    }
+
+    .tags { display: flex; flex-wrap: wrap; gap: 6px; }
+
+    .tag {
+      padding: 5px 10px;
+      border-radius: 999px;
+      background: var(--accent-soft);
+      color: var(--accent);
+      font-size: .8rem;
+      font-weight: 700;
+    }
+
+    .card h2 { margin: 0; font-size: 1.45rem; }
+    .card p { margin: 8px 0 20px; color: var(--muted); line-height: 1.55; }
+    .go { margin-top: auto; color: var(--accent); font-weight: 750; }
+    .card:hover .go { text-decoration: underline; }
+  </style>
+</head>
+<body>
+  <main>
+    <header>
+      <p class="grade">8. osztály</p>
+      <h1>Matematikai játékok</h1>
+    </header>
+
+    <section class="games" aria-label="Játékok">
+      <a class="card" href="jatekok/pitagorasz-tetel/index.html" data-tags="geometria">
+        <div class="card-top">
+          <span class="icon" aria-hidden="true">📐</span>
+          <div class="tags">
+            <span class="tag">Geometria</span>
+          </div>
+        </div>
+        <h2>Pitagorasz-tétel</h2>
+        <p>Rendezd át a háromszögeket, és fedezz fel három bizonyítást!</p>
+        <span class="go">Megnyitás <span aria-hidden="true">→</span></span>
+      </a>
+    </section>
+  </main>
+</body>
+</html>

@@ -1,0 +1,680 @@
+<!doctype html>
+<html lang="hu">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#f6f3ec">
+  <title>Miért irracionális a √2?</title>
+  <style>
+    :root {
+      color-scheme: light;
+      --ink: #202b30;
+      --muted: #536268;
+      --background: #f6f3ec;
+      --paper: #fff;
+      --line: #dbd8ce;
+      --accent: #17665d;
+      --accent-dark: #11534c;
+      --accent-soft: #e1f0eb;
+      --warm: #f8edd6;
+      --math: Georgia, "Times New Roman", serif;
+    }
+
+    *, *::before, *::after { box-sizing: border-box; }
+    [hidden] { display: none !important; }
+
+    body {
+      margin: 0;
+      color: var(--ink);
+      background: var(--background);
+      font: 1rem / 1.55 system-ui, sans-serif;
+    }
+
+    main {
+      width: min(960px, calc(100% - 32px));
+      margin-inline: auto;
+      padding-block: 20px 52px;
+    }
+
+    h1, h2, h3, p, figure { margin: 0; }
+    h1, h2, h3 { line-height: 1.22; }
+
+    h1 {
+      margin-top: 14px;
+      font: 800 clamp(2.45rem, 7vw, 4.4rem) / 1.04 var(--math);
+      letter-spacing: -.045em;
+    }
+
+    h2 { font-size: 1.2rem; }
+    h3 { font-size: 1.22rem; }
+
+    .back-link {
+      color: var(--accent-dark);
+      font-size: .88rem;
+      font-weight: 700;
+      text-underline-offset: .18em;
+    }
+
+    .proof-tabs {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-block: 20px;
+    }
+
+    .proof-tabs [aria-selected="true"] {
+      background: var(--accent-soft);
+      border-color: var(--accent);
+      color: var(--accent-dark);
+    }
+
+    .proof-header {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px 16px;
+      margin-bottom: 12px;
+    }
+
+    .progress {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      padding: 0;
+      margin: 0 0 18px;
+      list-style: none;
+    }
+
+    .progress li {
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      padding: 6px 10px;
+      color: var(--muted);
+      background: var(--paper);
+      font-size: .84rem;
+      font-weight: 650;
+    }
+
+    .progress [aria-current="step"] {
+      border-color: var(--accent);
+      color: var(--accent-dark);
+      background: var(--accent-soft);
+    }
+
+    .discovery-layout, .card-layout {
+      display: grid;
+      grid-template-columns: minmax(0, .88fr) minmax(0, 1.12fr);
+      align-items: start;
+      gap: 16px;
+    }
+
+    .card-layout { grid-template-columns: minmax(0, .64fr) minmax(0, 1.36fr); }
+
+    .panel {
+      min-width: 0;
+      padding: clamp(16px, 3vw, 26px);
+      border: 1px solid var(--line);
+      border-radius: 16px;
+      background: var(--paper);
+    }
+
+    .square-panel { display: grid; justify-items: center; gap: 12px; }
+
+    .square-diagram { display: block; width: min(100%, 310px); height: auto; }
+    .unit-fill { fill: var(--warm); }
+    .diagonal-square { fill: var(--accent-soft); stroke: var(--accent-dark); stroke-width: 2; }
+    .shared-half { fill: #c8e6db; }
+    .square-partition { fill: none; stroke: var(--accent); stroke-width: 1.25; stroke-dasharray: 4 3; }
+    .unit-outline { fill: none; stroke: #8a572c; stroke-width: 2; }
+    .unit-diagonal { fill: none; stroke: var(--accent-dark); stroke-width: 2.5; }
+    .square-diagram text { font-family: var(--math); text-anchor: middle; }
+    .half-labels { fill: var(--accent-dark); font-size: 19px; }
+    .unit-labels { fill: #734422; font-size: 18px; font-weight: 700; }
+    .diagonal-tag { fill: var(--paper); stroke: var(--accent-dark); }
+    .diagonal-label { fill: var(--accent-dark); font-size: 20px; font-weight: 700; }
+
+    figcaption { color: var(--muted); font-size: .91rem; }
+    figcaption strong { color: var(--accent-dark); }
+
+    .math, .display-math { font-family: var(--math); }
+
+    .display-math {
+      color: var(--accent-dark);
+      font-size: clamp(1.65rem, 5vw, 2.4rem);
+      font-weight: 700;
+      line-height: 1.2;
+    }
+
+    sup { font-size: .67em; }
+
+    .fraction {
+      display: inline-grid;
+      min-width: 1.1em;
+      vertical-align: middle;
+      text-align: center;
+      line-height: 1.03;
+    }
+
+    .fraction > :first-child { border-bottom: 1px solid currentColor; padding-bottom: .06em; }
+    .fraction > :last-child { padding-top: .06em; }
+
+    .task > * + * { margin-top: 12px; }
+    .task > p:not(.display-math) { color: var(--muted); }
+
+    fieldset { min-width: 0; margin: 0; padding: 0; border: 0; }
+    legend { padding: 0; margin-bottom: 8px; font-weight: 700; }
+
+    .option {
+      display: flex;
+      align-items: baseline;
+      gap: 10px;
+      padding: 7px 10px;
+      border: 1px solid transparent;
+      border-radius: 8px;
+      cursor: pointer;
+    }
+
+    .option input { flex: none; margin: 0; accent-color: var(--accent); }
+    .option .math { font-weight: 700; font-size: 1.12em; }
+    .option:has(input:checked) { background: var(--accent-soft); border-color: var(--accent); }
+    .option:has(input:focus-visible) { outline: 2px solid var(--accent); outline-offset: 2px; }
+    .option:has(input:disabled) { cursor: default; }
+    .option:hover:has(input:enabled):not(:has(input:checked)) { background: var(--background); }
+
+    .actions { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 12px; }
+
+    .button {
+      min-height: 40px;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      color: var(--ink);
+      background: var(--paper);
+      cursor: pointer;
+    }
+
+    .button { padding: 8px 12px; font: 700 .88rem / 1.2 system-ui, sans-serif; }
+    a.button { display: inline-flex; align-items: center; text-decoration: none; }
+    .button.primary { background: var(--accent); border-color: var(--accent); color: #fff; }
+    .button:hover:enabled { border-color: var(--accent); }
+    .button.primary:hover:enabled, a.button.primary:hover { background: var(--accent-dark); }
+    .button:disabled { color: var(--muted); background: var(--background); border-color: var(--line); cursor: default; }
+    :where(a, button):focus-visible { outline: 3px solid var(--accent); outline-offset: 3px; }
+
+    .feedback:not(:empty) { margin-top: 10px; font-size: .9rem; font-weight: 650; }
+    .feedback[data-result="correct"] { color: var(--accent-dark); }
+    .feedback[data-result="incorrect"] { color: #8c401e; }
+
+    .conclusion {
+      margin-top: 12px;
+      padding: 12px 16px;
+      border: 1px solid #accfc4;
+      border-radius: 10px;
+      background: var(--accent-soft);
+    }
+
+    .conclusion p + p { margin-top: 8px; }
+
+    .proof-notes dl { margin: 12px 0 0; }
+    .proof-notes dt { font-weight: 700; }
+    .proof-notes dd { margin: 3px 0 12px; color: var(--muted); font-size: .9rem; }
+    .proof-notes dd:last-child { margin-bottom: 0; }
+
+    .proof-cards {
+      display: grid;
+      gap: 8px;
+      padding: 0;
+      list-style: none;
+    }
+
+    .proof-card {
+      display: grid;
+      grid-template-columns: auto minmax(0, 1fr);
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: #faf9f6;
+    }
+
+    .card-grip {
+      display: grid;
+      width: 36px;
+      min-height: 44px;
+      place-items: center;
+      color: var(--muted);
+      cursor: grab;
+      touch-action: none;
+      user-select: none;
+    }
+
+    .card-content {
+      min-height: 44px;
+      padding: 8px 12px 8px 0;
+      border: 0;
+      border-radius: 6px;
+      color: inherit;
+      background: none;
+      font: inherit;
+      font-size: .94rem;
+      text-align: start;
+      cursor: pointer;
+    }
+
+    .card-content:focus-visible { outline-offset: -2px; }
+    .proof-card:has(.card-content:enabled:hover) { border-color: var(--accent); }
+    .proof-card[data-problem] { border-color: #b46c45; background: #fdf3eb; }
+    .proof-card:has([aria-pressed="true"]) { border-color: var(--accent); background: var(--accent-soft); }
+    .proof-card[data-drop] { outline: 2px dashed var(--accent); outline-offset: 1px; }
+    .proof-cards.is-dragging .card-grip { cursor: grabbing; }
+    .proof-cards[data-solved] .proof-card { border-color: #accfc4; background: #f1f8f5; }
+    .proof-cards[data-solved] .card-grip { visibility: hidden; }
+    .proof-cards[data-solved] .card-content { cursor: default; }
+    #card-conclusion .display-math { margin: 0; }
+
+    @media (max-width: 640px) {
+      .discovery-layout, .card-layout { grid-template-columns: 1fr; gap: 12px; }
+      .square-diagram { width: min(100%, 200px); }
+    }
+  </style>
+</head>
+<body>
+  <main>
+    <header class="page-header">
+      <a class="back-link" href="../../index.html">← Vissza a játékokhoz</a>
+      <h1>Miért irracionális a √2?</h1>
+    </header>
+
+    <div class="proof-tabs" role="tablist" aria-label="A bizonyítás módjai">
+      <button class="button" type="button" role="tab" id="discovery-tab" aria-controls="discovery-proof" aria-selected="true">Prímtényezők</button>
+      <button class="button" type="button" role="tab" id="cards-tab" aria-controls="cards-proof" aria-selected="false" tabindex="-1">Bizonyításkirakó</button>
+    </div>
+
+    <section id="discovery-proof" role="tabpanel" aria-labelledby="discovery-tab">
+      <div class="proof-header">
+        <h2>Felfedezés prímtényezőkkel</h2>
+        <button class="button" type="button" id="reset">Újrakezdés</button>
+      </div>
+
+      <ol class="progress" aria-label="A bizonyítás lépései">
+        <li aria-current="step">1. Feltevés és átrendezés</li>
+        <li>2. Páros vagy páratlan?</li>
+      </ol>
+
+      <div class="discovery-layout">
+        <figure class="panel square-panel">
+          <svg class="square-diagram" viewBox="44 4 246 232" role="img" aria-labelledby="square-title square-description">
+            <title id="square-title">Az egységnégyzet átlója</title>
+            <desc id="square-description">Az egységnégyzet átlója a zöld négyzet egyik oldala. A zöld négyzet négy fél egységnégyzetre oszlik.</desc>
+            <rect class="unit-fill" x="72" y="112" width="96" height="96" />
+            <polygon class="diagonal-square" points="72,112 168,16 264,112 168,208" />
+            <polygon class="shared-half" points="72,112 168,112 168,208" />
+            <path class="square-partition" d="M168 16V208 M72 112H264" />
+            <rect class="unit-outline" x="72" y="112" width="96" height="96" />
+            <path class="unit-diagonal" d="M72 112l96 96" />
+
+            <g class="half-labels" aria-hidden="true">
+              <text x="135" y="84">½</text>
+              <text x="201" y="84">½</text>
+              <text x="137" y="146">½</text>
+              <text x="201" y="146">½</text>
+            </g>
+            <g class="unit-labels" aria-hidden="true">
+              <text x="56" y="165">1</text>
+              <text x="120" y="229">1</text>
+            </g>
+            <g transform="translate(118 158) rotate(45)" aria-hidden="true">
+              <rect class="diagonal-tag" x="-20" y="-13" width="40" height="26" rx="5" />
+              <text class="diagonal-label" y="7">√2</text>
+            </g>
+          </svg>
+          <figcaption>A zöld négyzet négy fél egységnégyzetből áll, így a területe <strong>2</strong>. Az egységnégyzet átlója ennek a négyzetnek az oldala, ezért a hossza a terület négyzetgyöke, vagyis <strong>√2</strong>.</figcaption>
+        </figure>
+
+        <section class="stage panel task" aria-labelledby="assumption-heading">
+          <h3 id="assumption-heading" tabindex="-1">Tegyük fel, hogy √2 felírható két egész szám hányadosaként!</h3>
+          <p class="display-math" aria-label="Négyzetgyök kettő egyenlő a per b">
+            <span aria-hidden="true">√2 = <span class="fraction"><i>a</i><i>b</i></span></span>
+          </p>
+          <p><i>a</i> és <i>b</i> pozitív egész számok.</p>
+          <form data-answer="middle" data-hint="A tört számlálóját és nevezőjét is emeld négyzetre, majd szorozz b²-tel!">
+            <fieldset>
+              <legend>Mit kapsz négyzetre emelés és átrendezés után?</legend>
+              <label class="option"><input type="radio" name="equation" value="first" required><span class="math">4<i>b</i><sup>2</sup> = <i>a</i><sup>2</sup></span></label>
+              <label class="option"><input type="radio" name="equation" value="middle"><span class="math">2<i>b</i><sup>2</sup> = <i>a</i><sup>2</sup></span></label>
+              <label class="option"><input type="radio" name="equation" value="last"><span class="math"><i>b</i><sup>2</sup> = 2<i>a</i><sup>2</sup></span></label>
+            </fieldset>
+            <p class="feedback" role="status"></p>
+            <div class="actions">
+              <button class="button primary check" type="submit">Ellenőrzés</button>
+              <button class="button primary" type="button" data-next hidden>Tovább →</button>
+            </div>
+          </form>
+        </section>
+
+        <section class="stage panel task" aria-labelledby="parity-heading" hidden>
+          <h3 id="parity-heading" tabindex="-1">Páros vagy páratlan?</h3>
+          <p class="display-math">2<i>b</i><sup>2</sup> = <i>a</i><sup>2</sup></p>
+          <form data-answer="last" data-hint="Írd szorzatként a két oldalt! Balra 2 · b · b, jobbra a · a áll.">
+            <fieldset>
+              <legend>Hány kettes szerepel a két oldal prímtényezős felbontásában?</legend>
+              <label class="option"><input type="radio" name="parity" value="first" required>Balra páros, jobbra páratlan sok.</label>
+              <label class="option"><input type="radio" name="parity" value="middle">Mindkét oldalon páros sok.</label>
+              <label class="option"><input type="radio" name="parity" value="last">Balra páratlan, jobbra páros sok.</label>
+            </fieldset>
+            <p class="feedback" role="status"></p>
+            <div class="conclusion" tabindex="-1" hidden>
+              <p>Balra a <i>b</i> prímtényezői kétszer szerepelnek, és van még egy 2-es. Jobbra az <i>a</i> prímtényezői kétszer szerepelnek.</p>
+              <p>A prímtényezős felbontás egyértelmű, így azonos számokban ugyanannyi kettesnek kellene lennie. Ezért nincs két olyan egész szám, amelynek a hányadosa √2.</p>
+              <p class="display-math">A √2 irracionális.</p>
+              <div class="actions">
+                <a class="button primary" href="#cards-proof">Tovább a Bizonyításkirakóra →</a>
+              </div>
+            </div>
+            <div class="actions">
+              <button class="button" type="button" data-back>← Vissza</button>
+              <button class="button primary check" type="submit">Ellenőrzés</button>
+            </div>
+          </form>
+        </section>
+      </div>
+    </section>
+
+    <section class="card-layout" id="cards-proof" role="tabpanel" aria-labelledby="cards-tab" hidden>
+      <aside class="panel proof-notes" aria-labelledby="notes-heading">
+        <h2 id="notes-heading">Emlékeztető</h2>
+        <dl>
+          <dt>Relatív prímek</dt>
+          <dd>Két egész szám relatív prím, ha a legnagyobb közös osztójuk 1.</dd>
+          <dt>Páros négyzet</dt>
+          <dd>Egy egész szám négyzete pontosan akkor páros, ha a szám maga páros.</dd>
+        </dl>
+      </aside>
+
+      <section class="panel task" aria-labelledby="cards-heading">
+        <h2 id="cards-heading" tabindex="-1">Rakd sorrendbe a három csempét!</h2>
+        <p id="card-instructions">Húzd a csempét a fogantyújánál, vagy válaszd ki, majd válaszd azt a csempét, amelynek a helyére tennéd.</p>
+
+        <ol class="proof-cards" aria-label="A bizonyítás lépései" aria-describedby="card-instructions">
+          <li class="proof-card">
+            <span class="card-grip" aria-hidden="true">⠿</span>
+            <button class="card-content" type="button" aria-pressed="false">Tegyük fel, hogy <strong class="math">√2 = <i>a</i>/<i>b</i></strong>, ahol <i>a</i> és <i>b</i> relatív prím egész számok, és <strong class="math"><i>b</i> ≠ 0</strong>. Minden racionális számnak van ilyen törtalakja.</button>
+          </li>
+          <li class="proof-card" data-hint="Melyik feltevésből kapjuk ezt az egyenlőséget?">
+            <span class="card-grip" aria-hidden="true">⠿</span>
+            <button class="card-content" type="button" aria-pressed="false">Négyzetre emelés és átrendezés után <strong class="math"><i>a</i><sup>2</sup> = 2<i>b</i><sup>2</sup></strong>. A jobb oldal páros, így <i>a</i><sup>2</sup> és ezért <i>a</i> is páros. Ebből következik, hogy <strong><i>a</i><sup>2</sup> osztható 4-gyel</strong>.</button>
+          </li>
+          <li class="proof-card" data-hint="Melyik lépés mutatja meg, hogy a² osztható 4-gyel?">
+            <span class="card-grip" aria-hidden="true">⠿</span>
+            <button class="card-content" type="button" aria-pressed="false">Ekkor 2<i>b</i><sup>2</sup> is osztható 4-gyel, tehát <i>b</i><sup>2</sup> páros, és így <i>b</i> is páros. A 2 közös osztója <i>a</i>-nak és <i>b</i>-nek, ami <strong>ellentmond annak, hogy relatív prímek</strong>.</button>
+          </li>
+        </ol>
+
+        <p class="feedback" id="card-feedback" role="status"></p>
+        <div class="conclusion" id="card-conclusion" tabindex="-1" hidden>
+          <p class="display-math">A √2 irracionális.</p>
+        </div>
+        <div class="actions">
+          <button class="button primary" type="button" id="check-cards">Ellenőrzés</button>
+          <button class="button" type="button" id="shuffle-cards">Újrakeverés</button>
+        </div>
+      </section>
+    </section>
+  </main>
+  <script>
+    "use strict";
+
+    const stages = [...document.querySelectorAll(".stage")];
+    const progressItems = [...document.querySelectorAll(".progress li")];
+    const quizzes = [...document.querySelectorAll(".task form")];
+    const conclusion = document.querySelector("#discovery-proof .conclusion");
+
+    let activeStage = 0;
+
+    function showStage(index) {
+      stages[activeStage].hidden = true;
+      progressItems[activeStage].removeAttribute("aria-current");
+      activeStage = index;
+      const stage = stages[index];
+      stage.hidden = false;
+      progressItems[index].setAttribute("aria-current", "step");
+      stage.querySelector("h3").focus();
+    }
+
+    quizzes.forEach((quiz) => {
+      const fieldset = quiz.querySelector("fieldset");
+      const feedback = quiz.querySelector(".feedback");
+      const check = quiz.querySelector(".check");
+      const next = quiz.querySelector("[data-next]");
+
+      quiz.addEventListener("submit", (event) => {
+        event.preventDefault();
+        const selected = fieldset.querySelector("input:checked");
+        if (fieldset.disabled || !selected) return;
+
+        if (selected.value !== quiz.dataset.answer) {
+          feedback.dataset.result = "incorrect";
+          feedback.textContent = quiz.dataset.hint;
+          return;
+        }
+
+        fieldset.disabled = true;
+        check.disabled = true;
+        feedback.dataset.result = "correct";
+        feedback.textContent = "Helyes!";
+
+        if (next) {
+          next.hidden = false;
+          next.focus({ preventScroll: true });
+        } else {
+          conclusion.hidden = false;
+          conclusion.focus();
+        }
+      });
+
+      quiz.addEventListener("change", () => {
+        feedback.textContent = "";
+        delete feedback.dataset.result;
+      });
+
+      next?.addEventListener("click", () => showStage(activeStage + 1));
+      quiz.querySelector("[data-back]")?.addEventListener("click", () => showStage(activeStage - 1));
+    });
+
+    document.querySelector("#reset").addEventListener("click", () => {
+      for (const quiz of quizzes) {
+        quiz.reset();
+        quiz.querySelector("fieldset").disabled = false;
+        quiz.querySelector(".check").disabled = false;
+        const feedback = quiz.querySelector(".feedback");
+        feedback.textContent = "";
+        delete feedback.dataset.result;
+      }
+      document.querySelectorAll("[data-next]").forEach((next) => { next.hidden = true; });
+
+      conclusion.hidden = true;
+      showStage(0);
+    });
+
+    const proofTabs = [...document.querySelectorAll(".proof-tabs button")];
+    const proofPanels = proofTabs.map((tab) => document.getElementById(tab.getAttribute("aria-controls")));
+
+    function selectProof(index) {
+      proofTabs.forEach((tab, position) => {
+        const selected = position === index;
+        tab.setAttribute("aria-selected", String(selected));
+        tab.tabIndex = selected ? 0 : -1;
+        proofPanels[position].hidden = !selected;
+      });
+      proofTabs[index].focus({ preventScroll: true });
+    }
+
+    proofTabs.forEach((tab, index) => {
+      tab.addEventListener("click", () => selectProof(index));
+      tab.addEventListener("keydown", (event) => {
+        const last = proofTabs.length - 1;
+        const destinations = {
+          ArrowLeft: index === 0 ? last : index - 1,
+          ArrowRight: index === last ? 0 : index + 1,
+          Home: 0,
+          End: last,
+        };
+        if (!Object.hasOwn(destinations, event.key)) return;
+        event.preventDefault();
+        selectProof(destinations[event.key]);
+      });
+    });
+
+    const cardsLink = conclusion.querySelector("a");
+    const cardsIndex = proofPanels.findIndex((panel) => "#" + panel.id === cardsLink.hash);
+
+    function openCardsProof() {
+      selectProof(cardsIndex);
+      document.getElementById("cards-heading").focus();
+    }
+
+    cardsLink.addEventListener("click", (event) => {
+      if (event.ctrlKey || event.metaKey || event.shiftKey || event.altKey) return;
+      event.preventDefault();
+      openCardsProof();
+    });
+    if (location.hash === cardsLink.hash) openCardsProof();
+
+    function setupProofCards(panel) {
+      const list = panel.querySelector(".proof-cards");
+      const correctOrder = [...list.children];
+      const buttons = list.querySelectorAll(".card-content");
+      const check = panel.querySelector("#check-cards");
+      const shuffle = panel.querySelector("#shuffle-cards");
+      const feedback = panel.querySelector("#card-feedback");
+      const result = panel.querySelector("#card-conclusion");
+
+      let picked = null;
+      let problem = null;
+      let drag = null;
+      let dropTarget = null;
+
+      function pick(card) {
+        picked?.querySelector(".card-content").setAttribute("aria-pressed", "false");
+        picked = card;
+        picked?.querySelector(".card-content").setAttribute("aria-pressed", "true");
+      }
+
+      function showFeedback(message, state = "", incorrectCard = null) {
+        problem?.removeAttribute("data-problem");
+        problem = incorrectCard;
+        problem?.setAttribute("data-problem", "");
+        feedback.dataset.result = state;
+        feedback.textContent = message;
+      }
+
+      function moveCard(card, target) {
+        const cards = [...list.children];
+        const newPosition = cards.indexOf(target);
+        const movingDown = cards.indexOf(card) < newPosition;
+        list.insertBefore(card, movingDown ? target.nextElementSibling : target);
+        pick(null);
+        showFeedback(`A csempe új helye ${newPosition + 1}.`);
+        card.querySelector(".card-content").focus({ preventScroll: true });
+      }
+
+      list.addEventListener("click", (event) => {
+        const button = event.target.closest(".card-content");
+        if (!button || check.disabled || drag) return;
+        const card = button.parentElement;
+        if (picked && picked !== card) {
+          moveCard(picked, card);
+          return;
+        }
+        pick(picked ? null : card);
+        showFeedback(picked ? "Válaszd ki a célhelyén lévő kártyát!" : "");
+      });
+
+      function cardAtPointer(event) {
+        const bounds = list.getBoundingClientRect();
+        if (event.clientX < bounds.left || event.clientX > bounds.right ||
+            event.clientY < bounds.top || event.clientY > bounds.bottom) return null;
+        return [...list.children].find((card) => event.clientY <= card.getBoundingClientRect().bottom) ?? null;
+      }
+
+      function markDropTarget(card) {
+        dropTarget?.removeAttribute("data-drop");
+        dropTarget = card;
+        dropTarget?.setAttribute("data-drop", "");
+      }
+
+      list.addEventListener("pointerdown", (event) => {
+        const grip = event.target.closest(".card-grip");
+        if (!grip || check.disabled || drag || event.button !== 0) return;
+        grip.setPointerCapture(event.pointerId);
+        drag = { card: grip.parentElement, pointerId: event.pointerId };
+        pick(drag.card);
+        showFeedback("");
+        list.classList.add("is-dragging");
+      });
+
+      list.addEventListener("pointermove", (event) => {
+        if (drag?.pointerId !== event.pointerId) return;
+        const card = cardAtPointer(event);
+        markDropTarget(card === drag.card ? null : card);
+      });
+
+      function finishDrag(event) {
+        if (drag?.pointerId !== event.pointerId) return;
+        const { card } = drag;
+        const target = event.type === "pointerup" ? cardAtPointer(event) : null;
+        drag = null;
+        markDropTarget(null);
+        list.classList.remove("is-dragging");
+        if (target && target !== card) moveCard(card, target);
+        else pick(null);
+      }
+
+      list.addEventListener("pointerup", finishDrag);
+      list.addEventListener("pointercancel", finishDrag);
+      list.addEventListener("lostpointercapture", finishDrag);
+
+      function shuffleCards() {
+        if (drag) return;
+        const previous = [...list.children];
+        const mixed = [...correctOrder];
+        for (let i = mixed.length - 1; i > 0; i -= 1) {
+          const j = Math.floor(Math.random() * (i + 1));
+          [mixed[i], mixed[j]] = [mixed[j], mixed[i]];
+        }
+        while (mixed.every((card, i) => card === correctOrder[i]) ||
+               mixed.every((card, i) => card === previous[i])) {
+          mixed.push(mixed.shift());
+        }
+        pick(null);
+        showFeedback("");
+        list.replaceChildren(...mixed);
+        list.removeAttribute("data-solved");
+        buttons.forEach((button) => { button.disabled = false; });
+        check.disabled = false;
+        result.hidden = true;
+      }
+
+      check.addEventListener("click", () => {
+        if (drag || check.disabled) return;
+        const incorrectCard = [...list.children].find((card, i) => card !== correctOrder[i]);
+        pick(null);
+        if (incorrectCard) {
+          showFeedback(incorrectCard.dataset.hint, "incorrect", incorrectCard);
+          return;
+        }
+
+        showFeedback("Helyes! Összeállt a bizonyítás.", "correct");
+        list.setAttribute("data-solved", "");
+        buttons.forEach((button) => { button.disabled = true; });
+        check.disabled = true;
+        result.hidden = false;
+        result.focus({ preventScroll: true });
+      });
+
+      shuffle.addEventListener("click", shuffleCards);
+      shuffleCards();
+    }
+
+    setupProofCards(document.querySelector("#cards-proof"));
+  </script>
+</body>
+</html>

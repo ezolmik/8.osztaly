@@ -629,7 +629,7 @@
           <div class="actions" id="sum-proof-actions" hidden>
             <button type="button" class="primary" id="to-sum-proof">Tovább</button>
           </div>
-          <div class="reason" id="sum-proof-tiles" hidden>
+          <div id="sum-proof-tiles" hidden>
             <h3 id="sum-proof-title" tabindex="-1">Rakd sorrendbe a három csempét!</h3>
             <p class="card-instructions" id="sum-instructions">Húzd a csempét a fogantyújánál, vagy kattints rá, majd arra a csempére, amelynek a helyére tennéd.</p>
             <ol class="proof-cards" aria-label="Az összegnégyzetes bizonyítás csempéi" aria-describedby="sum-instructions"></ol>
@@ -637,7 +637,7 @@
             <div class="actions card-actions">
               <button type="button" class="primary" data-check>Ellenőrzés</button>
               <button type="button" data-shuffle>Újrakeverés</button>
-              <button type="button" id="to-difference" hidden>Tovább a különbségnégyzethez →</button>
+              <button type="button" id="to-difference" data-next hidden>Tovább a különbségnégyzethez →</button>
             </div>
           </div>
         </div>
@@ -674,6 +674,7 @@
           <div class="actions card-actions">
             <button type="button" class="primary" data-check>Ellenőrzés</button>
             <button type="button" data-shuffle>Újrakeverés</button>
+            <button type="button" id="to-euclid" data-next hidden>Tovább Eukleidész bizonyításához →</button>
           </div>
         </div>
       </div>
@@ -726,6 +727,9 @@
             <p class="feedback" id="euclid-theorem-feedback" role="status" tabindex="-1"></p>
           </form>
           <p class="equation" id="euclid-result" tabindex="-1" aria-label="A négyzet plusz b négyzet egyenlő c négyzet" hidden>a<sup>2</sup> + b<sup>2</sup> = c<sup>2</sup></p>
+          <div class="actions" id="euclid-next-actions" hidden>
+            <button type="button" class="primary" id="to-einstein">Tovább Einstein bizonyításához →</button>
+          </div>
         </div>
       </div>
     </section>
@@ -767,8 +771,8 @@
               <text class="einstein-letter einstein-beta" x="121" y="96">β</text>
             </g>
             <g pointer-events="none" aria-hidden="true">
-              <text id="einstein-area-b" class="math-label" y="140">T<tspan dy="5" font-size="65%">b</tspan></text>
-              <text id="einstein-area-a" class="math-label" y="140">T<tspan dy="5" font-size="65%">a</tspan></text>
+              <text id="einstein-area-b" class="math-label" y="140">t<tspan dy="5" font-size="65%">b</tspan></text>
+              <text id="einstein-area-a" class="math-label" y="140">t<tspan dy="5" font-size="65%">a</tspan></text>
             </g>
             <g id="einstein-track" role="slider" tabindex="0" aria-label="A C-ből induló szakasz végpontja az átfogón" aria-valuemin="0" aria-valuemax="300" aria-describedby="einstein-cut-instruction">
               <path d="M28 188 H328" fill="none" stroke="transparent" stroke-width="40" />
@@ -791,8 +795,8 @@
         <div class="panel">
           <div class="einstein-stage" id="einstein-split-stage">
             <h3>1. Felbontás</h3>
-            <p class="equation">T<sub>c</sub> = T<sub>a</sub> + T<sub>b</sub></p>
-            <p><i>T</i><sub>c</sub> a teljes terület. Az összeg a vágás szögétől független.</p>
+            <p class="equation">t<sub>c</sub> = t<sub>a</sub> + t<sub>b</sub></p>
+            <p><i>t</i><sub>c</sub> a teljes terület. Az összeg a vágás szögétől független.</p>
             <div id="einstein-cut-task">
               <p class="feedback" id="einstein-cut-instruction">Húzd a pontot az átfogón a 90°-os helyzetbe!</p>
             </div>
@@ -835,18 +839,18 @@
                 <span>a háromszög területe</span>
               </span>
             </p>
-            <p class="einstein-ratio einstein-ratio-equation" role="math" aria-label="k egyenlő a négyzet per T a, amely egyenlő b négyzet per T b, amely egyenlő c négyzet per T c">
+            <p class="einstein-ratio einstein-ratio-equation" role="math" aria-label="k egyenlő a négyzet per t a, amely egyenlő b négyzet per t b, amely egyenlő c négyzet per t c">
               <span>k =</span>
-              <span class="einstein-fraction"><span>a<sup>2</sup></span><span>T<sub>a</sub></span></span>
+              <span class="einstein-fraction"><span>a<sup>2</sup></span><span>t<sub>a</sub></span></span>
               <span>=</span>
-              <span class="einstein-fraction"><span>b<sup>2</sup></span><span>T<sub>b</sub></span></span>
+              <span class="einstein-fraction"><span>b<sup>2</sup></span><span>t<sub>b</sub></span></span>
               <span>=</span>
-              <span class="einstein-fraction"><span>c<sup>2</sup></span><span>T<sub>c</sub></span></span>
+              <span class="einstein-fraction"><span>c<sup>2</sup></span><span>t<sub>c</sub></span></span>
             </p>
-            <p class="equation" id="einstein-area-sum">T<sub>a</sub> + T<sub>b</sub> = T<sub>c</sub></p>
+            <p class="equation" id="einstein-area-sum">t<sub>a</sub> + t<sub>b</sub> = t<sub>c</sub></p>
             <button type="button" id="einstein-multiply" class="primary" aria-label="Mindhárom terület szorzása k-val" aria-controls="einstein-result" aria-expanded="false">× <i>k</i></button>
             <div id="einstein-result" tabindex="-1" hidden>
-              <p class="equation einstein-substitution"><i>k</i> · T<sub>a</sub> + <i>k</i> · T<sub>b</sub> = <i>k</i> · T<sub>c</sub></p>
+              <p class="equation einstein-substitution"><i>k</i> · t<sub>a</sub> + <i>k</i> · t<sub>b</sub> = <i>k</i> · t<sub>c</sub></p>
               <p class="equation" aria-label="a négyzet plusz b négyzet egyenlő c négyzet">a<sup>2</sup> + b<sup>2</sup> = c<sup>2</sup></p>
             </div>
           </div>
@@ -1318,7 +1322,7 @@
         const list = panel.querySelector(".proof-cards");
         const feedback = panel.querySelector(".proof-cards ~ .feedback");
         const check = panel.querySelector("[data-check]");
-        const next = panel.querySelector("#to-difference");
+        const next = panel.querySelector("[data-next]");
         let ordered;
         let picked = null;
         let gesture = null;
@@ -1510,6 +1514,8 @@
       byId("to-sliding").addEventListener("click", () => openView("sliding", true));
       byId("to-algebra").addEventListener("click", () => openView("algebra", true));
       byId("to-difference").addEventListener("click", () => openView("difference", true));
+      byId("to-euclid").addEventListener("click", () => openView("euclid", true));
+      byId("to-einstein").addEventListener("click", () => openView("einstein", true));
 
       function setupEuclid() {
         const points = {
@@ -1552,6 +1558,7 @@
         const theoremFeedback = byId("euclid-theorem-feedback");
         const action = byId("euclid-action");
         const result = byId("euclid-result");
+        const nextActions = byId("euclid-next-actions");
         const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)");
         let index = 0;
         let moveComplete = false;
@@ -1674,6 +1681,7 @@
           action.disabled = awaitingAnswer;
           action.classList.toggle("primary", !step.from && Boolean(step.action));
           result.hidden = theoremQuestion.hidden || !theoremChoices.disabled;
+          nextActions.hidden = result.hidden;
           drawBoard(step);
         }
 
@@ -1956,7 +1964,7 @@
           board.setAttribute("data-squares", "");
           board.setAttribute("viewBox", "-144 -176 644 692");
           board.removeAttribute("hidden");
-          board.setAttribute("aria-label", "A zöld háromszög területe T a, a sárgáé T b. Az oldalakra rajzolt négyzetek területe a négyzet, b négyzet és c négyzet.");
+          board.setAttribute("aria-label", "A zöld háromszög területe t a, a sárgáé t b. Az oldalakra rajzolt négyzetek területe a négyzet, b négyzet és c négyzet.");
           angles.setAttribute("hidden", "");
           times.hidden = false;
           byId("einstein-times-title").focus();
@@ -1984,7 +1992,7 @@
           board.removeAttribute("hidden");
           rightAngle.setAttribute("hidden", "");
           angles.setAttribute("hidden", "");
-          board.setAttribute("aria-label", "A zöld darab területe T a, a sárga darabé T b. A vágás pontja az AB átfogón mozgatható.");
+          board.setAttribute("aria-label", "A zöld darab területe t a, a sárga darabé t b. A vágás pontja az AB átfogón mozgatható.");
           cutFeedback.textContent = "";
           cutFeedback.removeAttribute("data-state");
           splitStage.hidden = false;
@@ -2399,12 +2407,14 @@
           "half-ab": "Ez egy háromszög területe. Mennyit ad ki a négy együtt?" },
         () => { sumProofActions.hidden = false; }, "two-ab");
       byId("to-sum-proof").addEventListener("click", () => {
+        sumTriangleQuestion.hidden = true;
         sumProofActions.hidden = true;
         sumProofTiles.hidden = false;
         byId("sum-proof-title").focus();
       });
       byId("reset-sum-build").addEventListener("click", () => {
         resetQuestion(sumTriangleQuestion, sumTriangleFeedback);
+        sumTriangleQuestion.hidden = false;
         sumProofActions.hidden = true;
         sumProofTiles.hidden = true;
       });

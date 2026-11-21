@@ -256,6 +256,11 @@
     .euclid-construction { fill: none; stroke: #65756e; stroke-width: 2; stroke-dasharray: 7 5; }
     .euclid-target { fill: none; stroke: var(--accent); stroke-width: 3; stroke-dasharray: 7 5; }
     .euclid-path { fill: none; stroke: #82531c; stroke-width: 3; stroke-dasharray: 5 6; }
+    .euclid-base { fill: none; stroke: #754496; stroke-width: 6; stroke-linecap: round; }
+    .euclid-height { fill: none; stroke: #175889; stroke-width: 3; stroke-dasharray: 6 5; }
+    .euclid-height-corner { fill: none; stroke: #175889; stroke-width: 2.5; }
+    .euclid-parallel { fill: none; stroke: #175889; stroke-width: 2; stroke-dasharray: 3 5; }
+    .euclid-mode-nav { margin: 8px 0 14px; }
     .euclid-handle { cursor: grab; }
     .euclid-handle circle { touch-action: none; }
     .euclid-paint-target { cursor: pointer; stroke: transparent; stroke-width: 4; }
@@ -791,6 +796,10 @@
           <button type="button" id="back-euclid" hidden>← Vissza</button>
           <button type="button" id="reset-euclid">Újrakezdés</button>
         </div>
+      </div>
+      <div class="mode-nav euclid-mode-nav" role="group" aria-label="Eukleidész bizonyításának változatai">
+        <button type="button" data-euclid-route="triangles" aria-pressed="true">Háromszögekkel</button>
+        <button type="button" data-euclid-route="parallelograms" aria-pressed="false">Paralelogrammákkal</button>
       </div>
       <div class="algebra-layout euclid-layout">
         <figure class="panel euclid-figure">
@@ -1951,7 +1960,15 @@
           A: [0, 0], B: [300, 0], C: [108, -144], D: [-144, -108], E: [-36, -252],
           F: [252, -336], G: [444, -192], H: [0, 300], I: [108, 300], J: [300, 300], K: [108, 0]
         };
+        const auxiliaryPoints = {
+          L: [points.B[0] + points.D[0], points.D[1]],
+          M: [points.C[0], points.C[1] + points.H[1]],
+          N: [points.G[0] - points.B[0], points.G[1]]
+        };
         const slideNote = base => `Csúsztatáskor ${base} alap és a hozzá tartozó magasság változatlan. Ezért a csúsztatás területtartó.`;
+        const shearNote = "A lila alap hossza és a szaggatott kék magasság változatlan, ezért a csúsztatás területtartó.";
+        const foldNote = "A tükrözés egybevágó háromszöget ad, ezért területtartó.";
+        const turnNote = "A forgatás egybevágó alakzatot ad, ezért területtartó.";
         const pairs = {
           left: { square: "DACE", rect: "AKIH", sourceDiagonal: "DC", targetDiagonal: "HK",
             fill: "#cce9db", shade: "#58c595", ink: "#1c6b55", name: "zöld", area: "b²",
@@ -1963,44 +1980,79 @@
         const leftSteps = [
           { from: "EDC", to: "ADC", fold: true, title: "Hajtás a DC átlóra", action: "Hajtsd rá",
             task: "Tükrözd az EDC háromszöget a DC átlóra! Az E csúcs az A-ba kerül.",
-            note: "A négyzetet az átló két egybevágó háromszögre osztja." },
+            note: foldNote },
           { from: "CAD", to: "BAD", title: "DAC → DAB", action: "Csúsztatás B-be",
             task: "Húzd C-t B-be az AD oldallal párhuzamosan!",
             note: slideNote("az AD") },
           { from: "BAD", to: "HAC", angle: 90, title: "DAB → HAC", action: "Forgatás A körül",
             task: "Húzd B-t az íven H-ba! A háromszög A körül 90°-kal fordul el.",
-            note: "A forgatás megőrzi a háromszög területét." },
+            note: turnNote },
           { from: "CAH", to: "KAH", title: "HAC → HAK", action: "Csúsztatás K-ba",
             task: "Húzd C-t K-ba az AH oldallal párhuzamosan!",
             note: slideNote("az AH") },
           { from: "AHK", to: "IHK", halfTurn: true, title: "A téglalap másik fele", action: "Fordítsd át",
             task: "Fordítsd el a HAK háromszög másolatát 180°-kal a HK átló felezőpontja körül!",
-            note: "Az A csúcs képe I. A két háromszög együtt kitölti az AKIH téglalapot." },
+            note: turnNote },
           { paint: true, title: "Színezd ki az egyenlő területet!", action: "Tovább a másik befogóhoz", question: "area" }
         ];
         const rightSteps = [
           { from: "FCG", to: "BCG", fold: true, title: "Hajtás a CG átlóra", action: "Hajtsd rá",
             task: "Tükrözd az FCG háromszöget a CG átlóra! Az F csúcs a B-be kerül.",
-            note: "A négyzetet az átló két egybevágó háromszögre osztja." },
+            note: foldNote },
           { from: "CBG", to: "ABG", title: "CBG → ABG", action: "Csúsztatás A-ba",
             task: "Húzd C-t A-ba a BG oldallal párhuzamosan!",
             note: slideNote("a BG") },
           { from: "ABG", to: "JBC", angle: -90, title: "ABG → JBC", action: "Forgatás B körül",
             task: "Húzd A-t az íven J-be! A háromszög B körül 90°-kal fordul el.",
-            note: "A háromszög területe ugyanakkora marad." },
+            note: turnNote },
           { from: "CBJ", to: "KBJ", title: "JBC → JBK", action: "Csúsztatás K-ba",
             task: "Húzd C-t K-ba a BJ oldallal párhuzamosan!",
             note: slideNote("a BJ") },
           { from: "BJK", to: "IJK", halfTurn: true, title: "A téglalap másik fele", action: "Fordítsd át",
             task: "Fordítsd el a JBK háromszög másolatát 180°-kal a JK átló felezőpontja körül!",
-            note: "A B csúcs képe I. A két háromszög együtt kitölti a KBJI téglalapot." },
+            note: turnNote },
           { paint: true, title: "Színezd ki az egyenlő területet!", action: "A területek összehasonlítása" }
         ];
-        const steps = [
-          ...leftSteps.map(step => ({ ...step, side: "left" })),
-          ...rightSteps.map(step => ({ ...step, side: "right" })),
-          { title: "A területek összehasonlítása", question: "theorem" }
+        const leftParallelograms = [
+          { from: "CEDA", to: "BLDA", base: "AD", title: "A zöld négyzetből paralelogramma", action: "Csúsztatás B-be",
+            task: "Húzd C-t B-be az egész CE oldallal együtt! A CB és az AD merőleges az AC-re, ezért párhuzamosak.",
+            note: shearNote },
+          { from: "BADL", to: "HACM", angle: 90, title: "A paralelogramma forgatása A körül", action: "Forgatás A körül",
+            task: "Húzd B-t az íven H-ba! A negyedfordulattal D a C-be kerül.", note: turnNote },
+          { from: "CMHA", to: "KIHA", base: "AH", title: "A paralelogrammából téglalap", action: "Csúsztatás K-ba",
+            task: "Húzd C-t K-ba az egész szemközti oldallal együtt! A CK az AH-val párhuzamos, mert mindkettő merőleges az AB-re.",
+            note: shearNote, done: "Helyes! A zöld négyzetből az AKIH téglalapot kaptad." },
+          { paint: true, title: "Színezd ki az egyenlő területet!", action: "Tovább a másik befogóhoz" }
         ];
+        const rightParallelograms = [
+          { from: "CFGB", to: "ANGB", base: "BG", title: "A sárga négyzetből paralelogramma", action: "Csúsztatás A-ba",
+            task: "Húzd C-t A-ba az egész CF oldallal együtt! A CA és a BG merőleges a BC-re, ezért párhuzamosak.",
+            note: shearNote },
+          { from: "ABGN", to: "JBCM", angle: -90, title: "A paralelogramma forgatása B körül", action: "Forgatás B körül",
+            task: "Húzd A-t az íven J-be! A negyedfordulattal G a C-be kerül.", note: turnNote },
+          { from: "CMJB", to: "KIJB", base: "BJ", title: "A paralelogrammából téglalap", action: "Csúsztatás K-ba",
+            task: "Húzd C-t K-ba az egész szemközti oldallal együtt! A CK a BJ-vel párhuzamos, mert mindkettő merőleges az AB-re.",
+            note: shearNote, done: "Helyes! A sárga négyzetből a KBJI téglalapot kaptad." },
+          { paint: true, title: "Színezd ki az egyenlő területet!", action: "A területek összehasonlítása" }
+        ];
+        function createRoute(left, right) {
+          return {
+            steps: [
+              ...left.map(step => ({ ...step, side: "left" })),
+              ...right.map(step => ({ ...step, side: "right" })),
+              { title: "A területek összehasonlítása", question: "theorem" }
+            ],
+            index: 0,
+            completedMoves: new Set(),
+            painted: new Set(),
+            theorem: null
+          };
+        }
+        const routes = {
+          triangles: createRoute(leftSteps, rightSteps),
+          parallelograms: createRoute(leftParallelograms, rightParallelograms)
+        };
+        const routeButtons = [...document.querySelectorAll("[data-euclid-route]")];
         const board = byId("euclid-board");
         const regions = byId("euclid-regions");
         const lines = byId("euclid-lines");
@@ -2011,6 +2063,7 @@
         const areaFeedback = byId("euclid-area-feedback");
         const theoremQuestion = byId("euclid-theorem-question");
         const theoremChoices = theoremQuestion.querySelector("fieldset");
+        const theoremOptions = [...theoremChoices.querySelectorAll('input[type="radio"]')];
         const theoremFeedback = byId("euclid-theorem-feedback");
         const action = byId("euclid-action");
         const replay = byId("euclid-replay");
@@ -2018,16 +2071,14 @@
         const result = byId("euclid-result");
         const nextActions = byId("euclid-next-actions");
         const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)");
-        let index = 0;
+        let route = routes.triangles;
         let moveComplete = false;
         let pointer = null;
         let frame = null;
-        let triangle;
+        let movingShape;
         let handle;
-        const completedMoves = new Set();
-        const painted = new Set();
 
-        const coordinates = names => Array.from(names, name => points[name]);
+        const coordinates = names => Array.from(names, name => points[name] ?? auxiliaryPoints[name]);
         const pointList = vertices => vertices.map(pt => pt.join(",")).join(" ");
         const shape = (names, attributes) => svg("polygon", { points: pointList(coordinates(names)), ...attributes });
         const line = (start, end, className) => svg("path", { d: `M${points[start]} L${points[end]}`, class: className });
@@ -2051,7 +2102,7 @@
         }
 
         function drawMotion(progress) {
-          const step = steps[index];
+          const step = route.steps[route.index];
           const vertices = coordinates(step.from);
           const degrees = rotation(step);
           if (degrees) {
@@ -2068,9 +2119,13 @@
             // The projection of a paper fold has a cosine profile. The endpoints
             // are the original vertex and its reflection across the hinge.
             const fraction = step.fold ? (1 - Math.cos(Math.PI * progress)) / 2 : progress;
-            vertices[0] = [x + (tx - x) * fraction, y + (ty - y) * fraction];
+            const movingVertices = step.base ? 2 : 1;
+            for (let i = 0; i < movingVertices; i++) {
+              const [vx, vy] = vertices[i];
+              vertices[i] = [vx + (tx - x) * fraction, vy + (ty - y) * fraction];
+            }
           }
-          triangle.setAttribute("points", pointList(vertices));
+          movingShape.setAttribute("points", pointList(vertices));
           handle.setAttribute("transform", `translate(${vertices[0]})`);
         }
 
@@ -2081,13 +2136,16 @@
         }
 
         function paintRectangle(side) {
-          const step = steps[index];
-          if (!step.paint || painted.has(step.side)) return;
+          const step = route.steps[route.index];
+          if (!step.paint || route.painted.has(step.side)) return;
           if (side !== step.side) {
-            showFeedback("Kövesd a háromszöget. Melyik téglalapot töltötte ki a másolatával?", "retry");
+            const hint = route === routes.triangles
+              ? "Kövesd a háromszöget. Melyik téglalapot töltötte ki a másolatával?"
+              : "Melyik téglalapra illeszkedett a mozgó alakzat az utolsó csúsztatás végén?";
+            showFeedback(hint, "retry");
             return;
           }
-          painted.add(side);
+          route.painted.add(side);
           render();
           feedback.focus({ preventScroll: true });
         }
@@ -2098,9 +2156,38 @@
           feedback.hidden = false;
         }
 
+        function drawShearMeasures(step) {
+          const [[ax, ay], [bx, by]] = coordinates(step.base);
+          const [start, opposite] = coordinates(step.from);
+          const [end, endOpposite] = coordinates(step.to);
+          const length = Math.hypot(bx - ax, by - ay);
+          const ux = (bx - ax) / length;
+          const uy = (by - ay) / length;
+          const mx = (ax + bx) / 2;
+          const my = (ay + by) / 2;
+          const height = (start[1] - ay) * ux - (start[0] - ax) * uy;
+          const heightEnd = [mx - uy * height, my + ux * height];
+          // Include the full line segment swept by the moving side.
+          const alongBase = ([x, y]) => x * ux + y * uy;
+          const span = [start, opposite, end, endOpposite].sort((p, q) => alongBase(p) - alongBase(q));
+          const corner = [mx + ux * 13, my + uy * 13];
+          const nx = -uy * Math.sign(height) * 13;
+          const ny = ux * Math.sign(height) * 13;
+          const cornerTop = [mx + nx, my + ny];
+          const cornerOuter = [corner[0] + nx, corner[1] + ny];
+          const marks = svg("g", { "pointer-events": "none" });
+          marks.append(
+            svg("path", { d: `M${span[0]} L${span.at(-1)}`, class: "euclid-parallel" }),
+            line(...step.base, "euclid-base"),
+            svg("path", { d: `M${mx},${my} L${heightEnd}`, class: "euclid-height" }),
+            svg("path", { d: `M${corner} L${cornerOuter} L${cornerTop}`, class: "euclid-height-corner" })
+          );
+          motion.append(marks);
+        }
+
         function drawBoard(step) {
           const final = step.question === "theorem";
-          const picking = step.paint && !painted.has(step.side);
+          const picking = step.paint && !route.painted.has(step.side);
           regions.replaceChildren();
           lines.replaceChildren(
             ...["DACE", "CBGF", "ABJH"].map(square => shape(square, { class: "euclid-outline" })),
@@ -2111,7 +2198,7 @@
 
           for (const [side, pair] of Object.entries(pairs)) {
             const active = step.side === side;
-            const matched = painted.has(side) && (final || (step.side === "right" && side === "left") || (active && step.paint));
+            const matched = route.painted.has(side) && (final || (step.side === "right" && side === "left") || (active && step.paint));
             const square = shape(pair.square, { fill: matched || (active && step.paint) ? pair.fill : "#f8f7f1" });
             const rectangle = shape(pair.rect, { fill: matched ? pair.fill : "#fff" });
             if (picking) {
@@ -2123,11 +2210,13 @@
               activateWithKeyboard(rectangle, () => paintRectangle(side));
             }
             regions.append(square, rectangle);
-            if (matched || (active && (step.fold || step.paint))) {
-              lines.append(line(...pair.sourceDiagonal, "euclid-construction"));
-            }
-            if (matched || (active && (step.halfTurn || step.paint))) {
-              lines.append(line(...pair.targetDiagonal, "euclid-construction"));
+            if (route === routes.triangles) {
+              if (matched || (active && (step.fold || step.paint))) {
+                lines.append(line(...pair.sourceDiagonal, "euclid-construction"));
+              }
+              if (matched || (active && (step.halfTurn || step.paint))) {
+                lines.append(line(...pair.targetDiagonal, "euclid-construction"));
+              }
             }
             if (matched || (active && step.paint)) appendAreaLabel(pair.sourceLabel, pair.area);
             if (matched) appendAreaLabel(pair.destinationLabel, pair.area);
@@ -2152,7 +2241,7 @@
             const fixed = step.fold ? step.to : step.from;
             regions.append(shape(fixed, { fill: step.fold ? pair.fill : "#e1eae6" }));
           }
-          triangle = svg("polygon", { fill: step.halfTurn ? "#b2c7bf" : pair.shade, "fill-opacity": .67,
+          movingShape = svg("polygon", { fill: step.halfTurn ? "#b2c7bf" : pair.shade, "fill-opacity": .67,
             stroke: step.halfTurn ? "#526c65" : pair.ink, "stroke-width": 3, "pointer-events": "none" });
           handle = svg("g", { class: "euclid-handle" });
           handle.append(svg("circle", { r: 34, fill: "transparent" }),
@@ -2162,33 +2251,39 @@
           if (degrees) guide.append(svg("circle", { cx: pivot[0], cy: pivot[1], r: 9, fill: "#82531c" }));
           guide.append(svg("circle", { cx: end[0], cy: end[1], r: 12, fill: "white", stroke: "#82531c", "stroke-width": 4 }));
           guide.toggleAttribute("hidden", moveComplete);
-          motion.append(guide, triangle, handle);
+          motion.append(guide, movingShape);
+          if (step.base) drawShearMeasures(step);
+          motion.append(handle);
           handle.toggleAttribute("hidden", moveComplete);
           handle.addEventListener("pointerdown", startDrag);
           drawMotion(Number(moveComplete));
         }
 
         function moveMessage(step) {
+          if (step.done) return step.done;
           if (step.fold) return "Az átló két egybevágó félre osztotta a négyzetet.";
           if (step.halfTurn) return "A két fél együtt kitölti a téglalapot.";
+          if (route === routes.parallelograms) return "Helyes! A paralelogramma a helyére került.";
           return "Helyes! A háromszög a helyére került.";
         }
 
         function render() {
-          const step = steps[index];
-          const matched = painted.has(step.side);
+          const step = route.steps[route.index];
+          const matched = route.painted.has(step.side);
           const awaitingAnswer = step.paint && (!matched || (step.question === "area" && !areaChoices.disabled));
-          moveComplete = completedMoves.has(index);
+          moveComplete = route.completedMoves.has(route.index);
           feedback.hidden = true;
           areaQuestion.hidden = step.question !== "area" || !matched;
           theoremQuestion.hidden = step.question !== "theorem";
-          back.hidden = index === 0;
-          byId("euclid-progress").textContent = `${index + 1} / ${steps.length}`;
+          back.hidden = route.index === 0;
+          byId("euclid-progress").textContent = `${route.index + 1} / ${route.steps.length}`;
           byId("euclid-step").textContent = step.title;
           byId("euclid-task").textContent = step.paint && !matched
             ? `Koppints a ${pairs[step.side].name} négyzettel megegyező területű téglalapra!`
             : step.task ?? "";
-          byId("euclid-note").textContent = moveComplete ? "" : step.note ?? "";
+          const note = byId("euclid-note");
+          note.textContent = step.note ?? "";
+          note.hidden = !step.note;
           byId("euclid-actions").hidden = !step.action || awaitingAnswer;
           action.textContent = moveComplete ? "Tovább" : step.action ?? "";
           action.disabled = awaitingAnswer;
@@ -2199,7 +2294,9 @@
           drawBoard(step);
           if (moveComplete) showFeedback(moveMessage(step));
           if (step.paint && matched) {
-            if (step.question !== "area") {
+            if (route === routes.parallelograms) {
+              showFeedback("Helyes! Minden mozdulat területtartó, ezért a négyzet és a téglalap területe egyenlő.");
+            } else if (step.question !== "area") {
               showFeedback("Helyes! Mindkét alakzat területe a saját felének kétszerese, és a két fél területe egyenlő.");
             } else if (!areaChoices.disabled) {
               showFeedback("Helyes téglalapot színeztél ki.");
@@ -2208,13 +2305,13 @@
         }
 
         function completeMove() {
-          completedMoves.add(index);
+          route.completedMoves.add(route.index);
           render();
           feedback.focus({ preventScroll: true });
         }
 
         function advance() {
-          index++;
+          route.index++;
           render();
           const question = [areaQuestion, theoremQuestion].find(form => !form.hidden);
           (question?.querySelector("legend") ?? byId("euclid-step")).focus({ preventScroll: true });
@@ -2230,7 +2327,7 @@
           const point = localPoint(event);
           if (!point) return;
           event.preventDefault();
-          const [x, y] = points[steps[index].from[0]];
+          const [x, y] = points[route.steps[route.index].from[0]];
           pointer = { id: event.pointerId, offsetX: point.x - x, offsetY: point.y - y };
           board.setPointerCapture(event.pointerId);
           board.setAttribute("data-dragging", "");
@@ -2241,7 +2338,7 @@
           if (!point) return 0;
           const x = point.x - pointer.offsetX;
           const y = point.y - pointer.offsetY;
-          const step = steps[index];
+          const step = route.steps[route.index];
           const [[sx, sy]] = coordinates(step.from);
           const degrees = rotation(step);
           if (degrees) {
@@ -2311,9 +2408,33 @@
           if (pointer) releaseDrag();
         }
 
+        routeButtons.forEach(button => {
+          button.addEventListener("click", () => {
+            const selectedRoute = routes[button.dataset.euclidRoute];
+            if (route === selectedRoute) return;
+            cancelMotion();
+            route.theorem = {
+              answer: theoremOptions.find(option => option.checked)?.value,
+              solved: theoremChoices.disabled,
+              message: theoremFeedback.textContent,
+              state: theoremFeedback.getAttribute("data-state")
+            };
+            route = selectedRoute;
+            resetQuestion(theoremQuestion, theoremFeedback);
+            if (route.theorem) {
+              for (const option of theoremOptions) option.checked = option.value === route.theorem.answer;
+              theoremChoices.disabled = route.theorem.solved;
+              theoremFeedback.textContent = route.theorem.message;
+              if (route.theorem.state) theoremFeedback.dataset.state = route.theorem.state;
+            }
+            for (const choice of routeButtons) choice.setAttribute("aria-pressed", String(choice === button));
+            render();
+          });
+        });
+
         action.addEventListener("click", () => {
-          if (pointer || frame !== null || action.disabled || !steps[index].action) return;
-          if (!steps[index].from || moveComplete) advance();
+          if (pointer || frame !== null || action.disabled || !route.steps[route.index].action) return;
+          if (!route.steps[route.index].from || moveComplete) advance();
           else playMotion();
         });
         replay.addEventListener("click", () => {
@@ -2321,9 +2442,9 @@
           playMotion();
         });
         back.addEventListener("click", () => {
-          if (index === 0) return;
+          if (route.index === 0) return;
           cancelMotion();
-          index--;
+          route.index--;
           render();
           byId("euclid-step").focus();
         });
@@ -2337,10 +2458,11 @@
         }, render, "equal");
         byId("reset-euclid").addEventListener("click", () => {
           cancelMotion();
-          index = 0;
-          completedMoves.clear();
-          painted.clear();
-          resetQuestion(areaQuestion, areaFeedback);
+          route.index = 0;
+          route.completedMoves.clear();
+          route.painted.clear();
+          route.theorem = null;
+          if (route === routes.triangles) resetQuestion(areaQuestion, areaFeedback);
           resetQuestion(theoremQuestion, theoremFeedback);
           render();
         });

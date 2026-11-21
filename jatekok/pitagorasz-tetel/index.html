@@ -188,7 +188,7 @@
     .replay-count { color: var(--muted); font-size: .88rem; }
 
     .proof-nav { display: flex; flex-wrap: wrap; gap: 8px; margin: 16px 0 20px; }
-    .proof-nav button[aria-pressed="true"], .mode-nav button[aria-pressed="true"] {
+    .proof-nav button[aria-pressed="true"], .mode-nav button[aria-pressed="true"], .proof-nav button[aria-selected="true"] {
       background: var(--accent-soft);
       border-color: var(--accent);
       color: var(--accent);
@@ -330,6 +330,7 @@
     }
 
     .proof-card[data-problem] { border-color: #ad6d35; background: #fff4e5; }
+    .proof-card[data-reading] { border-color: var(--accent); background: var(--accent-soft); }
     .card-grip {
       display: grid;
       place-items: center;
@@ -393,6 +394,45 @@
     #converse-handle circle { touch-action: none; }
     #converse-handle[data-dragging] { cursor: grabbing; }
 
+    .statement-layout { grid-template-columns: minmax(0, 2fr) minmax(0, 3fr); }
+    .statement-layout h3 { margin: 0 0 8px; }
+    .statement-bank, .statement-clause {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 10px;
+      padding: 8px;
+      min-height: 67px;
+      border: 1px dashed var(--line);
+      border-radius: 12px;
+    }
+    .statement-bank { margin: 14px 0; }
+    .statement-clause { grid-template-columns: auto minmax(0, 1fr); align-items: center; }
+    .statement-clause + .statement-clause { margin-top: 8px; }
+    .statement-clause strong { min-width: 4.7em; padding-left: 4px; color: var(--accent); font-size: .85rem; }
+    .statement-card { touch-action: none; user-select: none; cursor: grab; font-size: clamp(1.05rem, 2.5vw, 1.3rem); }
+    .statement-card[aria-pressed="true"], .statement-target:hover { background: var(--accent-soft); border-color: var(--accent); }
+    .statement-card[data-dragging] { position: relative; z-index: 3; cursor: grabbing; }
+    .statement-clause[data-drop], .statement-bank[data-drop] { border-color: var(--accent); background: var(--accent-soft); }
+    .statement-target { color: var(--muted); font-weight: 500; }
+    .statement-figure { margin: 0; text-align: center; }
+    .statement-figure .board { width: min(100%, 275px); }
+    #statement-feedback:empty { margin: 0; }
+
+    .converse-proof-figure { position: sticky; top: 8px; z-index: 2; }
+    .converse-proof-figure .board { width: min(100%, 434px); }
+    .converse-proof-figure h3, .converse-proof-list h3 { margin: 0 0 8px; }
+    .proof-equations {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 4px 16px;
+      margin-top: 8px;
+    }
+    #converse-proof-compare, #converse-proof-root, #converse-proof-angle { margin-top: 4px; }
+    #converse-proof-feedback:empty { margin: 0; }
+    .converse-proof-hypotenuse { stroke: var(--accent); stroke-width: 5; }
+    .proof-cards[data-reviewing] .card-sentence { opacity: 1; }
+    .proof-cards[data-reviewing] .card-grip { cursor: default; }
+
     @media (max-width: 620px) {
       .algebra-layout { display: flex; flex-direction: column; align-items: stretch; gap: 10px; }
       .hindu-puzzle { display: block; }
@@ -409,6 +449,13 @@
       .proof-figure .board { width: min(122px, 24dvh); }
       .proof-figure .caption { margin: 0; }
       .algebra-layout[data-building] .board { width: min(100%, 310px, 55dvh); }
+      .converse-proof-figure { padding-block: 10px; }
+      .converse-proof-figure .board { max-height: min(25dvh, 145px); }
+      .converse-proof-list .card-sentence { scroll-margin-top: min(48dvh, 290px); }
+    }
+
+    @media (max-height: 420px) {
+      .converse-proof-figure { position: static; }
     }
 
     @media (prefers-reduced-motion: reduce) {
@@ -925,26 +972,39 @@
     </div>
 
     <section class="mode-pane" id="converse-mode" aria-labelledby="converse-title" hidden>
+      <svg width="0" height="0" aria-hidden="true" style="position:absolute">
+        <defs>
+          <g id="converse-sketch-triangle">
+            <path d="M114 166 L105 55 L259 166 Z" fill="#f4f1e8"/>
+            <path class="converse-side converse-a" d="M114 166 L105 55"/>
+            <path class="converse-side converse-b" d="M114 166 H259"/>
+            <path class="converse-side converse-c" d="M105 55 L259 166"/>
+            <path class="converse-arc" d="M139 166 A25 25 0 0 0 111.98 141.08"/>
+            <text class="math-label side-label" x="95" y="114">a</text>
+            <text class="math-label side-label" x="186" y="182">b</text>
+            <text class="math-label side-label" x="195" y="102">c</text>
+          </g>
+          <path id="converse-alignment-outline"/>
+        </defs>
+      </svg>
       <div class="board-title">
         <h2 id="converse-title">A Pitagorasz-tétel megfordítása</h2>
-        <div class="proof-header-actions">
+        <div class="proof-header-actions" id="converse-discovery-controls">
           <button type="button" id="converse-back" hidden>← Vissza</button>
           <button type="button" id="converse-reset">Újrakezdés</button>
         </div>
       </div>
-      <div class="algebra-layout converse-layout">
+      <div class="proof-nav" role="tablist" aria-label="A megfordítás feladatai">
+        <button type="button" id="converse-tab-discovery" role="tab" aria-controls="converse-discovery" aria-selected="true">Felfedezés</button>
+        <button type="button" id="converse-tab-statement" role="tab" aria-controls="converse-statement" aria-selected="false" tabindex="-1">Tételkirakó</button>
+        <button type="button" id="converse-tab-proof-cards" role="tab" aria-controls="converse-proof-cards" aria-selected="false" tabindex="-1">Bizonyításkirakó</button>
+      </div>
+      <div class="algebra-layout converse-layout" id="converse-discovery" role="tabpanel" aria-labelledby="converse-tab-discovery">
         <div class="panel converse-figures">
           <figure id="converse-sketch">
             <figcaption>Adott háromszög</figcaption>
             <svg class="board" viewBox="0 0 290 196" role="img" aria-label="Vázlat az adott háromszögről. A kérdéses gamma szöget az a és b oldal zárja be, szemközt a c oldal van.">
-              <path d="M114 166 L105 55 L259 166 Z" fill="#f4f1e8"/>
-              <path class="converse-side converse-a" d="M114 166 L105 55"/>
-              <path class="converse-side converse-b" d="M114 166 H259"/>
-              <path class="converse-side converse-c" d="M105 55 L259 166"/>
-              <path class="converse-arc" d="M139 166 A25 25 0 0 0 111.98 141.08"/>
-              <text class="math-label side-label" x="95" y="114">a</text>
-              <text class="math-label side-label" x="186" y="182">b</text>
-              <text class="math-label side-label" x="195" y="102">c</text>
+              <use href="#converse-sketch-triangle"/>
               <text class="math-label side-label" x="144" y="135">γ = ?</text>
               <g class="converse-marks" id="converse-sketch-marks" hidden/>
             </svg>
@@ -975,7 +1035,6 @@
           <figure id="converse-alignment-figure" hidden>
             <figcaption>Egymásra illesztés</figcaption>
             <svg class="board converse-alignment" id="converse-alignment-board" viewBox="0 0 434 205" role="img" aria-label="A három egyenlő hosszú oldalpár egymásra kerül.">
-              <defs><path id="converse-alignment-outline"/></defs>
               <g id="converse-alignment-original" aria-hidden="true">
                 <use href="#converse-alignment-outline" fill="#f4f1e8" stroke="#324848" stroke-width="3"/>
                 <text class="converse-figure-label" x="186.5" y="188">Adott háromszög</text>
@@ -1089,6 +1148,98 @@
               <p>A <i>c</i>-vel szemközti γ szög ugyanakkora, mint a <i>c′</i>-vel szemközti derékszög. Ezért</p>
               <p class="equation">γ = 90°.</p>
             </div>
+          </div>
+        </div>
+      </div>
+      <div class="algebra-layout statement-layout" id="converse-statement" role="tabpanel" aria-labelledby="converse-tab-statement" hidden>
+        <figure class="panel statement-figure">
+          <svg class="board" viewBox="65 32 216 160" role="img" aria-labelledby="statement-triangle-caption">
+            <use href="#converse-sketch-triangle"/>
+            <text class="math-label side-label" x="147" y="141">γ</text>
+          </svg>
+          <figcaption class="caption" id="statement-triangle-caption">A háromszög oldalai <i>a</i>, <i>b</i> és <i>c</i>. A <i>c</i> oldallal szemközti szög γ.</figcaption>
+        </figure>
+        <div class="panel">
+          <h3>Rakd ki a tétel megfordítását!</h3>
+          <p>Húzd a kártyákat a helyükre, vagy válassz ki egy kártyát, majd a helyét.</p>
+          <div class="statement-bank" id="statement-bank" role="group" aria-label="Kártyák">
+            <button type="button" class="statement-card card-formula" id="statement-right-angle" aria-pressed="false" aria-label="Gamma egyenlő 90 fokkal">γ = 90°</button>
+            <button type="button" class="statement-card card-formula" id="statement-equality" aria-pressed="false" aria-label="A négyzet plusz b négyzet egyenlő c négyzet">a<sup>2</sup> + b<sup>2</sup> = c<sup>2</sup></button>
+          </div>
+          <div class="statement-clause" id="statement-if" role="group" aria-label="HA, a feltétel helye">
+            <strong>HA</strong>
+            <button type="button" class="statement-target" id="statement-place-if" aria-label="Kártya a feltétel helyére">Helyezd ide</button>
+          </div>
+          <div class="statement-clause" id="statement-then" role="group" aria-label="AKKOR, a következtetés helye">
+            <strong>AKKOR</strong>
+            <button type="button" class="statement-target" id="statement-place-then" aria-label="Kártya a következtetés helyére">Helyezd ide</button>
+          </div>
+          <div class="actions">
+            <button type="button" class="primary" id="statement-check" disabled>Ellenőrzés</button>
+            <button type="button" id="statement-reset">Újrakezdés</button>
+          </div>
+          <p class="feedback" id="statement-feedback" role="status"></p>
+        </div>
+      </div>
+      <div class="algebra-layout converse-layout" id="converse-proof-cards" role="tabpanel" aria-labelledby="converse-tab-proof-cards" hidden>
+        <div class="panel converse-proof-figure">
+          <h3>A bizonyítás az ábrán</h3>
+          <p class="progress" id="converse-proof-progress">0 / 6 lépés</p>
+          <svg class="board" id="converse-proof-board" viewBox="17 33 402 180" role="img" aria-label="Az adott háromszög vázlata, a gamma szög még ismeretlen.">
+            <g id="converse-proof-sketch" transform="translate(-74 0)">
+              <use href="#converse-sketch-triangle"/>
+              <text class="math-label side-label" x="146" y="136">γ = ?</text>
+              <text class="converse-figure-label" x="186.5" y="206">Adott háromszög</text>
+              <g class="converse-marks" id="converse-proof-sketch-marks" hidden></g>
+            </g>
+            <g id="converse-proof-helper" transform="translate(136 0)" hidden>
+              <use href="#converse-alignment-outline" fill="#e5f2ef" stroke="#324848" stroke-width="3"/>
+              <path class="converse-side converse-a" d="M114 166 V58"/>
+              <path class="converse-side converse-b" d="M114 166 H259"/>
+              <path class="converse-side converse-proof-hypotenuse" id="converse-proof-hypotenuse" d="M114 58 L259 166" hidden/>
+              <path class="converse-arc" d="M114 153 h13 v13"/>
+              <text class="math-label side-label" x="100" y="113">a</text>
+              <text class="math-label side-label" x="186" y="152">b</text>
+              <text class="math-label side-label" x="198" y="104">c′</text>
+              <text class="converse-figure-label" x="186.5" y="206">Segédháromszög</text>
+              <g class="converse-marks" id="converse-proof-helper-marks" hidden></g>
+            </g>
+            <g id="converse-proof-overlay" hidden>
+              <g id="converse-proof-aligned-original">
+                <use href="#converse-alignment-outline" fill="#f4f1e8" stroke="#324848" stroke-width="3"/>
+                <g id="converse-proof-right-angle" hidden>
+                  <path class="converse-arc" d="M114 153 h13 v13"/>
+                  <text class="math-label side-label" x="162" y="140">γ = 90°</text>
+                </g>
+              </g>
+              <g id="converse-proof-aligned-helper">
+                <use class="converse-alignment-helper" href="#converse-alignment-outline"/>
+              </g>
+            </g>
+          </svg>
+          <div class="proof-equations card-formula">
+            <p>Adott: c<sup>2</sup> = a<sup>2</sup> + b<sup>2</sup></p>
+            <p id="converse-proof-equation" hidden>Segédháromszög: c′<sup>2</sup> = a<sup>2</sup> + b<sup>2</sup></p>
+          </div>
+          <p class="card-formula" id="converse-proof-compare" hidden>c′<sup>2</sup> = c<sup>2</sup></p>
+          <p class="card-formula" id="converse-proof-root" hidden>
+            <math aria-label="c vessző egyenlő az a négyzet plusz b négyzet négyzetgyökével, amely egyenlő c-vel">
+              <msup><mi>c</mi><mo>′</mo></msup><mo>=</mo>
+              <msqrt><mrow><msup><mi>a</mi><mn>2</mn></msup><mo>+</mo><msup><mi>b</mi><mn>2</mn></msup></mrow></msqrt>
+              <mo>=</mo><mi>c</mi>
+            </math>
+          </p>
+          <p class="card-formula" id="converse-proof-angle" hidden>γ = 90°</p>
+          <p class="feedback" id="converse-proof-feedback" data-sort-feedback role="status" tabindex="-1"></p>
+        </div>
+        <div class="panel converse-proof-list">
+          <h3>Rakd sorba a bizonyítás lépéseit!</h3>
+          <p class="card-instructions" id="converse-proof-instructions">Húzd a kártyát a fogantyújánál, vagy válaszd ki a kártyát, majd azt, amelyiknek a helyére tennéd.</p>
+          <ol class="proof-cards" aria-label="A megfordítás bizonyításának lépései" aria-describedby="converse-proof-instructions"></ol>
+          <div class="actions card-actions">
+            <button type="button" class="primary" data-check>Ellenőrzés</button>
+            <button type="button" data-shuffle>Keverés</button>
+            <button type="button" data-next id="converse-proof-replay" hidden>Újrajátszás</button>
           </div>
         </div>
       </div>
@@ -1567,9 +1718,9 @@
         });
       }
 
-      function setupSorter(panel, available, onChecked = () => {}) {
+      function setupSorter(panel, available, onChecked = () => {}, { review, onReorder } = {}) {
         const list = panel.querySelector(".proof-cards");
-        const feedback = panel.querySelector(".proof-cards ~ .feedback");
+        const feedback = panel.querySelector("[data-sort-feedback]") ?? panel.querySelector(".proof-cards ~ .feedback");
         const check = panel.querySelector("[data-check]");
         const next = panel.querySelector("[data-next]");
         let ordered;
@@ -1577,6 +1728,7 @@
         let gesture = null;
         let dropTarget = null;
         let problem = null;
+        let reading = null;
         let skipClick = false;
 
         const nodes = new Map(available.map(card => {
@@ -1625,6 +1777,12 @@
           else feedback.removeAttribute("data-state");
         }
 
+        function showReading(card) {
+          if (reading) nodes.get(reading).row.removeAttribute("data-reading");
+          reading = card;
+          if (reading) nodes.get(reading).row.setAttribute("data-reading", "");
+        }
+
         function moveCard(card, target) {
           const from = ordered.indexOf(card);
           const to = ordered.indexOf(target);
@@ -1636,6 +1794,7 @@
           picked = null;
           updateSelection();
           setFeedback("A kártya új helye " + (to + 1) + ".");
+          onReorder?.();
           nodes.get(card).button.focus({ preventScroll: true });
         }
 
@@ -1698,7 +1857,9 @@
             [ordered[end], ordered[destination]] = [ordered[destination], ordered[end]];
           }
           picked = null;
+          showReading(null);
           list.removeAttribute("data-solved");
+          list.removeAttribute("data-reviewing");
           list.replaceChildren(...ordered.map(card => nodes.get(card).row));
           check.disabled = false;
           if (next) next.hidden = true;
@@ -1708,15 +1869,18 @@
           onChecked(false);
         }
 
-        check.addEventListener("click", () => {
-          if (gesture) return;
-          const firstProblem = firstUnjustified(ordered);
+        function showResult(firstProblem, focus = true) {
+          showReading(null);
+          list.removeAttribute("data-reviewing");
           if (firstProblem !== -1) {
-            setFeedback("A kiemelt kártya egy olyan lépésre épül, amely még hiányzik előle.", "retry");
-            problem = ordered[firstProblem];
+            const card = ordered[firstProblem];
+            setFeedback(card.hint ?? "A kiemelt kártya egy olyan lépésre épül, amely még hiányzik előle.", "retry");
+            problem = card;
+            check.disabled = false;
+            for (const { button } of nodes.values()) button.disabled = false;
             const { row, button } = nodes.get(problem);
             row.setAttribute("data-problem", "");
-            button.focus();
+            if (focus) button.focus();
             return;
           }
           picked = null;
@@ -1727,7 +1891,23 @@
           if (next) next.hidden = false;
           setFeedback("Helyes sorrend. Összeállt a bizonyítás!", "correct");
           onChecked(true);
-          feedback.focus({ preventScroll: true });
+          if (focus) feedback.focus({ preventScroll: true });
+        }
+
+        check.addEventListener("click", () => {
+          if (gesture || check.disabled) return;
+          const firstProblem = firstUnjustified(ordered);
+          if (!review) {
+            showResult(firstProblem);
+            return;
+          }
+          picked = null;
+          updateSelection();
+          setFeedback("");
+          list.setAttribute("data-reviewing", "");
+          check.disabled = true;
+          for (const { button } of nodes.values()) button.disabled = true;
+          review(ordered.slice(), firstProblem, showReading, focus => showResult(firstProblem, focus));
         });
 
         panel.querySelector("[data-shuffle]").addEventListener("click", shuffle);
@@ -2872,11 +3052,290 @@
         continueId: "difference-continue"
       });
 
+      function setupStatementPuzzle() {
+        const bank = byId("statement-bank");
+        const condition = byId("statement-if");
+        const conclusion = byId("statement-then");
+        const placeIf = byId("statement-place-if");
+        const placeThen = byId("statement-place-then");
+        const equality = byId("statement-equality");
+        const rightAngle = byId("statement-right-angle");
+        const cards = [rightAngle, equality];
+        const destinations = [condition, conclusion, bank];
+        const check = byId("statement-check");
+        const feedback = byId("statement-feedback");
+        let picked = null;
+        let gesture = null;
+        let skipClick = false;
+
+        const cardAt = destination => cards.find(card => card.parentElement === destination);
+
+        function update() {
+          const inCondition = cardAt(condition);
+          const inConclusion = cardAt(conclusion);
+          placeIf.hidden = Boolean(inCondition);
+          placeThen.hidden = Boolean(inConclusion);
+          check.disabled = !inCondition || !inConclusion;
+          for (const card of cards) card.setAttribute("aria-pressed", String(card === picked));
+        }
+
+        function clearFeedback() {
+          feedback.textContent = "";
+          feedback.removeAttribute("data-state");
+        }
+
+        function placeCard(card, destination) {
+          if (card.parentElement !== destination) {
+            const existing = destination === bank ? null : cardAt(destination);
+            if (existing) card.parentElement.append(existing);
+            destination.append(card);
+            clearFeedback();
+          }
+          picked = null;
+          update();
+          card.focus({ preventScroll: true });
+        }
+
+        function destinationAt(event) {
+          return destinations.find(destination => {
+            const { left, right, top, bottom } = destination.getBoundingClientRect();
+            return event.clientX >= left && event.clientX <= right && event.clientY >= top && event.clientY <= bottom;
+          });
+        }
+
+        function showDestination(destination) {
+          for (const element of destinations) element.toggleAttribute("data-drop", element === destination);
+        }
+
+        function cancelGesture() {
+          if (!gesture) return;
+          const { card, id } = gesture;
+          gesture = null;
+          showDestination(null);
+          card.removeAttribute("data-dragging");
+          card.style.transform = "";
+          if (card.hasPointerCapture(id)) card.releasePointerCapture(id);
+          update();
+        }
+
+        for (const card of cards) {
+          card.addEventListener("click", () => {
+            if (skipClick) return;
+            if (picked && card !== picked && card.parentElement !== bank) {
+              placeCard(picked, card.parentElement);
+            } else {
+              picked = picked === card ? null : card;
+              update();
+            }
+          });
+          card.addEventListener("pointerdown", event => {
+            if (event.button !== 0 || gesture) return;
+            gesture = { card, id: event.pointerId, x: event.clientX, y: event.clientY, moved: false };
+            card.setPointerCapture(event.pointerId);
+          });
+          card.addEventListener("pointermove", event => {
+            if (gesture?.id !== event.pointerId) return;
+            const dx = event.clientX - gesture.x;
+            const dy = event.clientY - gesture.y;
+            if (!gesture.moved && Math.hypot(dx, dy) < 6) return;
+            gesture.moved = true;
+            card.setAttribute("data-dragging", "");
+            card.style.transform = `translate(${dx}px, ${dy}px)`;
+            showDestination(destinationAt(event));
+          });
+          card.addEventListener("pointerup", event => {
+            if (gesture?.id !== event.pointerId) return;
+            const moved = gesture.moved;
+            const destination = moved ? destinationAt(event) : null;
+            cancelGesture();
+            if (destination) placeCard(card, destination);
+            if (moved) {
+              skipClick = true;
+              setTimeout(() => { skipClick = false; }, 0);
+            }
+          });
+          for (const type of ["pointercancel", "lostpointercapture"]) {
+            card.addEventListener(type, event => {
+              if (gesture?.id === event.pointerId) cancelGesture();
+            });
+          }
+        }
+        placeIf.addEventListener("click", () => { if (picked) placeCard(picked, condition); });
+        placeThen.addEventListener("click", () => { if (picked) placeCard(picked, conclusion); });
+        check.addEventListener("click", () => {
+          if (check.disabled || gesture) return;
+          picked = null;
+          update();
+          const converse = cardAt(condition) === equality;
+          feedback.dataset.state = converse ? "correct" : "retry";
+          feedback.textContent = converse
+            ? "Helyes! A megfordítást raktad ki. Az oldalak négyzetére vonatkozó egyenlőségből következik a derékszög."
+            : "A Pitagorasz-tételt raktad ki. Melyik adatból indulunk ki a megfordításnál?";
+        });
+        byId("statement-reset").addEventListener("click", () => {
+          cancelGesture();
+          bank.append(...cards);
+          picked = null;
+          clearFeedback();
+          update();
+        });
+
+        update();
+        return cancelGesture;
+      }
+
+      function positionConverseTriangles(original, helper, progress) {
+        const centerOffset = 30.5;
+        const originalOffset = -74 + (centerOffset + 74) * progress;
+        const helperOffset = 136 + (centerOffset - 136) * progress;
+        original.setAttribute("transform", `translate(${originalOffset} 0)`);
+        helper.setAttribute("transform", `translate(${helperOffset} 0)`);
+      }
+
+      function setupConverseProofCards(drawSideMarks, rightEndA) {
+        const cards = [
+          { id: "construct", text: "Szerkesztünk egy derékszögű segédháromszöget <i>a</i> és <i>b</i> befogókkal. Átfogója <i>c′</i>." },
+          { id: "pythagoras", needs: ["construct"],
+            text: "A segédháromszögre a Pitagorasz-tétel szerint <span class='card-formula'>c′² = a² + b²</span>.",
+            hint: "Melyik háromszögön alkalmazhatjuk a Pitagorasz-tételt? Hol szerkesztettük meg?" },
+          { id: "squares", needs: ["pythagoras"],
+            text: "A feltevés szerint <span class='card-formula'>c² = a² + b²</span>, ezért <span class='card-formula'>c′² = c²</span>.",
+            hint: "Melyik korábbi egyenletből tudjuk, hogy a segédháromszög átfogójának négyzete is a² + b²?" },
+          { id: "lengths", needs: ["squares"],
+            text: "Az oldalhosszak pozitívak. Az egyenlő négyzetekből ezért <span class='card-formula'>c′ = c</span> következik.",
+            hint: "Melyik lépés mutatja meg, hogy a két oldalhossz négyzete egyenlő?" },
+          { id: "congruent", needs: ["lengths"],
+            text: "Mindhárom oldalpár egyenlő. Az oldal–oldal–oldal alapeset szerint a háromszögek egybevágók.",
+            hint: "Az a és a b oldal már egyezik. Melyik lépés igazolja a harmadik oldalpár egyenlőségét?" },
+          { id: "angle", needs: ["congruent"],
+            text: "A megfelelő szögek egyenlők, ezért a <i>c</i>-vel szemközti γ szög derékszög.",
+            hint: "Mi igazolja, hogy a két háromszög megfelelő szögei egyenlők?" }
+        ];
+        const descriptions = [
+          "Az adott háromszög vázlata, a gamma szög még ismeretlen.",
+          "Az adott háromszög mellett megjelent az a és b befogójú derékszögű segédháromszög.",
+          "A segédháromszög c vessző átfogója kiemelve.",
+          "A két háromszög c és c vessző oldalának négyzete egyenlő.",
+          "A három egyenlő oldalpár azonos vonásjelölést kap.",
+          "Az egybevágó háromszögek egymásra kerülnek.",
+          "A háromszögek fedik egymást. Az adott háromszög gamma szöge 90 fok."
+        ];
+        const diagram = byId("converse-proof-board");
+        const progress = byId("converse-proof-progress");
+        const sketch = byId("converse-proof-sketch");
+        const helper = byId("converse-proof-helper");
+        const hypotenuse = byId("converse-proof-hypotenuse");
+        const marks = [byId("converse-proof-sketch-marks"), byId("converse-proof-helper-marks")];
+        const overlay = byId("converse-proof-overlay");
+        const originalAligned = byId("converse-proof-aligned-original");
+        const helperAligned = byId("converse-proof-aligned-helper");
+        const rightAngle = byId("converse-proof-right-angle");
+        const equations = ["equation", "compare", "root"].map(name => byId("converse-proof-" + name));
+        const angle = byId("converse-proof-angle");
+        const replay = byId("converse-proof-replay");
+        const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)");
+        let frame = null;
+        let finishPending = null;
+        let replayReview = null;
+
+        drawSideMarks(marks[0], [105, 55]);
+        drawSideMarks(marks[1], rightEndA);
+
+        function renderStep(step) {
+          const aligned = step >= 5;
+          const complete = step === cards.length;
+          sketch.toggleAttribute("hidden", aligned);
+          helper.toggleAttribute("hidden", step === 0 || aligned);
+          hypotenuse.toggleAttribute("hidden", step !== 2);
+          for (const mark of marks) mark.toggleAttribute("hidden", step !== 4);
+          overlay.toggleAttribute("hidden", !aligned);
+          rightAngle.toggleAttribute("hidden", !complete);
+          angle.hidden = !complete;
+          equations.forEach((element, index) => { element.hidden = step < index + 2; });
+          progress.textContent = `${step} / ${cards.length} lépés`;
+          diagram.setAttribute("aria-label", descriptions[step]);
+        }
+
+        function stopPlayback() {
+          if (frame !== null) window.cancelAnimationFrame(frame);
+          frame = null;
+          finishPending = null;
+          replay.disabled = false;
+        }
+
+        function resetPlayback() {
+          stopPlayback();
+          replayReview = null;
+          renderStep(0);
+        }
+
+        function play(order, firstProblem, showReading, finish = () => {}) {
+          stopPlayback();
+          const count = firstProblem === -1 ? order.length : firstProblem;
+          if (count === 0) {
+            renderStep(0);
+            finish();
+            return;
+          }
+          replay.disabled = true;
+          const stepDuration = 1050;
+          let start;
+          let shown = 0;
+          finishPending = (focus = true) => {
+            stopPlayback();
+            if (count >= 5) positionConverseTriangles(originalAligned, helperAligned, 1);
+            renderStep(count);
+            showReading(null);
+            finish(focus);
+          };
+
+          function animate(time) {
+            start ??= time;
+            const elapsed = time - start;
+            if (elapsed >= count * stepDuration) {
+              finishPending();
+              return;
+            }
+            const step = 1 + Math.floor(elapsed / stepDuration);
+            if (step >= 5) {
+              const slide = reducedMotion.matches ? 1 : Math.min(1, (elapsed - 4 * stepDuration) / 750);
+              positionConverseTriangles(originalAligned, helperAligned, slide);
+            }
+            if (shown !== step) {
+              shown = step;
+              renderStep(step);
+              showReading(order[step - 1]);
+            }
+            frame = window.requestAnimationFrame(animate);
+          }
+
+          renderStep(0);
+          frame = window.requestAnimationFrame(animate);
+        }
+
+        setupSorter(byId("converse-proof-cards"), cards, solved => {
+          if (!solved) resetPlayback();
+        }, {
+          review: (order, firstProblem, showReading, finish) => {
+            if (firstProblem === -1) replayReview = () => play(order, -1, showReading);
+            play(order, firstProblem, showReading, finish);
+          },
+          onReorder: resetPlayback
+        });
+        replay.addEventListener("click", () => replayReview?.());
+        return () => finishPending?.(false);
+      }
+
       function setupConverse() {
         const theoremMode = byId("theorem-mode");
         const converseMode = byId("converse-mode");
         const modeTheorem = byId("mode-theorem");
         const modeConverse = byId("mode-converse");
+        const tabNames = ["discovery", "statement", "proof-cards"];
+        const tabs = tabNames.map(name => byId("converse-tab-" + name));
+        const panels = tabNames.map(name => byId("converse-" + name));
+        const discoveryControls = byId("converse-discovery-controls");
+        const cancelStatementGesture = setupStatementPuzzle();
         const stageNames = ["guess", "build", "equation", "compare", "congruence", "alignment"];
         const stages = stageNames.map(name => byId("converse-" + name + "-stage"));
         const titles = stageNames.map(name => byId("converse-" + name + "-title"));
@@ -2994,13 +3453,7 @@
           alignmentFrame = null;
         }
 
-        function drawAlignment(progress) {
-          const centerOffset = 30.5;
-          const originalOffset = -74 + (centerOffset + 74) * progress;
-          const helperOffset = 136 + (centerOffset - 136) * progress;
-          alignmentOriginal.setAttribute("transform", `translate(${originalOffset} 0)`);
-          alignmentHelper.setAttribute("transform", `translate(${helperOffset} 0)`);
-        }
+        const drawAlignment = progress => positionConverseTriangles(alignmentOriginal, alignmentHelper, progress);
 
         function finishAlignment() {
           cancelAlignment();
@@ -3061,6 +3514,8 @@
             }
           } else {
             releaseHandle();
+            cancelStatementGesture();
+            finishProofReview();
             if (alignmentFrame !== null) finishAlignment();
           }
           theoremMode.hidden = converse;
@@ -3069,10 +3524,44 @@
           modeConverse.setAttribute("aria-pressed", String(converse));
         }
 
+        function showTab(index) {
+          if (tabs[index].disabled) return;
+          releaseHandle();
+          cancelStatementGesture();
+          if (index !== 2) finishProofReview();
+          if (alignmentFrame !== null) finishAlignment();
+          tabs.forEach((tab, i) => {
+            tab.setAttribute("aria-selected", String(i === index));
+            tab.tabIndex = i === index ? 0 : -1;
+            panels[i].hidden = i !== index;
+          });
+          discoveryControls.hidden = index !== 0;
+        }
+
+        for (const [index, tab] of tabs.entries()) {
+          tab.addEventListener("click", () => showTab(index));
+          tab.addEventListener("keydown", event => {
+            const enabled = tabs.filter(item => !item.disabled);
+            const position = enabled.indexOf(tab);
+            const destinations = {
+              ArrowLeft: enabled[(position - 1 + enabled.length) % enabled.length],
+              ArrowRight: enabled[(position + 1) % enabled.length],
+              Home: enabled[0],
+              End: enabled.at(-1)
+            };
+            const next = destinations[event.key];
+            if (!next) return;
+            event.preventDefault();
+            showTab(tabs.indexOf(next));
+            next.focus();
+          });
+        }
+
         track.setAttribute("d", `M${pointAt(minAngle, lengthA)} A${lengthA} ${lengthA} 0 0 0 ${pointAt(maxAngle, lengthA)}`);
         byId("converse-alignment-outline").setAttribute("d", `M${origin} L${rightEndA} L${endB} Z`);
         drawSideMarks(sketchMarks, [105, 55]);
         drawSideMarks(helperMarks, rightEndA);
+        const finishProofReview = setupConverseProofCards(drawSideMarks, rightEndA);
         angleInput.addEventListener("input", () => drawHelper(Number(angleInput.value)));
         handle.addEventListener("pointerdown", event => {
           if (event.button !== 0 || pointer !== null || step !== 1) return;

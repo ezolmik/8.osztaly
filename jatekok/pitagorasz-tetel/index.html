@@ -1046,6 +1046,21 @@
                 <button type="submit">Ellenőrzés</button>
               </fieldset>
               <p class="feedback" id="converse-compare-feedback" role="status" tabindex="-1"></p>
+              <p class="card-formula" id="converse-compare-equality" hidden>
+                <math aria-label="c vessző egyenlő az a négyzet plusz b négyzet négyzetgyökével, amely egyenlő c-vel">
+                  <msup><mi>c</mi><mo>′</mo></msup>
+                  <mo>=</mo>
+                  <msqrt>
+                    <mrow>
+                      <msup><mi>a</mi><mn>2</mn></msup>
+                      <mo>+</mo>
+                      <msup><mi>b</mi><mn>2</mn></msup>
+                    </mrow>
+                  </msqrt>
+                  <mo>=</mo>
+                  <mi>c</mi>
+                </math>
+              </p>
             </form>
             <div class="actions" id="converse-congruence-actions" hidden>
               <button type="button" class="primary" id="converse-to-congruence">Tovább</button>
@@ -2889,6 +2904,7 @@
         const equationFeedback = byId("converse-equation-feedback");
         const compare = byId("converse-compare-question");
         const compareFeedback = byId("converse-compare-feedback");
+        const compareEquality = byId("converse-compare-equality");
         const congruence = byId("converse-congruence-question");
         const congruenceFeedback = byId("converse-congruence-feedback");
         const compareActions = byId("converse-compare-actions");
@@ -3093,10 +3109,13 @@
           product: "A két oldal négyzetét add össze!"
         }, () => { compareActions.hidden = false; }, "sum");
         byId("converse-to-compare").addEventListener("click", () => showStep(3));
-        checkAnswer(compare, "length-reason", compareFeedback, "Helyes! c′ = c.", {
+        checkAnswer(compare, "length-reason", compareFeedback, "Helyes!", {
           any: "Gondolj a 3 és a −3 négyzetére! Mit tudunk az oldalhosszak előjeléről?",
           triangle: "Két oldal hossza önmagában kevés. Itt a harmadik oldalak négyzetéről is tudunk valamit."
-        }, () => { congruenceActions.hidden = false; }, "positive");
+        }, () => {
+          compareEquality.hidden = false;
+          congruenceActions.hidden = false;
+        }, "positive");
         byId("converse-to-congruence").addEventListener("click", () => showStep(4));
         checkAnswer(congruence, "congruence-reason", congruenceFeedback, "Helyes! A két háromszög egybevágó.", {
           included: "Az adott háromszög γ szöge még ismeretlen. Mely adatokról tudjuk, hogy páronként egyenlők?",
@@ -3107,6 +3126,7 @@
           guess.reset();
           resetQuestion(equation, equationFeedback);
           resetQuestion(compare, compareFeedback);
+          compareEquality.hidden = true;
           resetQuestion(congruence, congruenceFeedback);
           for (const actions of [compareActions, congruenceActions, alignmentActions]) actions.hidden = true;
           drawHelper(initialAngle);

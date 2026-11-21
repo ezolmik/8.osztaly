@@ -6,35 +6,2441 @@
   <meta name="theme-color" content="#f7f5ef">
   <title>Pitagorasz-tétel</title>
   <style>
+    :root {
+      color-scheme: light;
+      --paper: #f7f5ef;
+      --white: #fff;
+      --ink: #1f292d;
+      --muted: #536268;
+      --line: #dddcd2;
+      --accent: #16695f;
+      --accent-soft: #e5f2ef;
+      --uncovered: #dcefd5;
+    }
+
+    *, *::before, *::after { box-sizing: border-box; }
+    [hidden] { display: none !important; }
+
     body {
       margin: 0;
-      background: #f7f5ef;
-      color: #1f292d;
-      font-family: system-ui, -apple-system, "Segoe UI", sans-serif;
+      background: var(--paper);
+      color: var(--ink);
+      font: 1rem/1.5 system-ui, -apple-system, "Segoe UI", sans-serif;
     }
 
     main {
-      width: min(720px, calc(100% - 32px));
+      width: min(960px, calc(100% - 32px));
       margin: 0 auto;
-      padding-block: clamp(44px, 8vw, 90px);
+      padding: clamp(22px, 5vw, 55px) 0 56px;
     }
+
+    a { color: var(--accent); font-weight: 700; text-underline-offset: .2em; }
+    :focus-visible { outline: 3px solid var(--accent); outline-offset: 4px; }
 
     h1 {
-      margin-block: 28px 10px;
-      font: 800 clamp(2.25rem, 7vw, 3.5rem) / 1.02 Georgia, serif;
-      letter-spacing: -.045em;
+      margin: 15px 0 5px;
+      font: 800 clamp(2.55rem, 7vw, 4.8rem)/1.02 Georgia, serif;
+      letter-spacing: -.048em;
     }
 
-    p { margin: 0; line-height: 1.55; }
-    a { color: #16695f; font-weight: 700; text-underline-offset: .18em; }
-    a:focus-visible { outline: 3px solid #16695f; outline-offset: 4px; }
+    h2 { margin: 0; font-size: 1.25rem; line-height: 1.3; }
+    p { margin: 0; }
+
+    .panel {
+      padding: clamp(14px, 2.6vw, 24px);
+      border: 1px solid var(--line);
+      border-radius: 19px;
+      background: var(--white);
+    }
+
+    .work { grid-area: work; border-color: var(--accent); }
+    .board-title {
+      display: flex;
+      justify-content: space-between;
+      align-items: baseline;
+      flex-wrap: wrap;
+      gap: 3px 12px;
+      margin: 0 0 13px;
+    }
+
+    .progress { color: var(--accent); font-size: .86rem; font-weight: 750; }
+
+    .board {
+      display: block;
+      width: min(100%, 330px);
+      height: auto;
+      margin-inline: auto;
+      overflow: visible;
+      user-select: none;
+    }
+
+    .ground { fill: var(--uncovered); }
+    .border { fill: none; stroke: #3d5251; stroke-width: 2; pointer-events: none; }
+    .tile {
+      stroke: #fff;
+      stroke-width: 1.25;
+      stroke-linejoin: round;
+      transition: transform .34s ease;
+    }
+
+    .work .board { touch-action: none; }
+    .movable { cursor: grab; }
+    .dragging { cursor: grabbing; transition: none; }
+    .selected { stroke: var(--ink); stroke-width: 3; }
+    .movable:focus-visible { outline: 0; stroke: var(--ink); stroke-width: 4; }
+
+    .math-label {
+      fill: #154d36;
+      font: italic 700 24px Georgia, serif;
+      text-anchor: middle;
+      dominant-baseline: middle;
+      pointer-events: none;
+    }
+
+    .side-label { font-size: 20px; }
+
+    .corner { cursor: pointer; }
+    .corner rect { fill: transparent; }
+    .corner circle { fill: var(--white); stroke: var(--accent); stroke-width: 2; }
+    .corner:hover circle, .corner:focus-visible circle {
+      fill: var(--accent-soft);
+      stroke-width: 4;
+    }
+
+    .corner:focus-visible { outline: 0; }
+    .annotation { pointer-events: none; }
+    .hint-piece {
+      fill: #ffffff60;
+      stroke: var(--ink);
+      stroke-width: 2;
+      stroke-dasharray: 6 5;
+    }
+
+    .hint-arrow { stroke: var(--ink); stroke-width: 2.5; stroke-dasharray: 7 5; }
+    .slide-square-proof {
+      display: grid;
+      grid-template-columns: clamp(68px, 16vw, 112px) minmax(0, 1fr);
+      gap: 14px;
+      align-items: center;
+      margin-top: 8px;
+      font-size: .91rem;
+    }
+    .slide-square-proof figure { margin: 0; }
+    .slide-square-proof figcaption { color: var(--muted); font-size: .82rem; text-align: center; }
+    .slide-square-proof h3 { margin: 0 0 4px; font-size: 1rem; }
+    .slide-square-proof p + p { margin-top: 5px; }
+    .slide-diagonal {
+      stroke: #633289;
+      stroke-width: 2.5;
+      vector-effect: non-scaling-stroke;
+    }
+    .slide-diagonal.crosswise { stroke: #123b69; stroke-dasharray: 5 3; }
+    #slide-final-diagonals { animation: show-slide-diagonals .15s .34s ease both; }
+    @keyframes show-slide-diagonals { from { opacity: 0; } }
+    .caption, .status { margin-top: 12px; color: var(--muted); font-size: .91rem; }
+    .status { min-height: 3em; }
+    .actions { display: flex; align-items: center; flex-wrap: wrap; gap: 8px; margin-top: 12px; }
+    button {
+      min-height: 42px;
+      padding: 8px 13px;
+      background: var(--white);
+      border: 1px solid var(--line);
+      border-radius: 10px;
+      color: var(--ink);
+      font: inherit;
+      font-size: .93rem;
+      font-weight: 700;
+      cursor: pointer;
+    }
+
+    button:not(:disabled):hover { border-color: var(--accent); }
+    button:disabled { opacity: .5; cursor: default; }
+    .primary { background: var(--accent); color: var(--white); border-color: var(--accent); }
+    .primary:not(:disabled):hover { background: #12574f; }
+
+    .reason, .result { margin-top: 16px; }
+    .question { margin-top: 16px; }
+    fieldset { margin: 0; padding: 0; border: 0; min-inline-size: 0; }
+    legend { padding: 0; margin-bottom: 8px; font-weight: 750; }
+    .option {
+      display: flex;
+      align-items: baseline;
+      gap: 8px;
+      padding: 7px 9px;
+      border-radius: 8px;
+      cursor: pointer;
+    }
+
+    .option:hover, .option:focus-within { background: var(--accent-soft); }
+    input[type="radio"] { flex: 0 0 auto; accent-color: var(--accent); }
+    .feedback { margin-top: 10px; max-width: 72ch; }
+    .feedback[data-state="correct"], .status[data-state="correct"] { color: #146044; }
+    .feedback[data-state="retry"] { color: #894224; }
+    .result { border-color: #a8c8ad; background: #eff7eb; }
+    .equation {
+      margin: 6px 0 10px;
+      font: italic 700 clamp(2.15rem, 6vw, 3.15rem)/1.2 Georgia, serif;
+      color: #154d36;
+    }
+
+    .equation sup { font-size: .62em; }
+    .replay-count { color: var(--muted); font-size: .88rem; }
+
+    .proof-nav { display: flex; flex-wrap: wrap; gap: 8px; margin: 16px 0 20px; }
+    .proof-nav button[aria-pressed="true"] {
+      background: var(--accent-soft);
+      border-color: var(--accent);
+      color: var(--accent);
+    }
+
+    .algebra-layout {
+      display: grid;
+      grid-template-columns: minmax(0, 2fr) minmax(0, 3fr);
+      gap: 16px;
+      align-items: start;
+    }
+
+    .build-stage-title { margin: 8px 0 12px; }
+    .hindu-puzzle {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 0 10px;
+      align-items: start;
+      width: min(100%, 780px);
+      margin-inline: auto;
+    }
+    .algebra-layout[data-building] .hindu-puzzle .board { grid-area: 1 / 1 / 2 / 3; width: 100%; }
+    .hindu-questions { grid-area: 1 / 2; z-index: 1; padding: clamp(12px, 2vw, 20px); }
+    .hindu-questions .build-discovery { margin-top: 0; }
+    .hindu-questions .question { margin-top: 12px; }
+    .hindu-comparison { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); }
+    .hindu-comparison .question { margin-top: 0; }
+    .hindu-comparison details { margin-top: 16px; }
+    .hindu-comparison summary { cursor: pointer; font-weight: 700; }
+    .arrangement-figures { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; }
+    .arrangement-figures figure { margin: 0; text-align: center; }
+    .arrangement-figures figcaption { margin-top: 4px; font-size: .85rem; font-weight: 700; }
+
+    .proof-figure { position: sticky; top: 8px; z-index: 2; }
+    .proof-figure .board { width: min(100%, 300px); }
+    .proof-figure .caption { color: var(--ink); }
+    .algebra-layout[data-building] { display: block; }
+    .algebra-layout[data-building] .proof-figure { position: static; display: block; }
+    .algebra-layout[data-building] .board { width: min(100%, 680px); touch-action: none; }
+    .algebra-layout[data-building] .board[role="img"] { touch-action: auto; }
+    .build-task { margin-bottom: 10px; }
+    .build-status { margin-top: 8px; }
+    .build-discovery p + p { margin-top: 5px; }
+    .build-continue { margin-top: 12px; }
+    .build-target { stroke: #697a75; stroke-width: 1.5; stroke-dasharray: 6 5; }
+    .build-target.is-target { cursor: pointer; fill: #e6f2ec; }
+    .build-target.is-target:hover, .build-target:focus-visible { fill: #c5e5d7; }
+    .build-piece { stroke: #324848; stroke-width: 1.4; }
+    .build-piece.selected { stroke: var(--ink); stroke-width: 3; }
+    .build-piece.movable:focus-visible { stroke-width: 4; }
+    .build-piece.dragging { transition: none; }
+    .build-tray-label { font: 600 16px system-ui, sans-serif; }
+    .build-inner-label { font-size: 14px; }
+
+    .euclid-layout, .einstein-layout { grid-template-columns: minmax(0, 1.25fr) minmax(0, 1fr); }
+    .euclid-layout .board { width: min(100%, 420px); }
+    .euclid-figure { margin: 0; }
+    .euclid-outline { fill: none; stroke: #3d5251; stroke-width: 2.5; }
+    .euclid-construction { fill: none; stroke: #65756e; stroke-width: 2; stroke-dasharray: 7 5; }
+    .euclid-target { fill: none; stroke: var(--accent); stroke-width: 3; stroke-dasharray: 7 5; }
+    .euclid-path { fill: none; stroke: #82531c; stroke-width: 3; stroke-dasharray: 5 6; }
+    .euclid-handle { cursor: grab; }
+    .euclid-handle circle { touch-action: none; }
+    #euclid-board[data-dragging] .euclid-handle { cursor: grabbing; }
+    .euclid-point { fill: var(--ink); font: 650 26px system-ui, sans-serif; }
+    .euclid-area { font-size: 33px; }
+    #euclid-controls h3 { margin: 5px 0 10px; }
+    #euclid-controls .actions { margin-top: 14px; }
+
+    #einstein-board { width: min(100%, 410px); }
+    #einstein-track { cursor: grab; touch-action: none; }
+    #einstein-track path, #einstein-track circle { touch-action: none; }
+    #einstein-track[data-dragging] { cursor: grabbing; }
+    #einstein-track:focus-visible { outline: 0; }
+    #einstein-track:focus-visible .einstein-handle { stroke: var(--ink); stroke-width: 4; }
+    .einstein-outline { stroke: #3d5251; stroke-width: 1.8; stroke-linejoin: round; }
+    .einstein-letter { fill: var(--ink); font: 650 18px system-ui, sans-serif; text-anchor: middle; }
+    #einstein-board[data-squares] .einstein-letter { font-size: 24px; }
+    #einstein-board[data-squares] .side-label { font-size: 25px; }
+    #einstein-board[data-squares] :is(#einstein-area-a, #einstein-area-b) { font-size: 31px; }
+    .einstein-square-label { font-size: 42px; }
+    #einstein-angle-value { stroke: white; stroke-width: 4; paint-order: stroke; }
+    .einstein-alpha { fill: #6946a3; }
+    .einstein-beta { fill: #a44926; }
+    #einstein-scale-board { width: min(100%, 300px); }
+    #einstein-scale { display: block; width: 100%; min-height: 36px; accent-color: var(--accent); }
+    #einstein-scale-value { font-weight: 700; font-variant-numeric: tabular-nums; }
+    .einstein-stage h3 { margin: 0 0 8px; }
+    [data-keep-question] fieldset:disabled .option { background: transparent; cursor: default; }
+    [data-keep-question] fieldset:disabled .option:has(input:checked) {
+      background: var(--accent-soft);
+      box-shadow: inset 0 0 0 1px var(--accent);
+    }
+    .einstein-stage .equation { font-size: clamp(1.65rem, 5vw, 2.6rem); }
+    .einstein-stage .equation sub { font-size: .62em; }
+    .einstein-ratio { display: flex; align-items: center; gap: .5em; font: 1.05rem/1.25 Georgia, serif; }
+    .einstein-ratio-symbol { flex: none; font-size: 1.2em; }
+    .einstein-fraction { display: inline-grid; text-align: center; }
+    .einstein-fraction span { padding: .15em .3em; }
+    .einstein-fraction span:first-child { border-bottom: 1px solid currentColor; }
+    .einstein-ratio-equation { margin-top: .5em; font-size: 1.25rem; font-style: italic; }
+    #einstein-result {
+      margin-top: 14px;
+      padding: 16px 8px;
+      border-radius: 12px;
+      background: var(--accent-soft);
+      text-align: center;
+      animation: einstein-result-pop .24s ease-out;
+    }
+    #einstein-result .equation { margin: 0; font-size: clamp(1.9rem, 5.8vw, 3.3rem); }
+    #einstein-result .einstein-substitution { margin-bottom: .35em; font-size: clamp(1.05rem, 3.6vw, 1.55rem); }
+    @keyframes einstein-result-pop {
+      from { opacity: .4; transform: scale(.9); }
+    }
+
+    .card-instructions { margin: 0 0 12px; }
+    .proof-cards { margin: 0; padding: 0; list-style: none; display: grid; gap: 8px; }
+    .proof-card {
+      display: grid;
+      grid-template-columns: 44px minmax(0, 1fr);
+      align-items: stretch;
+      border: 1px solid var(--line);
+      border-radius: 10px;
+      background: var(--white);
+    }
+
+    .proof-card:has(button[aria-pressed="true"]), .proof-card[data-drop] {
+      border-color: var(--accent);
+      box-shadow: inset 0 0 0 1px var(--accent);
+      background: var(--accent-soft);
+    }
+
+    .proof-card[data-problem] { border-color: #ad6d35; background: #fff4e5; }
+    .card-grip {
+      display: grid;
+      place-items: center;
+      min-height: 44px;
+      color: var(--muted);
+      cursor: grab;
+      touch-action: none;
+      user-select: none;
+    }
+
+    .card-sentence {
+      padding: 10px 12px 10px 0;
+      background: transparent;
+      border: 0;
+      border-radius: 8px;
+      color: var(--ink);
+      text-align: start;
+      font: inherit;
+      line-height: 1.45;
+      cursor: pointer;
+      user-select: none;
+    }
+
+    .card-sentence:focus-visible { outline-offset: -3px; }
+    .proof-cards.is-dragging, .proof-cards.is-dragging button, .proof-cards.is-dragging .card-grip { cursor: grabbing; }
+    .proof-cards[data-solved] .card-grip { visibility: hidden; }
+    .proof-cards[data-solved] .proof-card { border-color: #a7cdbb; background: #f4faf6; }
+    .proof-cards[data-solved] .card-sentence { opacity: 1; }
+    .card-formula { font: 700 1.05em/1.35 Georgia, serif; }
+    .card-actions { margin-top: 14px; }
+    .card-sentence, .card-actions button { scroll-margin-top: 170px; }
+
+    @media (max-width: 620px) {
+      .algebra-layout { display: flex; flex-direction: column; align-items: stretch; gap: 10px; }
+      .hindu-puzzle { display: block; }
+      .algebra-layout[data-building] .hindu-puzzle .board { width: min(100%, 310px, 55dvh); }
+      .hindu-questions { margin-top: 10px; }
+      .proof-figure {
+        display: grid;
+        grid-template-columns: auto minmax(0, 1fr);
+        gap: 12px;
+        align-items: center;
+        padding: 8px 12px;
+        top: 0;
+      }
+      .proof-figure .board { width: min(122px, 24dvh); }
+      .proof-figure .caption { margin: 0; }
+      .algebra-layout[data-building] .board { width: min(100%, 310px, 55dvh); }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      .tile { transition: none; }
+      #slide-final-diagonals { animation: none; }
+      #einstein-result { animation: none; }
+    }
   </style>
 </head>
 <body>
   <main>
-    <a href="../../index.html"><span aria-hidden="true">←</span> Vissza a játékokhoz</a>
-    <h1>Pitagorasz-tétel</h1>
-    <p>Az első pálya készül.</p>
+    <header>
+      <a href="../../index.html"><span aria-hidden="true">←</span> Vissza a játékokhoz</a>
+      <h1>Pitagorasz-tétel</h1>
+    </header>
+
+    <nav class="proof-nav" aria-label="Bizonyítások">
+      <button type="button" id="open-rearrangement" aria-controls="rearrangement" aria-pressed="true">1. Hindu bizonyítás</button>
+      <button type="button" id="open-sliding" aria-controls="sliding" aria-pressed="false">2. Csúsztatásos</button>
+      <button type="button" id="open-algebra" aria-controls="algebra" aria-pressed="false">3. Összegnégyzet</button>
+      <button type="button" id="open-difference" aria-controls="difference" aria-pressed="false">4. Különbségnégyzet</button>
+      <button type="button" id="open-euclid" aria-controls="euclid" aria-pressed="false">5. Eukleidész</button>
+      <button type="button" id="open-einstein" aria-controls="einstein" aria-pressed="false">6. Einstein</button>
+    </nav>
+
+    <div id="rearrangement">
+      <div class="board-title">
+        <span>Hindu bizonyítás átrendezéssel</span>
+        <button type="button" id="restart-arrangement">Mindkét kirakás újra</button>
+      </div>
+
+      <section id="arr-start-stage" aria-labelledby="arr-start-title">
+        <h2 class="build-stage-title" id="arr-start-title" tabindex="-1">1. A minta · két szabad négyzet</h2>
+        <div class="algebra-layout" id="arr-start-layout" data-building>
+          <div class="panel proof-figure">
+            <p class="build-task" id="arr-start-task">Helyezd a négy egybevágó derékszögű háromszöget a sablonba! Húzd a darabokat, vagy kattints egy darabra, majd a helyére.</p>
+            <div class="hindu-puzzle">
+              <svg class="board" id="arr-start-board" viewBox="-5 -5 661 310" role="group" aria-label="Az első kirakósablon négy háromszög számára">
+                <g id="arr-start-shapes"></g>
+                <g id="arr-start-targets"></g>
+                <g id="arr-start-pieces"></g>
+                <g id="arr-start-lines" class="annotation" aria-hidden="true" hidden>
+                  <g id="arr-start-area-labels" hidden></g>
+                </g>
+              </svg>
+              <section class="panel hindu-questions" id="arr-start-completion" aria-label="Az A minta elemzése" hidden>
+                <p class="caption build-discovery" id="arr-start-discovery" tabindex="-1" hidden><strong>Helyes!</strong> Kész az A minta.</p>
+                <form class="question" id="arr-start-question" data-keep-question>
+                  <fieldset>
+                    <legend>Mennyi a két zöld négyzet területe együtt?</legend>
+                    <label class="option"><input type="radio" name="free-area" value="outer" required> <span class="card-formula">(a + b)²</span></label>
+                    <label class="option"><input type="radio" name="free-area" value="sum"> <span class="card-formula">a² + b²</span></label>
+                    <label class="option"><input type="radio" name="free-area" value="rectangle"> <span class="card-formula">ab</span></label>
+                    <button type="submit">Ellenőrzés</button>
+                  </fieldset>
+                  <p class="feedback" id="arr-start-feedback" role="status" tabindex="-1"></p>
+                </form>
+                <div class="actions"><button type="button" class="primary" id="build-arr-end" hidden>Rakd ki a B mintát →</button></div>
+              </section>
+            </div>
+            <p class="caption build-status" id="arr-start-status" role="status"></p>
+          </div>
+        </div>
+      </section>
+
+      <section id="arr-end-stage" aria-labelledby="arr-end-title" hidden>
+        <h2 class="build-stage-title" id="arr-end-title" tabindex="-1">2. B minta · egy zöld négyszög</h2>
+        <div class="algebra-layout" id="arr-end-layout" data-building>
+          <div class="panel proof-figure">
+            <p class="build-task" id="arr-end-task">Helyezd a négy egybevágó derékszögű háromszöget a sablonba! Húzd a darabokat, vagy kattints egy darabra, majd a helyére.</p>
+            <div class="hindu-puzzle">
+              <svg class="board" id="arr-end-board" viewBox="-5 -5 661 310" role="group" aria-label="A második kirakósablon négy háromszög számára">
+                <g id="arr-end-shapes"></g>
+                <g id="arr-end-targets"></g>
+                <g id="arr-end-pieces"></g>
+                <g id="arr-end-lines" class="annotation" aria-hidden="true" hidden>
+                  <g id="arr-end-angle-labels"></g>
+                  <g id="arr-end-side-labels" hidden></g>
+                  <g id="arr-end-area-labels" hidden></g>
+                </g>
+              </svg>
+              <section class="panel hindu-questions" id="arr-end-completion" aria-label="A B minta elemzése" hidden>
+                <p class="caption build-discovery" id="arr-end-discovery" tabindex="-1" hidden><strong>Helyes!</strong> Kész a B minta.</p>
+                <form class="question" id="shape-question" data-keep-question>
+                  <fieldset>
+                    <legend>Miért derékszög a γ szög?</legend>
+                    <label class="option"><input type="radio" name="why-angle" value="equal-angles" required> Mert α és β egyenlő.</label>
+                    <label class="option"><input type="radio" name="why-angle" value="straight-angle"> Mert α + β = 90°, és a három jelölt szög összege 180°.</label>
+                    <label class="option"><input type="radio" name="why-angle" value="equal-sides"> Mert a zöld négyszög mind a négy oldala egyenlő.</label>
+                    <button type="submit">Ellenőrzés</button>
+                  </fieldset>
+                  <p class="feedback" id="shape-feedback" role="status" tabindex="-1"></p>
+                </form>
+                <div class="actions"><button type="button" class="primary" id="to-arr-end-area" hidden>Tovább</button></div>
+                <form class="question" id="arr-end-area-question" data-keep-question hidden>
+                  <fieldset>
+                    <legend id="arr-end-area-title" tabindex="-1">Mennyi a zöld négyzet területe?</legend>
+                    <label class="option"><input type="radio" name="free-area" value="length" required> <span class="card-formula">c</span></label>
+                    <label class="option"><input type="radio" name="free-area" value="outer"> <span class="card-formula">(a + b)²</span></label>
+                    <label class="option"><input type="radio" name="free-area" value="square"> <span class="card-formula">c²</span></label>
+                    <button type="submit">Ellenőrzés</button>
+                  </fieldset>
+                  <p class="feedback" id="arr-end-area-feedback" role="status" tabindex="-1"></p>
+                </form>
+                <div class="actions"><button type="button" class="primary" id="to-arr-proof" hidden>Hasonlítsd össze a két mintát →</button></div>
+              </section>
+            </div>
+            <p class="caption build-status" id="arr-end-status" role="status"></p>
+          </div>
+        </div>
+      </section>
+
+      <section id="arr-proof-stage" aria-labelledby="arr-proof-title" hidden>
+        <h2 class="build-stage-title" id="arr-proof-title" tabindex="-1">3. A két minta összehasonlítása</h2>
+        <div class="algebra-layout hindu-comparison">
+          <section class="panel arrangement-figures" aria-label="A két elkészült minta">
+            <figure>
+              <svg class="board" id="reference-board" viewBox="-3 -3 306 306" role="img"
+                   aria-label="Az A mintán a két zöld négyzet területe együtt a négyzet plusz b négyzet.">
+                <rect class="ground" width="300" height="300"/>
+                <g id="reference-tiles"></g>
+                <g id="reference-labels" aria-hidden="true"></g>
+                <rect class="border" width="300" height="300"/>
+              </svg>
+              <figcaption>A minta · <span class="card-formula">a² + b²</span></figcaption>
+            </figure>
+            <figure>
+              <svg class="board" id="arr-target-board" viewBox="-3 -3 306 306" role="img"
+                   aria-label="A B mintán a zöld négyzet területe c négyzet.">
+                <rect class="ground" width="300" height="300"/>
+                <g id="arr-target-tiles"></g>
+                <g id="arr-target-labels" aria-hidden="true"></g>
+                <rect class="border" width="300" height="300"/>
+              </svg>
+              <figcaption>B minta · <span class="card-formula">c²</span></figcaption>
+            </figure>
+          </section>
+          <div class="panel">
+            <form class="question" id="arr-compare-question" data-keep-question>
+              <fieldset>
+                <legend>Hogyan viszonyul egymáshoz a két zöld maradék területe?</legend>
+                <label class="option"><input type="radio" name="comparison" value="a-larger" required> Az A mintáé nagyobb, mert ott két zöld négyzet van.</label>
+                <label class="option"><input type="radio" name="comparison" value="equal"> Egyenlő, mert az egybevágó külső négyzetekből ugyanazt a négy háromszöget hagytuk el.</label>
+                <label class="option"><input type="radio" name="comparison" value="b-larger"> A B mintáé nagyobb, mert a zöld négyzet oldala mindkét befogónál hosszabb.</label>
+                <button type="submit">Ellenőrzés</button>
+              </fieldset>
+              <p class="feedback" id="arr-compare-feedback" role="status" tabindex="-1"></p>
+            </form>
+            <section class="panel result" id="result" aria-labelledby="result-title" hidden>
+              <h2 id="result-title">A Pitagorasz-tétel</h2>
+              <p class="equation"><i>a</i><sup>2</sup> + <i>b</i><sup>2</sup> = <i>c</i><sup>2</sup></p>
+              <p class="caption"><a href="https://www.nkp.hu/api/media/relpath/NKP%20K%C3%B6z%C3%B6s%20f%C3%A1jlok/R%C3%A9gi%20-%20Nyilv%C3%A1nos%20tartalmak/Matematika/Matematika%2009.%20%282016%29/Matematika%209.%20I.%20%28%C3%9AG%29/FI-503010901_1_Matematika%209-1_2016_NKP_2016-04-08.pdf#page=115" target="_blank" rel="noopener">Matematika 9., I. kötet, 31. lecke, 115. o. (OFI, 2016)</a></p>
+              <div class="actions"><button type="button" class="primary" id="to-sliding">Tovább a csúsztatáshoz →</button></div>
+            </section>
+            <details id="arrangement-cards" hidden>
+              <summary>Bizonyítás mondatkártyákkal</summary>
+              <div class="reason" id="arrangement-sorter">
+                <h3>Rakd sorrendbe a három csempét!</h3>
+                <p class="card-instructions" id="arrangement-instructions">Húzd a kártyákat a fogantyújuknál, vagy kattints a mozgatandó kártyára, majd arra, amelynek a helyére tennéd.</p>
+                <ol class="proof-cards" aria-label="A hindu bizonyítás mondatkártyái" aria-describedby="arrangement-instructions"></ol>
+                <p class="feedback" role="status" tabindex="-1"></p>
+                <div class="actions card-actions">
+                  <button type="button" class="primary" data-check>Ellenőrzés</button>
+                  <button type="button" data-shuffle>Újrakeverés</button>
+                </div>
+              </div>
+            </details>
+          </div>
+        </div>
+      </section>
+    </div>
+
+    <section id="sliding" aria-labelledby="sliding-title" hidden>
+      <div class="board-title">
+        <h2 id="sliding-title" tabindex="-1">Csúsztatásos bizonyítás</h2>
+        <button type="button" id="reset-sliding">Újrakezdés</button>
+      </div>
+      <div class="panel work">
+        <div class="board-title">
+          <p id="slide-instruction">Csúsztasd a kék háromszöget felfelé!</p>
+          <span class="progress" id="progress">0 / 3 csúsztatás</span>
+        </div>
+        <svg class="board" id="work-board" viewBox="-3 -3 306 306" role="group" aria-label="Mozgatható háromszögek a négyzetkeretben">
+          <defs>
+            <marker id="arrow-tip" viewBox="0 0 8 8" refX="6" refY="4" markerWidth="6" markerHeight="6" orient="auto">
+              <path d="M0 0 L8 4 L0 8 Z" fill="#1f292d"/>
+            </marker>
+          </defs>
+          <rect class="ground" width="300" height="300"/>
+          <g id="tiles"></g>
+          <g id="slide-final-diagonals" class="annotation" aria-hidden="true" hidden></g>
+          <g id="annotations" class="annotation" aria-hidden="true"></g>
+          <rect class="border" width="300" height="300"/>
+          <g id="corners"></g>
+        </svg>
+        <p class="status" id="game-status" role="status" tabindex="-1">Kattintással is választhatsz darabot és célpontot.</p>
+        <div class="actions" id="slide-help">
+          <button type="button" id="hint">Merre húzzam?</button>
+        </div>
+        <div id="slide-result" hidden>
+          <div class="slide-square-proof">
+            <figure>
+              <svg class="board" viewBox="-3 -3 306 306" role="img" aria-label="A lila és a sárga háromszög közös átlója folytonos, a kék és a piros közös átlója szaggatott.">
+                <rect class="ground" width="300" height="300"/>
+                <g id="slide-start-diagram"></g>
+                <rect class="border" width="300" height="300"/>
+              </svg>
+              <figcaption>Kezdőállás</figcaption>
+            </figure>
+            <div>
+              <h3>Miért lesz a maradék végül négyzet?</h3>
+              <p>Ha az egyik téglalapot negyedfordulattal a másikra illeszted, a két jelölt átló egymásra kerül. Az irányuk tehát 90°-kal tér el. A csúsztatás megőrzi az átfogók hosszát és irányát. A maradék négy oldala így mind <i>c</i> hosszú, és két merőleges irány váltakozik, ezért minden szöge derékszög.</p>
+            </div>
+          </div>
+          <p class="equation"><i>a</i><sup>2</sup> + <i>b</i><sup>2</sup> = <i>c</i><sup>2</sup></p>
+          <div class="actions">
+            <button type="button" id="previous">◀ Előző állás</button>
+            <button type="button" id="next">Következő állás ▶</button>
+            <button type="button" id="play">Visszajátszás</button>
+            <span class="replay-count" id="replay-count" role="status"></span>
+          </div>
+          <div class="actions">
+            <button type="button" class="primary" id="to-algebra">Tovább az összegnégyzethez →</button>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section id="algebra" aria-labelledby="algebra-title" hidden>
+      <div class="board-title">
+        <h2 id="algebra-title" tabindex="-1">Bizonyítás összegnégyzettel</h2>
+        <button type="button" id="reset-sum-build">Kirakás újra</button>
+      </div>
+      <div class="algebra-layout" id="sum-layout" data-building>
+        <div class="panel proof-figure">
+          <p class="build-task" id="sum-task">Helyezd a négy egybevágó derékszögű háromszöget a sablonba! Húzd a darabokat, vagy kattints egy darabra, majd a helyére.</p>
+          <svg class="board" id="sum-board" viewBox="-5 -5 661 310" role="group" aria-label="Háromszögek és kirakósablon">
+            <g id="sum-shapes"></g>
+            <g id="sum-targets"></g>
+            <g id="sum-pieces"></g>
+            <g id="sum-lines" class="annotation" aria-hidden="true" hidden></g>
+          </svg>
+          <p class="caption build-status" id="sum-status" role="status"></p>
+          <p class="caption build-discovery" id="sum-discovery" tabindex="-1" hidden><strong>Helyes!</strong> A külső négyzet oldala <strong><i>a</i> + <i>b</i></strong>, a belsőé <strong><i>c</i></strong>.</p>
+          <button type="button" class="primary build-continue" id="sum-continue" hidden>Tovább</button>
+        </div>
+        <div class="panel" id="sum-sorter" tabindex="-1" hidden>
+          <form class="question" id="sum-triangle-question" data-keep-question>
+            <fieldset>
+              <legend>Mennyi a négy háromszög területe együtt?</legend>
+              <label class="option"><input type="radio" name="triangle-area" value="four-ab" required> <span class="card-formula">4 · ab = 4ab</span></label>
+              <label class="option"><input type="radio" name="triangle-area" value="two-ab"> <span class="card-formula">4 · (ab/2) = 2ab</span></label>
+              <label class="option"><input type="radio" name="triangle-area" value="half-ab"> <span class="card-formula">ab/2</span></label>
+              <button type="submit">Ellenőrzés</button>
+            </fieldset>
+            <p class="feedback" id="sum-triangle-feedback" role="status" tabindex="-1"></p>
+          </form>
+          <div class="actions" id="sum-proof-actions" hidden>
+            <button type="button" class="primary" id="to-sum-proof">Tovább</button>
+          </div>
+          <div class="reason" id="sum-proof-tiles" hidden>
+            <h3 id="sum-proof-title" tabindex="-1">Rakd sorrendbe a három csempét!</h3>
+            <p class="card-instructions" id="sum-instructions">Húzd a csempét a fogantyújánál, vagy kattints rá, majd arra a csempére, amelynek a helyére tennéd.</p>
+            <ol class="proof-cards" aria-label="Az összegnégyzetes bizonyítás csempéi" aria-describedby="sum-instructions"></ol>
+            <p class="feedback" role="status" tabindex="-1"></p>
+            <div class="actions card-actions">
+              <button type="button" class="primary" data-check>Ellenőrzés</button>
+              <button type="button" data-shuffle>Újrakeverés</button>
+              <button type="button" id="to-difference" hidden>Tovább a különbségnégyzethez →</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section id="difference" aria-labelledby="difference-title" hidden>
+      <div class="board-title">
+        <h2 id="difference-title" tabindex="-1">Bhāskara bizonyítása</h2>
+        <button type="button" id="reset-difference-build">Kirakás újra</button>
+      </div>
+      <div class="algebra-layout" id="difference-layout" data-building>
+        <div class="panel proof-figure">
+          <p class="build-task" id="difference-task">Helyezd a négy egybevágó derékszögű háromszöget a sablonba! Húzd a darabokat, vagy kattints egy darabra, majd a helyére.</p>
+          <svg class="board" id="difference-board" viewBox="-5 -5 661 310" role="group" aria-label="Háromszögek és kirakósablon">
+            <g id="difference-shapes"></g>
+            <g id="difference-targets"></g>
+            <g id="difference-pieces"></g>
+            <g id="difference-lines" class="annotation" aria-hidden="true" hidden></g>
+          </svg>
+          <p class="caption build-status" id="difference-status" role="status"></p>
+          <div class="caption build-discovery" id="difference-discovery" tabindex="-1" hidden>
+            <p><strong>Helyes!</strong> Kész a kirakás.</p>
+            <p>A belső négyszög <strong>négyzet</strong>. Derékszögei vannak, és mind a négy oldala <strong><i>a</i> − <i>b</i></strong> hosszú. Innen a különbségnégyzet elnevezés.</p>
+            <p>A külső négyzet oldala <strong><i>c</i></strong>, a háromszögek átfogója.</p>
+          </div>
+          <button type="button" class="primary build-continue" id="difference-continue" hidden>Tovább</button>
+        </div>
+        <div class="panel" id="difference-sorter" tabindex="-1" hidden>
+          <h3>Rakd sorrendbe a három csempét!</h3>
+          <p class="card-instructions" id="difference-instructions">Húzd a csempét a fogantyújánál, vagy kattints rá, majd arra a csempére, amelynek a helyére tennéd.</p>
+          <ol class="proof-cards" aria-label="A különbségnégyzetes bizonyítás mondatkártyái" aria-describedby="difference-instructions"></ol>
+          <p class="feedback" role="status" tabindex="-1"></p>
+          <div class="actions card-actions">
+            <button type="button" class="primary" data-check>Ellenőrzés</button>
+            <button type="button" data-shuffle>Újrakeverés</button>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section id="euclid" aria-labelledby="euclid-title" hidden>
+      <div class="board-title">
+        <h2 id="euclid-title" tabindex="-1">Eukleidész bizonyítása mozgással</h2>
+        <button type="button" id="reset-euclid">Újrakezdés</button>
+      </div>
+      <div class="algebra-layout euclid-layout">
+        <figure class="panel euclid-figure">
+          <svg class="board" id="euclid-board" viewBox="-180 -374 664 712" role="img" aria-label="Az ABC derékszögű háromszög és az oldalaira rajzolt négyzetek. Az oldalak hossza a = BC, b = AC és c = AB. K a C pont vetülete az AB átfogón, I a szemközti oldalon.">
+            <g id="euclid-regions"></g>
+            <g id="euclid-lines" aria-hidden="true"></g>
+            <g id="euclid-motion" aria-hidden="true"></g>
+            <g id="euclid-labels" aria-hidden="true" pointer-events="none"></g>
+          </svg>
+          <figcaption class="caption">Az <i>ABC</i> háromszög derékszöge <i>C</i>-nél van. A <i>KI</i> szakasz két téglalapra osztja az átfogóra rajzolt négyzetet.</figcaption>
+        </figure>
+        <div class="panel" id="euclid-controls">
+          <div role="status" aria-atomic="true">
+            <p class="progress" id="euclid-progress"></p>
+            <h3 id="euclid-step"></h3>
+            <p id="euclid-task"></p>
+            <p class="feedback" id="euclid-note"></p>
+          </div>
+          <p class="feedback" data-state="correct" id="euclid-feedback" role="status" tabindex="-1" hidden>Helyes! A háromszög a helyére került.</p>
+          <form class="question" id="euclid-area-question" data-keep-question hidden>
+            <fieldset>
+              <legend tabindex="-1">Miért egyenlő a DACE négyzet és az AKIH téglalap területe?</legend>
+              <label class="option"><input type="radio" name="area-reason" value="congruent" required> Mert a DAC és a HAK háromszög egybevágó.</label>
+              <label class="option"><input type="radio" name="area-reason" value="equal-halves"> Mert a DAC és a HAK háromszög területe egyenlő, és mindkettő a saját alakzatának fele.</label>
+              <label class="option"><input type="radio" name="area-reason" value="diagonal"> Mert a négyzet és a téglalap átlója egyenlő hosszú.</label>
+              <button type="submit">Ellenőrzés</button>
+            </fieldset>
+            <p class="feedback" id="euclid-area-feedback" role="status" tabindex="-1"></p>
+          </form>
+          <div class="actions" id="euclid-actions">
+            <button type="button" id="euclid-action"></button>
+          </div>
+          <form class="question" id="euclid-theorem-question" data-keep-question hidden>
+            <fieldset>
+              <legend tabindex="-1">Hogyan viszonyul az <span class="card-formula">a<sup>2</sup> + b<sup>2</sup></span> összeg <span class="card-formula">c<sup>2</sup></span>-hez?</legend>
+              <label class="option"><input type="radio" name="theorem" value="smaller" required> <span class="card-formula">a<sup>2</sup> + b<sup>2</sup> &lt; c<sup>2</sup></span></label>
+              <label class="option"><input type="radio" name="theorem" value="larger"> <span class="card-formula">a<sup>2</sup> + b<sup>2</sup> &gt; c<sup>2</sup></span></label>
+              <label class="option"><input type="radio" name="theorem" value="equal"> <span class="card-formula">a<sup>2</sup> + b<sup>2</sup> = c<sup>2</sup></span></label>
+              <button type="submit">Ellenőrzés</button>
+            </fieldset>
+            <p class="feedback" id="euclid-theorem-feedback" role="status" tabindex="-1"></p>
+          </form>
+          <p class="equation" id="euclid-result" tabindex="-1" aria-label="A négyzet plusz b négyzet egyenlő c négyzet" hidden>a<sup>2</sup> + b<sup>2</sup> = c<sup>2</sup></p>
+        </div>
+      </div>
+    </section>
+
+    <section id="einstein" aria-labelledby="einstein-title" hidden>
+      <div class="board-title">
+        <h2 id="einstein-title" tabindex="-1">Einstein bizonyítása</h2>
+        <button type="button" id="reset-einstein">Újrakezdés</button>
+      </div>
+      <div class="algebra-layout einstein-layout">
+        <div class="panel">
+          <svg class="board" id="einstein-board" viewBox="0 0 356 234" role="group" aria-label="Az ABC derékszögű háromszög. Az AB átfogón mozgatható a magasság talppontja.">
+            <g id="einstein-squares" aria-hidden="true" hidden>
+              <polygon class="einstein-outline" points="136,44 328,188 472,-4 280,-148" fill="#dcf1e7" />
+              <polygon class="einstein-outline" points="28,188 136,44 -8,-64 -116,80" fill="#fdf0ce" />
+              <polygon class="einstein-outline" points="28,188 328,188 328,488 28,488" fill="#e3eaf6" />
+              <text class="math-label einstein-square-label" x="304" y="20">a<tspan dy="-12" font-size="60%">2</tspan></text>
+              <text class="math-label einstein-square-label" x="10" y="62">b<tspan dy="-12" font-size="60%">2</tspan></text>
+              <text class="math-label einstein-square-label" x="178" y="338">c<tspan dy="-12" font-size="60%">2</tspan></text>
+            </g>
+            <g aria-hidden="true">
+              <polygon id="einstein-part-b" fill="#fbe6af" />
+              <polygon id="einstein-part-a" fill="#bfe5d3" />
+              <path class="einstein-outline" d="M28 188 H328 L136 44 Z" fill="none" />
+            </g>
+            <g pointer-events="none" aria-hidden="true">
+              <path class="einstein-outline" d="M126.4 56.8 L139.2 66.4 L148.8 53.6" fill="none" />
+              <text class="einstein-letter" x="19" y="208">A</text><text class="einstein-letter" x="337" y="208">B</text>
+              <text class="einstein-letter" x="134" y="32">C</text>
+              <text class="math-label side-label" x="77" y="104">b</text><text class="math-label side-label" x="239" y="101">a</text>
+              <text class="math-label side-label" x="174" y="212">c</text>
+            </g>
+            <path id="einstein-cut" fill="none" stroke="#16695f" stroke-width="3" pointer-events="none" />
+            <path id="einstein-right-angle" class="einstein-outline" d="M136 175 H149 V188" fill="none" pointer-events="none" hidden />
+            <g id="einstein-angles" pointer-events="none" aria-hidden="true" hidden>
+              <text class="einstein-letter einstein-alpha" x="59" y="176">α</text>
+              <text class="einstein-letter einstein-alpha" x="155" y="96">α</text>
+              <text class="einstein-letter einstein-beta" x="289" y="176">β</text>
+              <text class="einstein-letter einstein-beta" x="121" y="96">β</text>
+            </g>
+            <g pointer-events="none" aria-hidden="true">
+              <text id="einstein-area-b" class="math-label" y="140">T<tspan dy="5" font-size="65%">b</tspan></text>
+              <text id="einstein-area-a" class="math-label" y="140">T<tspan dy="5" font-size="65%">a</tspan></text>
+            </g>
+            <g id="einstein-track" role="slider" tabindex="0" aria-label="A C-ből induló szakasz végpontja az átfogón" aria-valuemin="0" aria-valuemax="300" aria-describedby="einstein-cut-instruction">
+              <path d="M28 188 H328" fill="none" stroke="transparent" stroke-width="40" />
+              <g id="einstein-foot">
+                <circle r="22" fill="transparent" />
+                <circle class="einstein-handle" r="9" fill="#16695f" stroke="white" stroke-width="2" />
+                <text id="einstein-angle-value" class="einstein-letter" x="0" y="-18" pointer-events="none"></text>
+              </g>
+            </g>
+          </svg>
+          <svg class="board" id="einstein-scale-board" viewBox="0 0 290 276" role="img" aria-label="Egy derékszögű háromszög és az átfogójára rajzolt négyzet" hidden>
+            <g transform="translate(23 260)">
+              <g id="einstein-scale-pair" class="einstein-outline">
+                <polygon points="48,0 0,-36 36,-84 84,-48" fill="#bfe5d3" />
+                <polygon points="0,0 48,0 0,-36" fill="#e3eaf6" />
+              </g>
+            </g>
+          </svg>
+        </div>
+        <div class="panel">
+          <div class="einstein-stage" id="einstein-split-stage">
+            <h3>1. Felbontás</h3>
+            <p class="equation">T<sub>c</sub> = T<sub>a</sub> + T<sub>b</sub></p>
+            <p><i>T</i><sub>c</sub> a teljes terület. Az összeg a vágás szögétől független.</p>
+            <div id="einstein-cut-task">
+              <p class="feedback" id="einstein-cut-instruction">Húzd a pontot az átfogón a 90°-os helyzetbe!</p>
+            </div>
+            <p class="feedback" id="einstein-cut-feedback" role="status" tabindex="-1"></p>
+            <form class="question" id="einstein-match-question" data-keep-question hidden>
+              <fieldset>
+                <legend id="einstein-match-title" tabindex="-1">Hasonló-e mindhárom háromszög?</legend>
+                <label class="option"><input type="radio" name="similarity" value="right" required> Igen, mert mindhárom derékszögű.</label>
+                <label class="option"><input type="radio" name="similarity" value="angles"> Igen, mert mindkét darabnak van derékszöge és egy közös hegyesszöge az eredetivel.</label>
+                <label class="option"><input type="radio" name="similarity" value="size"> Nem, mert a háromszögek különböző méretűek.</label>
+                <button type="submit">Ellenőrzés</button>
+              </fieldset>
+              <p class="feedback" id="einstein-match-feedback" role="status" tabindex="-1"></p>
+            </form>
+            <div class="actions"><button type="button" class="primary" id="einstein-to-scale" hidden>Tovább</button></div>
+          </div>
+          <div class="einstein-stage" id="einstein-scale-task" hidden>
+            <h3 id="einstein-scale-title" tabindex="-1">2. Nagyítás</h3>
+            <label for="einstein-scale">Mozgasd a csúszkát, és figyeld a két terület arányát!</label>
+            <p><i>λ</i> = <output id="einstein-scale-value" for="einstein-scale" aria-live="off">1</output></p>
+            <input id="einstein-scale" type="range" min="1" max="3" step="0.1" value="1">
+            <form class="question" id="einstein-scale-question" data-keep-question>
+              <fieldset>
+                <legend>Változatlan-e a négyzet és a háromszög területének aránya nagyításkor?</legend>
+                <label class="option"><input type="radio" name="scale-ratio" value="length" required> <span>Igen, mert mindkét terület <i>λ</i>-szorosára nő.</span></label>
+                <label class="option"><input type="radio" name="scale-ratio" value="square"> <span>Igen, mert mindkét terület <i>λ</i><sup>2</sup>-szeresére nő.</span></label>
+                <label class="option"><input type="radio" name="scale-ratio" value="different"> Nem, mert a két terület különböző arányban nő.</label>
+                <button type="submit">Ellenőrzés</button>
+              </fieldset>
+              <p class="feedback" id="einstein-scale-feedback" role="status" tabindex="-1"></p>
+            </form>
+            <div class="actions"><button type="button" class="primary" id="einstein-to-times" hidden>Tovább</button></div>
+          </div>
+          <div class="einstein-stage" id="einstein-times" hidden>
+            <h3 id="einstein-times-title" tabindex="-1">3. A közös szorzó</h3>
+            <p class="einstein-ratio" role="math" aria-label="k egyenlő az átfogóra rajzolt négyzet területének és a háromszög területének hányadosával">
+              <span class="einstein-ratio-symbol"><i>k</i> =</span>
+              <span class="einstein-fraction">
+                <span>az átfogóra rajzolt négyzet területe</span>
+                <span>a háromszög területe</span>
+              </span>
+            </p>
+            <p class="einstein-ratio einstein-ratio-equation" role="math" aria-label="k egyenlő a négyzet per T a, amely egyenlő b négyzet per T b, amely egyenlő c négyzet per T c">
+              <span>k =</span>
+              <span class="einstein-fraction"><span>a<sup>2</sup></span><span>T<sub>a</sub></span></span>
+              <span>=</span>
+              <span class="einstein-fraction"><span>b<sup>2</sup></span><span>T<sub>b</sub></span></span>
+              <span>=</span>
+              <span class="einstein-fraction"><span>c<sup>2</sup></span><span>T<sub>c</sub></span></span>
+            </p>
+            <p class="equation" id="einstein-area-sum">T<sub>a</sub> + T<sub>b</sub> = T<sub>c</sub></p>
+            <button type="button" id="einstein-multiply" class="primary" aria-label="Mindhárom terület szorzása k-val" aria-controls="einstein-result" aria-expanded="false">× <i>k</i></button>
+            <div id="einstein-result" tabindex="-1" hidden>
+              <p class="equation einstein-substitution"><i>k</i> · T<sub>a</sub> + <i>k</i> · T<sub>b</sub> = <i>k</i> · T<sub>c</sub></p>
+              <p class="equation" aria-label="a négyzet plusz b négyzet egyenlő c négyzet">a<sup>2</sup> + b<sup>2</sup> = c<sup>2</sup></p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <noscript><p>A kirakáshoz engedélyezd a JavaScriptet a böngésződben.</p></noscript>
   </main>
+
+  <script>
+    const size = 300;
+    const a = 174;
+    const b = size - a;
+    const snapDistance = 29;
+    const pieces = [
+      { id: "purple", name: "lila", color: "#bd99e3", points: [[0, 0], [b, 0], [0, a]], shift: [0, 0] },
+      { id: "blue", name: "kék", color: "#559be7", points: [[size, a], [b, a], [size, size]], shift: [0, -a] },
+      { id: "red", name: "piros", color: "#ef7274", points: [[b, size], [size, size], [b, a]], shift: [-b, 0] },
+      { id: "gold", name: "sárga", color: "#f3ca62", points: [[b, a], [0, a], [b, 0]], shift: [a, b] }
+    ];
+    const moves = pieces.slice(1);
+    const finalSquare = [[b, 0], [size, b], [a, size], [0, a]];
+    const cornerDefinitions = [
+      { id: "blue", name: "Jobb felső sarok", x: size, y: 0 },
+      { id: "red", name: "Bal alsó sarok", x: 0, y: size },
+      { id: "gold", name: "Jobb alsó sarok", x: size, y: size }
+    ];
+
+    const byId = id => document.getElementById(id);
+    const board = byId("work-board");
+    const tiles = byId("tiles");
+    const annotations = byId("annotations");
+    const corners = byId("corners");
+    const gameStatus = byId("game-status");
+    const progress = byId("progress");
+    const slideInstruction = byId("slide-instruction");
+    const slideHelp = byId("slide-help");
+    const slideResult = byId("slide-result");
+    const slideFinalDiagonals = byId("slide-final-diagonals");
+    const hintButton = byId("hint");
+    const previousButton = byId("previous");
+    const nextButton = byId("next");
+    const playButton = byId("play");
+
+    const placed = new Set();
+    const initialInstructions = gameStatus.textContent;
+    const directions = { blue: "felfelé", red: "balra", gold: "átlósan jobbra lefelé" };
+    let selected = null;
+    let drag = null;
+    let hint = null;
+    let replayStep = moves.length;
+    let replayTimer = null;
+
+    function svg(tag, attrs, text = "") {
+      const node = document.createElementNS("http://www.w3.org/2000/svg", tag);
+      Object.entries(attrs).forEach(([key, value]) => node.setAttribute(key, value));
+      if (text) node.textContent = text;
+      return node;
+    }
+
+    function polygon(piece) {
+      return svg("polygon", {
+        points: piece.points.map(point => point.join(",")).join(" "),
+        fill: piece.color,
+        class: "tile"
+      });
+    }
+
+    function slideHypotenuse(piece, [dx, dy]) {
+      const [, [x1, y1], [x2, y2]] = piece.points;
+      const crosswise = piece.id === "blue" || piece.id === "red";
+      return svg("line", {
+        x1: x1 + dx, y1: y1 + dy, x2: x2 + dx, y2: y2 + dy,
+        class: crosswise ? "slide-diagonal crosswise" : "slide-diagonal"
+      });
+    }
+
+    function mathLabel(x, y, label, side = false) {
+      return svg("text", { x, y, class: side ? "math-label side-label" : "math-label" }, label);
+    }
+
+    function startLabels() {
+      return [
+        mathLabel(b + a / 2, a / 2, "a²"),
+        mathLabel(b / 2, a + b / 2, "b²")
+      ];
+    }
+
+    function activateWithKeyboard(node, action) {
+      node.addEventListener("keydown", event => {
+        if (event.key === "Enter" || event.key === " ") {
+          event.preventDefault();
+          action();
+        }
+      });
+    }
+
+    function initializeBoards() {
+      const referenceTiles = byId("reference-tiles");
+      byId("reference-labels").append(...startLabels());
+      byId("slide-start-diagram").append(
+        ...pieces.map(polygon),
+        ...pieces.slice(0, 2).map(piece => slideHypotenuse(piece, [0, 0]))
+      );
+      slideFinalDiagonals.append(...pieces.map(piece => slideHypotenuse(piece, piece.shift)));
+
+      for (const piece of pieces) {
+        referenceTiles.append(polygon(piece));
+        piece.node = polygon(piece);
+        tiles.append(piece.node);
+        if (piece.id === "purple") continue;
+
+        piece.node.dataset.piece = piece.id;
+        piece.node.setAttribute("aria-label", piece.name + " háromszög");
+        piece.node.addEventListener("pointerdown", event => startDrag(event, piece));
+        activateWithKeyboard(piece.node, () => {
+          if (!placed.has(piece.id)) choosePiece(piece, true);
+        });
+      }
+      board.addEventListener("pointermove", moveDrag);
+      board.addEventListener("pointerup", finishDrag);
+      board.addEventListener("pointercancel", cancelDrag);
+      board.addEventListener("lostpointercapture", cancelDrag);
+
+      for (const corner of cornerDefinitions) {
+        const hitWidth = 56;
+        const towardInsideX = corner.x === 0 ? 1 : -1;
+        const towardInsideY = corner.y === 0 ? 1 : -1;
+        const group = svg("g", {
+          class: "corner", role: "button", tabindex: "0", "aria-label": corner.name,
+          "data-corner": corner.id
+        });
+        group.append(
+          svg("rect", {
+            x: towardInsideX > 0 ? corner.x : corner.x - hitWidth,
+            y: towardInsideY > 0 ? corner.y : corner.y - hitWidth,
+            width: hitWidth,
+            height: hitWidth
+          }),
+          svg("circle", {
+            cx: corner.x + 19 * towardInsideX,
+            cy: corner.y + 19 * towardInsideY,
+            r: 11
+          })
+        );
+        group.addEventListener("click", () => chooseCorner(corner, false));
+        activateWithKeyboard(group, () => chooseCorner(corner, true));
+        corners.append(group);
+        corner.node = group;
+      }
+    }
+
+    function translate(node, [x, y]) {
+      node.style.transform = `translate(${x}px, ${y}px)`;
+    }
+
+    function drawAnnotations(visibleCount) {
+      annotations.replaceChildren();
+      if (visibleCount === 0 && !drag?.moved) annotations.append(...startLabels());
+      if (visibleCount === moves.length) annotations.append(mathLabel(size / 2, size / 2, "c²"));
+
+      if (hint && !drag) {
+        const [dx, dy] = hint.shift;
+        const [cx, cy] = hint.points.reduce(([x, y], [px, py]) => [x + px / 3, y + py / 3], [0, 0]);
+        annotations.append(
+          svg("polygon", {
+            points: hint.points.map(([x, y]) => `${x + dx},${y + dy}`).join(" "),
+            class: "hint-piece"
+          }),
+          svg("line", {
+            x1: cx, y1: cy, x2: cx + dx, y2: cy + dy, class: "hint-arrow",
+            "marker-end": "url(#arrow-tip)"
+          })
+        );
+      }
+    }
+
+    function renderBoard() {
+      const complete = placed.size === moves.length;
+      const visibleMoves = complete ? new Set([...placed].slice(0, replayStep)) : placed;
+      for (const piece of pieces) {
+        const inPlace = visibleMoves.has(piece.id);
+        const canMove = !complete && !inPlace && piece.id !== "purple";
+        const isDragged = drag?.piece === piece && drag.moved;
+        piece.node.classList.toggle("movable", canMove);
+        piece.node.classList.toggle("selected", canMove && selected === piece);
+        piece.node.classList.toggle("dragging", isDragged);
+
+        if (canMove) {
+          piece.node.setAttribute("role", "button");
+          piece.node.setAttribute("tabindex", "0");
+          piece.node.setAttribute("aria-pressed", String(selected === piece));
+        } else {
+          piece.node.removeAttribute("role");
+          piece.node.removeAttribute("tabindex");
+          piece.node.removeAttribute("aria-pressed");
+        }
+
+        if (!isDragged) translate(piece.node, inPlace ? piece.shift : [0, 0]);
+      }
+
+      for (const corner of cornerDefinitions) {
+        const visible = !complete && selected && !drag && !placed.has(corner.id);
+        corner.node.toggleAttribute("hidden", !visible);
+      }
+
+      const nextPiece = moves.find(piece => !placed.has(piece.id));
+      slideInstruction.textContent = nextPiece
+        ? `Csúsztasd a ${nextPiece.name} háromszöget ${directions[nextPiece.id]}!`
+        : "A bizonyítás kész.";
+      progress.textContent = `${visibleMoves.size} / ${moves.length} csúsztatás`;
+      slideHelp.hidden = complete;
+      slideResult.hidden = !complete;
+      slideFinalDiagonals.toggleAttribute("hidden", visibleMoves.size !== moves.length);
+      drawAnnotations(visibleMoves.size);
+    }
+
+    function boardPoint(event) {
+      return new DOMPoint(event.clientX, event.clientY).matrixTransform(board.getScreenCTM().inverse());
+    }
+
+    function startDrag(event, piece) {
+      if (placed.has(piece.id) || drag || event.button !== 0) return;
+      event.preventDefault();
+      drag = { piece, pointerId: event.pointerId, start: boardPoint(event), moved: false };
+      // Capture on the board so raising a triangle cannot interrupt the gesture.
+      board.setPointerCapture(event.pointerId);
+    }
+
+    function slideProgress(piece, dx, dy) {
+      const [shiftX, shiftY] = piece.shift;
+      const fraction = (dx * shiftX + dy * shiftY) / (shiftX ** 2 + shiftY ** 2);
+      return Math.min(1, Math.max(0, fraction));
+    }
+
+    function moveDrag(event) {
+      if (drag?.pointerId !== event.pointerId) return;
+      if (drag.piece.id === "gold" && placed.size < 2) return;
+      const point = boardPoint(event);
+      const dx = point.x - drag.start.x;
+      const dy = point.y - drag.start.y;
+      if (!drag.moved) {
+        if (Math.hypot(dx, dy) < 5) return;
+        drag.moved = true;
+        selected = drag.piece;
+        tiles.append(drag.piece.node);
+        renderBoard();
+      }
+      const [shiftX, shiftY] = drag.piece.shift;
+      const distance = slideProgress(drag.piece, dx, dy);
+      translate(drag.piece.node, [shiftX * distance, shiftY * distance]);
+    }
+
+    function finishDrag(event) {
+      if (drag?.pointerId !== event.pointerId) return;
+      const { piece, start, moved } = drag;
+      drag = null;
+      const point = boardPoint(event);
+      const releaseX = point.x - start.x;
+      const releaseY = point.y - start.y;
+      if (!moved && Math.hypot(releaseX, releaseY) < 5) {
+        choosePiece(piece, false);
+        return;
+      }
+      const [dx, dy] = piece.shift;
+      const corner = cornerDefinitions.find(candidate => candidate.id === piece.id);
+      const remaining = (1 - slideProgress(piece, releaseX, releaseY)) * Math.hypot(dx, dy);
+      const aligned = remaining <= snapDistance;
+      const nearCorner = Math.hypot(point.x - corner.x, point.y - corner.y) <= 44;
+      if (aligned || nearCorner) {
+        placePiece(piece);
+      } else {
+        selected = null;
+        setSlideStatus("Próbáld egy másik sarokhoz csúsztatni a háromszöget!");
+        renderBoard();
+      }
+    }
+
+    function cancelDrag(event) {
+      if (!drag || (event && drag.pointerId !== event.pointerId)) return;
+      const { pointerId } = drag;
+      drag = null;
+      if (board.hasPointerCapture(pointerId)) board.releasePointerCapture(pointerId);
+      renderBoard();
+    }
+
+    function choosePiece(piece, keyboard) {
+      selected = piece;
+      setSlideStatus(`A ${piece.name} háromszöget választottad. Kattints egy kerek célpontra!`);
+      renderBoard();
+      if (keyboard) cornerDefinitions.find(corner => !corner.node.hasAttribute("hidden"))?.node.focus();
+    }
+
+    function chooseCorner(corner, keyboard) {
+      if (!selected) return;
+      const piece = selected;
+      if (piece.id !== corner.id) {
+        setSlideStatus(`Próbálj másik sarkot a ${piece.name} háromszögnek!`);
+        return;
+      }
+      const success = placePiece(piece);
+      if (!keyboard) return;
+      if (!success) piece.node.focus();
+      else if (placed.size < moves.length) moves.find(candidate => !placed.has(candidate.id)).node.focus();
+    }
+
+    function setSlideStatus(message, correct = false) {
+      gameStatus.textContent = message;
+      if (correct) gameStatus.dataset.state = "correct";
+      else gameStatus.removeAttribute("data-state");
+    }
+
+    function placePiece(piece) {
+      if (piece.id === "gold" && placed.size < 2) {
+        selected = null;
+        setSlideStatus("Előbb csúsztasd el a kék és a piros háromszöget!");
+        renderBoard();
+        return false;
+      }
+
+      placed.add(piece.id);
+      selected = null;
+      hint = null;
+      setSlideStatus(`Helyes! A ${piece.name} háromszög csúsztatása után a maradék területe változatlan.`, true);
+      if (placed.size === moves.length) {
+        replayStep = moves.length;
+        renderReplay();
+        gameStatus.focus({ preventScroll: true });
+      } else renderBoard();
+      return true;
+    }
+
+    hintButton.addEventListener("click", () => {
+      hint = moves.find(piece => !placed.has(piece.id));
+      selected = null;
+      setSlideStatus(`A ${hint.name} háromszöget csúsztasd ${directions[hint.id]} a jelölt helyre!`);
+      renderBoard();
+    });
+
+    function checkAnswer(form, field, feedback, explanation, retry, advance, correct = "both") {
+      form.addEventListener("submit", event => {
+        event.preventDefault();
+        const answer = new FormData(form).get(field);
+        if (answer !== correct) {
+          feedback.dataset.state = "retry";
+          feedback.textContent = retry[answer];
+          return;
+        }
+        feedback.dataset.state = "correct";
+        feedback.textContent = explanation;
+        const choices = form.querySelector("fieldset");
+        choices.disabled = true;
+        choices.hidden = !form.hasAttribute("data-keep-question");
+        advance();
+        if (explanation) feedback.focus({ preventScroll: true });
+      });
+    }
+
+    function resetQuestion(form, feedback) {
+      form.reset();
+      const choices = form.querySelector("fieldset");
+      choices.disabled = false;
+      choices.hidden = false;
+      feedback.removeAttribute("data-state");
+      feedback.textContent = "";
+    }
+
+    function markStudyCorner(labels, gamma) {
+      const right = Math.atan2(b, a);
+      const left = Math.atan2(a, -b);
+      const radius = 33;
+      const rayPoint = (angle, distance) => [b + distance * Math.cos(angle), distance * Math.sin(angle)];
+      const sectors = [[0, right, "β"], [right, left, gamma], [left, Math.PI, "α"]];
+      labels.replaceChildren();
+      for (const [from, to, symbol] of sectors) {
+        labels.append(svg("path", {
+          d: `M ${rayPoint(from, radius).join(" ")} A ${radius} ${radius} 0 0 1 ${rayPoint(to, radius).join(" ")}`,
+          stroke: "#124739", "stroke-width": 3, fill: "none"
+        }));
+        const [x, y] = rayPoint((from + to) / 2, 56);
+        const label = mathLabel(x, y, symbol);
+        label.setAttribute("style", "font-size: 30px");
+        labels.append(label);
+      }
+    }
+
+    function renderReplay() {
+      renderBoard();
+      previousButton.disabled = replayStep === 0;
+      nextButton.disabled = replayStep === moves.length;
+      playButton.textContent = replayTimer !== null
+        ? "Szünet"
+        : replayStep === moves.length ? "Visszajátszás" : "Lejátszás";
+      byId("replay-count").textContent = `${replayStep + 1}. állás / ${moves.length + 1}`;
+    }
+
+    function stopReplay() {
+      window.clearInterval(replayTimer);
+      replayTimer = null;
+    }
+
+    function stepReplay(amount) {
+      stopReplay();
+      replayStep = Math.min(moves.length, Math.max(0, replayStep + amount));
+      renderReplay();
+    }
+
+    function toggleReplay() {
+      if (replayTimer !== null) {
+        stopReplay();
+        renderReplay();
+        return;
+      }
+
+      const direction = replayStep === moves.length ? -1 : 1;
+      const end = direction === 1 ? moves.length : 0;
+      const advance = () => {
+        replayStep += direction;
+        if (replayStep === end) stopReplay();
+        renderReplay();
+      };
+      replayTimer = window.setInterval(advance, 760);
+      advance();
+    }
+
+    previousButton.addEventListener("click", () => stepReplay(-1));
+    nextButton.addEventListener("click", () => stepReplay(1));
+    playButton.addEventListener("click", toggleReplay);
+
+    function resetSlide() {
+      cancelDrag();
+      stopReplay();
+      placed.clear();
+      selected = null;
+      hint = null;
+      setSlideStatus(initialInstructions);
+      renderBoard();
+    }
+
+    byId("reset-sliding").addEventListener("click", resetSlide);
+
+    initializeBoards();
+    renderBoard();
+  </script>
+  <script>
+    (() => {
+      const sumCards = [
+        { id: "outer", text: "A külső négyzet területe <span class='card-formula'>(a + b)² = a² + 2ab + b²</span>." },
+        { id: "remaining", needs: ["outer"], text: "A négy háromszög területét levonva <span class='card-formula'>a² + 2ab + b² − 2ab = a² + b²</span> marad." },
+        { id: "conclusion", needs: ["remaining"], text: "A maradék a <em>c</em> oldalú négyzet területe, vagyis <span class='card-formula'>c²</span>. Ezért <span class='card-formula'>a² + b² = c²</span>." }
+      ];
+      const differenceCards = [
+        { id: "areas", text: "A külső négyzet területe <span class='card-formula'>c²</span>, a belső négyzeté <span class='card-formula'>(a − b)²</span>." },
+        { id: "parts", needs: ["areas"], text: "A belső négyzet és a négy háromszög együtt tölti ki a külső négyzetet, ezért <span class='card-formula'>c² = (a − b)² + 2ab</span>." },
+        { id: "conclusion", needs: ["parts"], text: "Kifejtve és összevonva <span class='card-formula'>c² = a² − 2ab + b² + 2ab = a² + b²</span>." }
+      ];
+
+      function firstUnjustified(cards) {
+        const established = new Set();
+        return cards.findIndex(card => {
+          if (card.needs?.some(id => !established.has(id))) return true;
+          established.add(card.id);
+          return false;
+        });
+      }
+
+      function setupSorter(panel, available, onChecked = () => {}) {
+        const list = panel.querySelector(".proof-cards");
+        const feedback = panel.querySelector(".proof-cards ~ .feedback");
+        const check = panel.querySelector("[data-check]");
+        const next = panel.querySelector("#to-difference");
+        let ordered;
+        let picked = null;
+        let gesture = null;
+        let dropTarget = null;
+        let problem = null;
+        let skipClick = false;
+
+        const nodes = new Map(available.map(card => {
+          const row = document.createElement("li");
+          row.className = "proof-card";
+          const handle = document.createElement("span");
+          handle.className = "card-grip";
+          handle.textContent = "⠿";
+          handle.setAttribute("aria-hidden", "true");
+          const button = document.createElement("button");
+          button.type = "button";
+          button.className = "card-sentence";
+          button.innerHTML = card.text;
+          row.append(handle, button);
+          button.addEventListener("click", () => {
+            if (skipClick) return;
+            if (picked && picked !== card) {
+              moveCard(picked, card);
+              return;
+            }
+            picked = picked ? null : card;
+            updateSelection();
+            setFeedback(picked ? "Kártya kiválasztva. Kattints arra a kártyára, amelynek a helyére tennéd!" : "Kiválasztás törölve.");
+          });
+          row.addEventListener("pointerdown", event => {
+            if (check.disabled || gesture || event.button !== 0 ||
+                (event.pointerType !== "mouse" && !handle.contains(event.target))) return;
+            const origin = handle.contains(event.target) ? handle : button;
+            gesture = { card, origin, id: event.pointerId, x: event.clientX, y: event.clientY, moved: false };
+            origin.setPointerCapture(event.pointerId);
+          });
+          return [card, { row, button }];
+        }));
+
+        function updateSelection() {
+          for (const [card, { button }] of nodes) button.setAttribute("aria-pressed", String(picked === card));
+        }
+
+        function setFeedback(message, state) {
+          if (problem) {
+            nodes.get(problem).row.removeAttribute("data-problem");
+            problem = null;
+          }
+          feedback.textContent = message;
+          if (state) feedback.dataset.state = state;
+          else feedback.removeAttribute("data-state");
+        }
+
+        function moveCard(card, target) {
+          const from = ordered.indexOf(card);
+          const to = ordered.indexOf(target);
+          ordered.splice(from, 1);
+          ordered.splice(to, 0, card);
+          const row = nodes.get(card).row;
+          const nextCard = ordered[to + 1];
+          list.insertBefore(row, nextCard ? nodes.get(nextCard).row : null);
+          picked = null;
+          updateSelection();
+          setFeedback("A kártya új helye " + (to + 1) + ".");
+          nodes.get(card).button.focus({ preventScroll: true });
+        }
+
+        function findDropTarget(event) {
+          const bounds = list.getBoundingClientRect();
+          if (event.clientX < bounds.left || event.clientX > bounds.right ||
+              event.clientY < bounds.top || event.clientY > bounds.bottom) return null;
+          return ordered.find(card => event.clientY <= nodes.get(card).row.getBoundingClientRect().bottom) ?? null;
+        }
+
+        function markDropTarget(target) {
+          if (dropTarget) nodes.get(dropTarget).row.removeAttribute("data-drop");
+          dropTarget = target;
+          if (target && target !== gesture?.card) nodes.get(target).row.setAttribute("data-drop", "");
+        }
+
+        list.addEventListener("pointermove", event => {
+          if (gesture?.id !== event.pointerId) return;
+          if (!gesture.moved && Math.hypot(event.clientX - gesture.x, event.clientY - gesture.y) < 6) return;
+          gesture.moved = true;
+          picked = gesture.card;
+          updateSelection();
+          list.classList.add("is-dragging");
+          markDropTarget(findDropTarget(event));
+        });
+
+        function finishGesture(event) {
+          if (gesture?.id !== event.pointerId) return;
+          const { card, id, moved, origin } = gesture;
+          const target = moved && event.type === "pointerup" ? findDropTarget(event) : null;
+          gesture = null;
+          markDropTarget(null);
+          list.classList.remove("is-dragging");
+          if (origin.hasPointerCapture(id)) origin.releasePointerCapture(id);
+          if (!moved) return;
+          skipClick = true;
+          setTimeout(() => { skipClick = false; }, 0);
+          if (target && target !== card) moveCard(card, target);
+          else {
+            picked = null;
+            updateSelection();
+          }
+        }
+
+        list.addEventListener("pointerup", finishGesture);
+        list.addEventListener("pointercancel", finishGesture);
+        list.addEventListener("lostpointercapture", finishGesture);
+
+        function shuffle() {
+          if (gesture) return;
+          const previous = ordered;
+          ordered = [...available];
+          for (let i = ordered.length - 1; i > 0; i -= 1) {
+            const j = Math.floor(Math.random() * (i + 1));
+            [ordered[i], ordered[j]] = [ordered[j], ordered[i]];
+          }
+          if (firstUnjustified(ordered) === -1 || ordered.every((card, i) => card === previous?.[i])) {
+            const end = ordered.indexOf(available.at(-1));
+            const destination = end === 0 ? 1 : 0;
+            [ordered[end], ordered[destination]] = [ordered[destination], ordered[end]];
+          }
+          picked = null;
+          list.removeAttribute("data-solved");
+          list.replaceChildren(...ordered.map(card => nodes.get(card).row));
+          check.disabled = false;
+          if (next) next.hidden = true;
+          for (const { button } of nodes.values()) button.disabled = false;
+          updateSelection();
+          setFeedback("");
+          onChecked(false);
+        }
+
+        check.addEventListener("click", () => {
+          if (gesture) return;
+          const firstProblem = firstUnjustified(ordered);
+          if (firstProblem !== -1) {
+            setFeedback("A kiemelt kártya egy olyan lépésre épül, amely még hiányzik előle.", "retry");
+            problem = ordered[firstProblem];
+            const { row, button } = nodes.get(problem);
+            row.setAttribute("data-problem", "");
+            button.focus();
+            return;
+          }
+          picked = null;
+          updateSelection();
+          list.setAttribute("data-solved", "");
+          for (const { button } of nodes.values()) button.disabled = true;
+          check.disabled = true;
+          if (next) next.hidden = false;
+          setFeedback("Helyes sorrend. Összeállt a bizonyítás!", "correct");
+          onChecked(true);
+          feedback.focus({ preventScroll: true });
+        });
+
+        panel.querySelector("[data-shuffle]").addEventListener("click", shuffle);
+        shuffle();
+        return shuffle;
+      }
+
+      const views = {
+        rearrangement: ["open-rearrangement", null],
+        sliding: ["open-sliding", "sliding-title"],
+        algebra: ["open-algebra", "algebra-title"],
+        difference: ["open-difference", "difference-title"],
+        euclid: ["open-euclid", "euclid-title"],
+        einstein: ["open-einstein", "einstein-title"]
+      };
+
+      function openView(name, focusHeading = false) {
+        if (name !== "sliding" && drag) cancelDrag();
+        if (name !== "sliding" && replayTimer !== null) {
+          stopReplay();
+          renderReplay();
+        }
+        for (const [key, [button]] of Object.entries(views)) {
+          byId(key).hidden = key !== name;
+          byId(button).setAttribute("aria-pressed", String(key === name));
+        }
+        if (focusHeading) byId(views[name][1]).focus();
+      }
+
+      for (const [name, [button]] of Object.entries(views)) {
+        byId(button).addEventListener("click", () => openView(name));
+      }
+      byId("to-sliding").addEventListener("click", () => openView("sliding", true));
+      byId("to-algebra").addEventListener("click", () => openView("algebra", true));
+      byId("to-difference").addEventListener("click", () => openView("difference", true));
+
+      function setupEuclid() {
+        const points = {
+          A: [0, 0], B: [300, 0], C: [108, -144], D: [-144, -108], E: [-36, -252],
+          F: [252, -336], G: [444, -192], H: [0, 300], I: [108, 300], J: [300, 300], K: [108, 0]
+        };
+        const slideNote = base => `Csúsztatáskor ${base} alap és a hozzá tartozó magasság változatlan. Ezért a csúsztatás területtartó.`;
+        const steps = [
+          { from: "CAD", to: "BAD", title: "DAC → DAB", action: "Csúsztatás B-be",
+            task: "Húzd C-t B-be az AD oldallal párhuzamosan!",
+            note: slideNote("az AD") },
+          { from: "BAD", to: "HAC", angle: 90, title: "DAB → HAC", action: "Forgatás A körül",
+            task: "Húzd B-t az íven H-ba! A háromszög A körül 90°-kal fordul el.",
+            note: "A forgatás megőrzi a háromszög területét." },
+          { from: "CAH", to: "KAH", title: "HAC → HAK", action: "Csúsztatás K-ba",
+            task: "Húzd C-t K-ba az AH oldallal párhuzamosan!",
+            note: slideNote("az AH") },
+          { title: "Megvan az első téglalap!", action: "Tovább a másik befogóhoz", question: "area" },
+          { from: "CBG", to: "ABG", title: "CBG → ABG", action: "Csúsztatás A-ba",
+            task: "Húzd C-t A-ba a BG oldallal párhuzamosan!",
+            note: slideNote("a BG") },
+          { from: "ABG", to: "JBC", angle: -90, title: "ABG → JBC", action: "Forgatás B körül",
+            task: "Húzd A-t az íven J-be! A háromszög B körül 90°-kal fordul el.",
+            note: "A háromszög területe ugyanakkora marad." },
+          { from: "CBJ", to: "KBJ", title: "JBC → JBK", action: "Csúsztatás K-ba",
+            task: "Húzd C-t K-ba a BJ oldallal párhuzamosan!",
+            note: slideNote("a BJ") },
+          { title: "A területek összehasonlítása", question: "theorem" }
+        ];
+        const board = byId("euclid-board");
+        const regions = byId("euclid-regions");
+        const lines = byId("euclid-lines");
+        const motion = byId("euclid-motion");
+        const feedback = byId("euclid-feedback");
+        const areaQuestion = byId("euclid-area-question");
+        const areaChoices = areaQuestion.querySelector("fieldset");
+        const areaFeedback = byId("euclid-area-feedback");
+        const theoremQuestion = byId("euclid-theorem-question");
+        const theoremChoices = theoremQuestion.querySelector("fieldset");
+        const theoremFeedback = byId("euclid-theorem-feedback");
+        const action = byId("euclid-action");
+        const result = byId("euclid-result");
+        const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)");
+        let index = 0;
+        let moveComplete = false;
+        let pointer = null;
+        let frame = null;
+        let triangle;
+        let handle;
+
+        const coordinates = names => Array.from(names, name => points[name]);
+        const pointList = vertices => vertices.map(pt => pt.join(",")).join(" ");
+        const shape = (names, attributes) => svg("polygon", { points: pointList(coordinates(names)), ...attributes });
+        const line = (start, end, className) => svg("path", { d: `M${points[start]} L${points[end]}`, class: className });
+
+        const labels = {
+          A: [-40, 30], B: [18, 28], C: [-10, -19], D: [-30, 6], E: [-14, -14], F: [-12, -13],
+          G: [13, 1], H: [-25, 27], I: [-2, 29], J: [12, 27], K: [17, 29]
+        };
+        for (const [name, [x, y]] of Object.entries(points)) {
+          const [dx, dy] = labels[name];
+          byId("euclid-labels").append(
+            svg("circle", { cx: x, cy: y, r: 3.5, fill: "#3d5251" }),
+            svg("text", { x: x + dx, y: y + dy, class: "euclid-point" }, name)
+          );
+        }
+
+        function drawMotion(progress) {
+          const step = steps[index];
+          const vertices = coordinates(step.from);
+          if (step.angle) {
+            const [x, y] = vertices[1];
+            const angle = step.angle * progress * Math.PI / 180;
+            const cos = Math.cos(angle);
+            const sin = Math.sin(angle);
+            for (const [i, [vx, vy]] of vertices.entries()) {
+              vertices[i] = [x + (vx - x) * cos - (vy - y) * sin, y + (vx - x) * sin + (vy - y) * cos];
+            }
+          } else {
+            const [x, y] = vertices[0];
+            const [tx, ty] = points[step.to[0]];
+            vertices[0] = [x + (tx - x) * progress, y + (ty - y) * progress];
+          }
+          triangle.setAttribute("points", pointList(vertices));
+          handle.setAttribute("transform", `translate(${vertices[0]})`);
+        }
+
+        function drawBoard(step) {
+          const leftDone = index >= 3;
+          const rightDone = index === steps.length - 1;
+          const left = "#cce9db";
+          const right = "#f6e5bc";
+          regions.replaceChildren(
+            shape("DACE", { fill: leftDone ? left : "#f2f7f4" }),
+            shape("CBGF", { fill: rightDone ? right : "#fcf8ee" }),
+            shape("AKIH", { fill: leftDone ? left : "#fff" }),
+            shape("KBJI", { fill: rightDone ? right : "#fff" })
+          );
+          lines.replaceChildren(
+            ...["DACE", "CBGF", "ABJH"].map(square => shape(square, { class: "euclid-outline" })),
+            line("K", "I", "euclid-outline"),
+            svg("path", { d: "M96 -128 L112 -116 L124 -132", class: "euclid-outline" })
+          );
+          motion.replaceChildren();
+          if (leftDone) {
+            lines.append(line("D", "C", "euclid-construction"), line("H", "K", "euclid-construction"));
+          }
+          if (rightDone) {
+            lines.append(line("C", "G", "euclid-construction"), line("J", "K", "euclid-construction"));
+          }
+          if (!step.from) {
+            const areaLabels = rightDone
+              ? [[-18, -111, "b²"], [52, 159, "b²"], [273, -164, "a²"], [200, 159, "a²"], [150, 273, "c²"]]
+              : [[-18, -111, "AC²"]];
+            if (rightDone) {
+              lines.append(svg("path", { d: "M16 235 v9 H284 v-9", class: "euclid-outline" }));
+            } else if (areaChoices.disabled) {
+              areaLabels.push([52, 159, "AC²"]);
+            }
+            for (const [x, y, label] of areaLabels) {
+              const area = mathLabel(x, y, label);
+              area.classList.add("euclid-area");
+              lines.append(area);
+            }
+            return;
+          }
+
+          const [start, pivot] = coordinates(step.from);
+          const [end] = coordinates(step.to);
+          const radius = Math.hypot(start[0] - pivot[0], start[1] - pivot[1]);
+          const track = step.angle
+            ? `M${start} A${radius} ${radius} 0 0 ${Number(step.angle > 0)} ${end}`
+            : `M${start} L${end}`;
+          triangle = svg("polygon", { fill: index < 3 ? "#58c595" : "#e5ad4f", "fill-opacity": .57,
+            stroke: index < 3 ? "#1c6b55" : "#95621d", "stroke-width": 3, "pointer-events": "none" });
+          handle = svg("g", { class: "euclid-handle" });
+          handle.append(svg("circle", { r: 34, fill: "transparent" }),
+            svg("circle", { r: 12, fill: "#82531c", stroke: "white", "stroke-width": 3 }));
+          motion.append(shape(step.to, { class: "euclid-target" }), triangle,
+            svg("path", { d: track, class: "euclid-path" }));
+          if (step.angle) {
+            motion.append(svg("circle", { cx: pivot[0], cy: pivot[1], r: 9, fill: "#82531c" }));
+          }
+          motion.append(svg("circle", { cx: end[0], cy: end[1], r: 12, fill: "white", stroke: "#82531c", "stroke-width": 4 }), handle);
+          handle.addEventListener("pointerdown", startDrag);
+          drawMotion(0);
+        }
+
+        function render() {
+          const step = steps[index];
+          const awaitingAnswer = step.question === "area" && !areaChoices.disabled;
+          moveComplete = false;
+          feedback.hidden = true;
+          areaQuestion.hidden = step.question !== "area";
+          theoremQuestion.hidden = step.question !== "theorem";
+          byId("euclid-progress").textContent = step.from ? `${index < 3 ? index + 1 : index} / 6` : "";
+          byId("euclid-step").textContent = step.title;
+          byId("euclid-task").textContent = step.task ?? "";
+          byId("euclid-note").textContent = step.note ?? "";
+          byId("euclid-actions").hidden = !step.action || awaitingAnswer;
+          action.textContent = step.action ?? "";
+          action.disabled = awaitingAnswer;
+          action.classList.toggle("primary", !step.from && Boolean(step.action));
+          result.hidden = theoremQuestion.hidden || !theoremChoices.disabled;
+          drawBoard(step);
+        }
+
+        function completeMove() {
+          moveComplete = true;
+          drawMotion(1);
+          handle.setAttribute("hidden", "");
+          feedback.hidden = false;
+          action.textContent = "Tovább";
+          action.classList.add("primary");
+          feedback.focus({ preventScroll: true });
+        }
+
+        function advance() {
+          index++;
+          render();
+          const question = [areaQuestion, theoremQuestion].find(form => !form.hidden);
+          question?.querySelector("legend").focus({ preventScroll: true });
+        }
+
+        function localPoint(event) {
+          const matrix = board.getScreenCTM();
+          return matrix && new DOMPoint(event.clientX, event.clientY).matrixTransform(matrix.inverse());
+        }
+
+        function startDrag(event) {
+          if (event.button !== 0 || pointer || frame !== null || moveComplete) return;
+          const point = localPoint(event);
+          if (!point) return;
+          event.preventDefault();
+          const [x, y] = points[steps[index].from[0]];
+          pointer = { id: event.pointerId, offsetX: point.x - x, offsetY: point.y - y };
+          board.setPointerCapture(event.pointerId);
+          board.setAttribute("data-dragging", "");
+        }
+
+        function dragProgress(event) {
+          const point = localPoint(event);
+          if (!point) return 0;
+          const x = point.x - pointer.offsetX;
+          const y = point.y - pointer.offsetY;
+          const step = steps[index];
+          const [[sx, sy], [px, py]] = coordinates(step.from);
+          let progress;
+          if (step.angle) {
+            const ux = sx - px;
+            const uy = sy - py;
+            const vx = x - px;
+            const vy = y - py;
+            progress = Math.atan2(ux * vy - uy * vx, ux * vx + uy * vy) / (step.angle * Math.PI / 180);
+          } else {
+            const [tx, ty] = points[step.to[0]];
+            const dx = tx - sx;
+            const dy = ty - sy;
+            progress = ((x - sx) * dx + (y - sy) * dy) / (dx * dx + dy * dy);
+          }
+          return Math.max(0, Math.min(1, progress));
+        }
+
+        function releaseDrag() {
+          const { id } = pointer;
+          pointer = null;
+          board.removeAttribute("data-dragging");
+          if (board.hasPointerCapture(id)) board.releasePointerCapture(id);
+        }
+
+        board.addEventListener("pointermove", event => {
+          if (pointer?.id === event.pointerId) drawMotion(dragProgress(event));
+        });
+        board.addEventListener("pointerup", event => {
+          if (pointer?.id !== event.pointerId) return;
+          const progress = dragProgress(event);
+          releaseDrag();
+          if (progress >= .88) completeMove();
+          else drawMotion(0);
+        });
+        for (const type of ["pointercancel", "lostpointercapture"]) {
+          board.addEventListener(type, event => {
+            if (pointer?.id !== event.pointerId) return;
+            releaseDrag();
+            drawMotion(0);
+          });
+        }
+
+        action.addEventListener("click", () => {
+          if (pointer || frame !== null || action.disabled || !steps[index].action) return;
+          if (!steps[index].from || moveComplete) {
+            advance();
+            return;
+          }
+          if (reducedMotion.matches) {
+            completeMove();
+            return;
+          }
+          let start;
+          function animate(time) {
+            start ??= time;
+            const progress = Math.min(1, (time - start) / 650);
+            drawMotion(progress);
+            if (progress < 1) frame = window.requestAnimationFrame(animate);
+            else {
+              frame = null;
+              completeMove();
+            }
+          }
+          frame = window.requestAnimationFrame(animate);
+        });
+        checkAnswer(areaQuestion, "area-reason", areaFeedback, "Helyes!", {
+          congruent: "A háromszögek területe egyenlő. Mit felez a két szaggatott átló?",
+          diagonal: "A két átló a négyzetet és a téglalapot felezi. Mit tudsz a két színezett alakzat feléről?"
+        }, render, "equal-halves");
+        checkAnswer(theoremQuestion, "theorem", theoremFeedback, "Helyes! Ez a Pitagorasz-tétel.", {
+          smaller: "Marad üres rész a nagy négyzetben a két téglalap mellett?",
+          larger: "Nézd meg, túlnyúlik-e valamelyik téglalap a nagy négyzet határán!"
+        }, render, "equal");
+        byId("reset-euclid").addEventListener("click", () => {
+          if (frame !== null) window.cancelAnimationFrame(frame);
+          frame = null;
+          if (pointer) releaseDrag();
+          index = 0;
+          resetQuestion(areaQuestion, areaFeedback);
+          resetQuestion(theoremQuestion, theoremFeedback);
+          render();
+        });
+        render();
+      }
+
+      setupEuclid();
+
+      function setupEinstein() {
+        const board = byId("einstein-board");
+        const squares = byId("einstein-squares");
+        const track = byId("einstein-track");
+        const foot = byId("einstein-foot");
+        const cut = byId("einstein-cut");
+        const angleValue = byId("einstein-angle-value");
+        const rightAngle = byId("einstein-right-angle");
+        const angles = byId("einstein-angles");
+        const leftPart = byId("einstein-part-b");
+        const rightPart = byId("einstein-part-a");
+        const leftArea = byId("einstein-area-b");
+        const rightArea = byId("einstein-area-a");
+        const splitStage = byId("einstein-split-stage");
+        const cutFeedback = byId("einstein-cut-feedback");
+        const cutTask = byId("einstein-cut-task");
+        const matchForm = byId("einstein-match-question");
+        const matchFeedback = byId("einstein-match-feedback");
+        const toScale = byId("einstein-to-scale");
+        const scaleTask = byId("einstein-scale-task");
+        const scaleBoard = byId("einstein-scale-board");
+        const scalePair = byId("einstein-scale-pair");
+        const scaleInput = byId("einstein-scale");
+        const scaleValue = byId("einstein-scale-value");
+        const scaleForm = byId("einstein-scale-question");
+        const scaleFeedback = byId("einstein-scale-feedback");
+        const toTimes = byId("einstein-to-times");
+        const times = byId("einstein-times");
+        const multiply = byId("einstein-multiply");
+        const result = byId("einstein-result");
+        const left = 28;
+        const right = 328;
+        const apexX = 136;
+        const apexY = 44;
+        const baseY = 188;
+        const initialX = 233;
+        let x = initialX;
+        let pointer = null;
+
+        function setFoot(next) {
+          x = Math.max(left, Math.min(right, Math.round(next)));
+          const angle = Math.round(Math.atan2(baseY - apexY, x - apexX) * 180 / Math.PI);
+          foot.setAttribute("transform", `translate(${x} ${baseY})`);
+          cut.setAttribute("d", `M${apexX} ${apexY} L${x} ${baseY}`);
+          leftPart.setAttribute("points", `${left},${baseY} ${x},${baseY} ${apexX},${apexY}`);
+          rightPart.setAttribute("points", `${x},${baseY} ${right},${baseY} ${apexX},${apexY}`);
+          leftArea.setAttribute("x", (left + x + apexX) / 3);
+          rightArea.setAttribute("x", (x + right + apexX) / 3);
+          leftArea.toggleAttribute("hidden", x - left < 42);
+          rightArea.toggleAttribute("hidden", right - x < 42);
+          track.setAttribute("aria-valuenow", x - left);
+          track.setAttribute("aria-valuetext", `${angle} fokos szög az átfogóval`);
+          angleValue.textContent = `${angle}°`;
+        }
+
+        function checkCut() {
+          if (Math.abs(x - apexX) > 5) {
+            cutFeedback.textContent = "Állítsd a szöget 90°-ra!";
+            cutFeedback.dataset.state = "retry";
+            return;
+          }
+          setFoot(apexX);
+          track.setAttribute("hidden", "");
+          rightAngle.removeAttribute("hidden");
+          angles.removeAttribute("hidden");
+          board.setAttribute("aria-label", "Az átfogóra állított magasság két derékszögű háromszögre bontja az eredetit. Az azonos színű szögek egyenlők.");
+          cutTask.hidden = true;
+          cutFeedback.textContent = "Helyes! Megvan a 90°.";
+          cutFeedback.dataset.state = "correct";
+          matchForm.hidden = false;
+          cutFeedback.focus({ preventScroll: true });
+        }
+
+        function moveFoot(event) {
+          const matrix = board.getScreenCTM();
+          if (!matrix) return;
+          const point = new DOMPoint(event.clientX, event.clientY).matrixTransform(matrix.inverse());
+          setFoot(point.x);
+        }
+
+        function releaseFoot() {
+          const id = pointer;
+          pointer = null;
+          track.removeAttribute("data-dragging");
+          if (track.hasPointerCapture(id)) track.releasePointerCapture(id);
+        }
+
+        track.addEventListener("pointerdown", event => {
+          if (event.button !== 0 || pointer !== null || cutTask.hidden) return;
+          event.preventDefault();
+          pointer = event.pointerId;
+          track.setPointerCapture(pointer);
+          track.setAttribute("data-dragging", "");
+          moveFoot(event);
+        });
+        track.addEventListener("pointermove", event => {
+          if (event.pointerId === pointer) moveFoot(event);
+        });
+        track.addEventListener("pointerup", event => {
+          if (event.pointerId !== pointer) return;
+          moveFoot(event);
+          releaseFoot();
+          checkCut();
+        });
+        for (const type of ["pointercancel", "lostpointercapture"]) {
+          track.addEventListener(type, event => {
+            if (event.pointerId === pointer) releaseFoot();
+          });
+        }
+        track.addEventListener("keydown", event => {
+          if (cutTask.hidden || pointer !== null) return;
+          const delta = { ArrowLeft: -1, ArrowDown: -1, ArrowRight: 1, ArrowUp: 1 }[event.key];
+          if (delta) {
+            event.preventDefault();
+            setFoot(x + delta * (event.shiftKey ? 10 : 3));
+            if (Math.abs(x - apexX) <= 5) checkCut();
+          } else if (event.key === "Home" || event.key === "End") {
+            event.preventDefault();
+            setFoot(event.key === "Home" ? left : right);
+          }
+        });
+        activateWithKeyboard(track, () => {
+          if (!cutTask.hidden && pointer === null) checkCut();
+        });
+
+        function showScale() {
+          splitStage.hidden = true;
+          scaleTask.hidden = false;
+          board.setAttribute("hidden", "");
+          scaleBoard.removeAttribute("hidden");
+          byId("einstein-scale-title").focus();
+        }
+
+        checkAnswer(matchForm, "similarity", matchFeedback, "Helyes!",
+          { right: "Nézd meg a hegyesszögeket is!", size: "A hasonló háromszögek mérete eltérhet." },
+          () => { toScale.hidden = false; }, "angles");
+        toScale.addEventListener("click", showScale);
+
+        function updateScale() {
+          const scale = Number(scaleInput.value);
+          scalePair.setAttribute("transform", `scale(${scale})`);
+          scaleValue.textContent = scale.toLocaleString("hu-HU");
+        }
+
+        scaleInput.addEventListener("input", updateScale);
+
+        function showTimes() {
+          scaleTask.hidden = true;
+          scaleBoard.setAttribute("hidden", "");
+          squares.removeAttribute("hidden");
+          board.setAttribute("data-squares", "");
+          board.setAttribute("viewBox", "-144 -176 644 692");
+          board.removeAttribute("hidden");
+          board.setAttribute("aria-label", "A zöld háromszög területe T a, a sárgáé T b. Az oldalakra rajzolt négyzetek területe a négyzet, b négyzet és c négyzet.");
+          angles.setAttribute("hidden", "");
+          times.hidden = false;
+          byId("einstein-times-title").focus();
+        }
+
+        checkAnswer(scaleForm, "scale-ratio", scaleFeedback, "Helyes!",
+          { length: "Az alap és a magasság is λ-szoros.", different: "Mindkét alakzat hosszúságai λ-szorosak." },
+          () => { toTimes.hidden = false; }, "square");
+        toTimes.addEventListener("click", showTimes);
+
+        multiply.addEventListener("click", () => {
+          multiply.disabled = true;
+          multiply.setAttribute("aria-expanded", "true");
+          result.hidden = false;
+          result.focus();
+        });
+
+        function reset() {
+          if (pointer !== null) releaseFoot();
+          setFoot(initialX);
+          track.removeAttribute("hidden");
+          squares.setAttribute("hidden", "");
+          board.removeAttribute("data-squares");
+          board.setAttribute("viewBox", "0 0 356 234");
+          board.removeAttribute("hidden");
+          rightAngle.setAttribute("hidden", "");
+          angles.setAttribute("hidden", "");
+          board.setAttribute("aria-label", "A zöld darab területe T a, a sárga darabé T b. A vágás pontja az AB átfogón mozgatható.");
+          cutFeedback.textContent = "";
+          cutFeedback.removeAttribute("data-state");
+          splitStage.hidden = false;
+          cutTask.hidden = false;
+          matchForm.hidden = true;
+          toScale.hidden = true;
+          scaleTask.hidden = true;
+          scaleBoard.setAttribute("hidden", "");
+          toTimes.hidden = true;
+          times.hidden = true;
+          multiply.disabled = false;
+          multiply.setAttribute("aria-expanded", "false");
+          result.hidden = true;
+          resetQuestion(matchForm, matchFeedback);
+          resetQuestion(scaleForm, scaleFeedback);
+          scaleInput.value = "1";
+          updateScale();
+        }
+
+        byId("reset-einstein").addEventListener("click", reset);
+        reset();
+      }
+
+      setupEinstein();
+
+      function setupTrianglePuzzle({ id, geometry, innerPoints, outerPoints, locations, cards, uncovered = [innerPoints],
+        dimensions, completedView, completedNarrowView = "-12 -5 324 536", completedLabel, continueId }) {
+        const board = byId(id + "-board");
+        const layout = byId(id + "-layout");
+        const figures = byId(id + "-shapes");
+        const targets = byId(id + "-targets");
+        const movable = byId(id + "-pieces");
+        const measures = byId(id + "-lines");
+        const task = byId(id + "-task");
+        const status = byId(id + "-status");
+        const discovery = byId(id + "-discovery");
+        const completion = byId(id + (cards ? "-sorter" : "-completion"));
+        const continueButton = continueId ? byId(continueId) : null;
+        const resetCards = cards ? setupSorter(completion, cards) : null;
+        const narrow = window.matchMedia("(max-width: 620px)");
+        const placed = new Set();
+        let continued = false;
+        let picked = null;
+        let pointer = null;
+
+        const puzzlePieces = geometry.map((points, index) => {
+          const piece = polygon({ points, color: pieces[index].color });
+          const target = polygon({ points, color: "#f9faf8" });
+          const [x0, y0] = points[0];
+          const [x1, y1] = points[1];
+          const [x2, y2] = points[2];
+          const width = Math.max(x0, x1, x2) - Math.min(x0, x1, x2);
+          const bottom = Math.max(y0, y1, y2);
+          const winding = Math.sign((x1 - x0) * (y2 - y0) - (y1 - y0) * (x2 - x0));
+          const entry = { points, piece, target, winding,
+            trayX: (width === a ? 0 : a + 12) - Math.min(x0, x1, x2),
+            trayY: (points.filter(([, y]) => y === bottom).length === 2 ? 10 : 0) - Math.min(y0, y1, y2) };
+          piece.classList.add("build-piece");
+          piece.setAttribute("aria-label", pieces[index].name + " háromszög");
+          target.classList.add("build-target");
+          target.setAttribute("aria-label", locations[index] + " mintahely");
+          target.addEventListener("click", () => selectTarget(entry));
+          activateWithKeyboard(target, () => selectTarget(entry, true));
+          piece.addEventListener("pointerdown", event => beginMove(event, entry));
+          activateWithKeyboard(piece, () => {
+            if (!placed.has(entry)) choosePiece(entry, true);
+          });
+          targets.append(target);
+          movable.append(piece);
+          return entry;
+        });
+
+        const regions = uncovered.map(points => polygon({ points, color: "#dcefd5" }));
+        const outer = svg("polygon", {
+          points: outerPoints.map(pair => pair.join(",")).join(" "), class: "border"
+        });
+        const trayLabel = mathLabel(0, 0, "Építőelemek", true);
+        trayLabel.classList.add("build-tray-label");
+        figures.append(...regions, outer, trayLabel);
+        measures.append(...dimensions);
+
+        function trayOffset({ trayX, trayY }) {
+          return narrow.matches ? [trayX - 6, trayY + 342] : [trayX + 337, trayY + 68];
+        }
+
+        function updateBoard() {
+          const complete = placed.size === puzzlePieces.length;
+          const showReview = complete && continued;
+          layout.toggleAttribute("data-building", !showReview);
+          board.setAttribute("viewBox", showReview ? completedView
+            : narrow.matches ? (complete ? completedNarrowView : "-12 -5 324 536") : "-5 -5 661 310");
+          board.setAttribute("role", complete ? "img" : "group");
+          board.setAttribute("aria-label", complete
+            ? completedLabel
+            : "Kirakósablon négy háromszög számára");
+          trayLabel.setAttribute("x", narrow.matches ? size / 2 : 337 + (size + 12) / 2);
+          trayLabel.setAttribute("y", narrow.matches ? 323 : 47);
+          trayLabel.toggleAttribute("hidden", complete);
+          regions.forEach(region => region.toggleAttribute("hidden", !complete));
+          measures.toggleAttribute("hidden", !complete);
+          task.hidden = showReview;
+          status.hidden = showReview;
+          discovery.hidden = !complete;
+          completion.hidden = continueButton ? !showReview : !complete;
+          if (continueButton) continueButton.hidden = !complete || showReview;
+
+          for (const entry of puzzlePieces) {
+            const free = !placed.has(entry);
+            entry.target.toggleAttribute("hidden", !free);
+            entry.target.setAttribute("role", "button");
+            entry.target.setAttribute("tabindex", free && picked && !pointer ? "0" : "-1");
+            entry.target.classList.toggle("is-target", Boolean(free && picked && !pointer));
+            entry.piece.classList.toggle("movable", free);
+            entry.piece.classList.toggle("selected", picked === entry);
+            entry.piece.classList.toggle("dragging", pointer?.entry === entry && pointer.moved);
+            if (free) {
+              entry.piece.setAttribute("role", "button");
+              entry.piece.setAttribute("tabindex", "0");
+              entry.piece.setAttribute("aria-pressed", String(picked === entry));
+            } else {
+              entry.piece.removeAttribute("role");
+              entry.piece.removeAttribute("tabindex");
+              entry.piece.removeAttribute("aria-pressed");
+            }
+            translate(entry.piece, free ? trayOffset(entry) : [0, 0]);
+          }
+        }
+
+        function updateStatus(message = "") {
+          status.textContent = placed.size + " / " + puzzlePieces.length + " a helyén." + (message ? " " + message : "");
+        }
+
+        function choosePiece(entry, focusTarget = false) {
+          picked = entry;
+          updateBoard();
+          updateStatus("Kattints arra a mintahelyre, ahová a darab illik!");
+          if (focusTarget) puzzlePieces.find(piece => !placed.has(piece)).target.focus();
+        }
+
+        function place(entry, focusNext = false) {
+          placed.add(entry);
+          picked = null;
+          updateBoard();
+          updateStatus();
+          if (placed.size === puzzlePieces.length) discovery.focus({ preventScroll: true });
+          else if (focusNext) puzzlePieces.find(piece => !placed.has(piece)).piece.focus();
+        }
+
+        function selectTarget(entry, focusNext = false) {
+          if (!picked || placed.has(entry)) return;
+          if (picked !== entry) {
+            updateStatus("Próbálj egy másik mintahelyet!");
+            return;
+          }
+          place(entry, focusNext);
+        }
+
+        function point(event) {
+          return new DOMPoint(event.clientX, event.clientY).matrixTransform(board.getScreenCTM().inverse());
+        }
+
+        function beginMove(event, entry) {
+          if (event.button !== 0 || placed.has(entry) || pointer) return;
+          event.preventDefault();
+          pointer = { id: event.pointerId, start: point(event), entry, moved: false };
+          board.setPointerCapture(event.pointerId);
+        }
+
+        function move(event) {
+          if (pointer?.id !== event.pointerId) return;
+          const now = point(event);
+          const dx = now.x - pointer.start.x;
+          const dy = now.y - pointer.start.y;
+          if (!pointer.moved && Math.hypot(dx, dy) < 5) return;
+          if (!pointer.moved) {
+            pointer.moved = true;
+            picked = pointer.entry;
+            movable.append(pointer.entry.piece);
+            updateBoard();
+          }
+          const [x, y] = trayOffset(pointer.entry);
+          translate(pointer.entry.piece, [x + dx, y + dy]);
+        }
+
+        function stopMove() {
+          if (!pointer) return;
+          const id = pointer.id;
+          pointer = null;
+          if (board.hasPointerCapture(id)) board.releasePointerCapture(id);
+        }
+
+        function insideTarget(position, { points, winding }) {
+          return points.every(([x, y], index) => {
+            const [nextX, nextY] = points[(index + 1) % points.length];
+            const cross = (nextX - x) * (position.y - y) - (nextY - y) * (position.x - x);
+            return winding * cross >= 0;
+          });
+        }
+
+        function finishMove(event) {
+          if (pointer?.id !== event.pointerId) return;
+          const { entry, start, moved } = pointer;
+          const end = point(event);
+          const dx = end.x - start.x;
+          const dy = end.y - start.y;
+          stopMove();
+          if (!moved && Math.hypot(dx, dy) < 5) {
+            choosePiece(entry);
+            return;
+          }
+          const [x, y] = trayOffset(entry);
+          if (Math.hypot(x + dx, y + dy) <= snapDistance || insideTarget(end, entry)) {
+            place(entry);
+          } else {
+            picked = null;
+            updateBoard();
+            updateStatus("A darab visszakerült a tálcára. Húzd arra a mintahelyre, ahová illik!");
+          }
+        }
+
+        function cancelMove(event) {
+          if (pointer?.id !== event.pointerId) return;
+          stopMove();
+          picked = null;
+          updateBoard();
+        }
+
+        board.addEventListener("pointermove", move);
+        board.addEventListener("pointerup", finishMove);
+        board.addEventListener("pointercancel", cancelMove);
+        board.addEventListener("lostpointercapture", cancelMove);
+        narrow.addEventListener("change", () => {
+          stopMove();
+          updateBoard();
+        });
+        continueButton?.addEventListener("click", () => {
+          continued = true;
+          updateBoard();
+          completion.focus();
+        });
+        function resetBuild() {
+          stopMove();
+          placed.clear();
+          picked = null;
+          continued = false;
+          resetCards?.();
+          updateBoard();
+          updateStatus();
+        }
+        if (cards) byId("reset-" + id + "-build").addEventListener("click", resetBuild);
+        updateBoard();
+        updateStatus();
+        return resetBuild;
+      }
+
+      const straightFrame = [[0, 0], [size, 0], [size, size], [0, size]];
+      const straightGeometry = pieces.map(piece => piece.points);
+      const slantedGeometry = pieces.map(({ points, shift: [dx, dy] }) => points.map(([x, y]) => [x + dx, y + dy]));
+      const hinduCompletedNarrowView = "-12 -5 324 310";
+
+      const resetFirstPattern = setupTrianglePuzzle({
+        id: "arr-start",
+        geometry: straightGeometry,
+        uncovered: [[[b, 0], [size, 0], [size, a], [b, a]], [[0, a], [b, a], [b, size], [0, size]]],
+        outerPoints: straightFrame,
+        locations: ["bal felső lila", "jobb alsó kék", "jobb alsó piros", "bal felső sárga"],
+        dimensions: [mathLabel(b + a / 2, 18, "a", true), mathLabel(b / 2, size - 18, "b", true)],
+        completedNarrowView: hinduCompletedNarrowView,
+        completedLabel: "Az A mintán két szabad zöld négyzet látszik. Az oldalaik hossza a és b."
+      });
+      const resetSecondPattern = setupTrianglePuzzle({
+        id: "arr-end",
+        geometry: slantedGeometry,
+        innerPoints: finalSquare,
+        outerPoints: straightFrame,
+        locations: ["bal felső", "jobb felső", "bal alsó", "jobb alsó"],
+        dimensions: [],
+        completedNarrowView: hinduCompletedNarrowView,
+        completedLabel: "A B mintán a négy háromszög c hosszú átfogói határolják a zöld alakzatot. A felső csúcsnál balról jobbra alfa, gamma és béta következik."
+      });
+      slantedGeometry.forEach((points, index) => {
+        byId("arr-target-tiles").append(polygon({ points, color: pieces[index].color }));
+      });
+      byId("arr-target-labels").append(mathLabel(size / 2, size / 2, "c²"));
+
+      const resetAreaCards = setupSorter(byId("arrangement-sorter"), [
+        { id: "straight", text: "Az A minta külső négyzetéből elhagyjuk a négy derékszögű háromszöget. A két megmaradó négyzet területe együtt <span class='card-formula'>a² + b²</span>." },
+        { id: "slanted", text: "A B minta külső négyzetéből elhagyjuk a négy derékszögű háromszöget. A megmaradó négyzet területe <span class='card-formula'>c²</span>." },
+        { id: "conclusion", needs: ["straight", "slanted"], text: "A két külső négyzet egybevágó, és ugyanakkora háromszögterületet hagytunk el belőlük. A két maradék területe tehát egyenlő, így <span class='card-formula'>a² + b² = c²</span>." }
+      ]);
+
+      function showArrangementStage(stage) {
+        for (const id of ["arr-start", "arr-end", "arr-proof"]) {
+          byId(id + "-stage").hidden = id !== stage;
+        }
+        byId(stage + "-title").focus();
+      }
+
+      const startQuestion = byId("arr-start-question");
+      const startFeedback = byId("arr-start-feedback");
+      const startAreaLabels = byId("arr-start-area-labels");
+      startAreaLabels.append(...startLabels());
+      const toSecondBuild = byId("build-arr-end");
+      const shapeQuestion = byId("shape-question");
+      const shapeFeedback = byId("shape-feedback");
+      const angleLabels = byId("arr-end-angle-labels");
+      const endSideLabels = byId("arr-end-side-labels");
+      const endAreaLabels = byId("arr-end-area-labels");
+      const endAreaQuestion = byId("arr-end-area-question");
+      const endAreaFeedback = byId("arr-end-area-feedback");
+      const toEndArea = byId("to-arr-end-area");
+      const toComparison = byId("to-arr-proof");
+      const compareQuestion = byId("arr-compare-question");
+      const compareFeedback = byId("arr-compare-feedback");
+      const hinduResult = byId("result");
+      const hinduCards = byId("arrangement-cards");
+
+      markStudyCorner(angleLabels, "γ = ?");
+      endSideLabels.append(mathLabel((b + size) / 2 - 11, b / 2 + 19, "c", true));
+      endAreaLabels.append(mathLabel(size / 2, size / 2, "c²"));
+
+      checkAnswer(startQuestion, "free-area", startFeedback,
+        "Helyes! A két négyzet területe együtt a² + b².",
+        { outer: "A külső keret helyett csak a két zöld négyzet területét add össze!",
+          rectangle: "A két zöld rész egy-egy négyzet. Számítsd ki külön a területüket!" },
+        () => {
+          startAreaLabels.removeAttribute("hidden");
+          toSecondBuild.hidden = false;
+        }, "sum");
+      toSecondBuild.addEventListener("click", () => showArrangementStage("arr-end"));
+      checkAnswer(shapeQuestion, "why-angle", shapeFeedback,
+        "Helyes! Mind a négy csúcsnál derékszög van. A négy oldal egy-egy c hosszú átfogó, így a zöld alakzat c oldalú négyzet.",
+        { "equal-angles": "Mennyi az α és a β szög összege egy derékszögű háromszögben?",
+          "equal-sides": "Keresd meg, melyik három szög alkot egyenesszöget!" },
+        () => {
+          markStudyCorner(angleLabels, "γ = 90°");
+          toEndArea.hidden = false;
+        }, "straight-angle");
+      toEndArea.addEventListener("click", () => {
+        toEndArea.hidden = true;
+        shapeQuestion.hidden = true;
+        angleLabels.setAttribute("hidden", "");
+        endSideLabels.removeAttribute("hidden");
+        endAreaQuestion.hidden = false;
+        byId("arr-end-area-title").focus();
+      });
+      checkAnswer(endAreaQuestion, "free-area", endAreaFeedback,
+        "Helyes! A zöld négyzet területe c².",
+        { length: "A c a négyzet oldalhossza. Hogyan számolod ki a területét?",
+          outer: "A kérdés a belső, zöld négyzet területére vonatkozik." },
+        () => {
+          endAreaLabels.removeAttribute("hidden");
+          toComparison.hidden = false;
+        }, "square");
+      toComparison.addEventListener("click", () => showArrangementStage("arr-proof"));
+      checkAnswer(compareQuestion, "comparison", compareFeedback,
+        "Helyes!",
+        { "a-larger": "Gondold végig, mit hagytunk el az egyforma külső négyzetekből!",
+          "b-larger": "Hasonlítsd össze a két külső négyzetet és a belőlük elhagyott háromszögeket!" },
+        () => {
+          hinduResult.hidden = false;
+          hinduCards.hidden = false;
+        }, "equal");
+
+      byId("restart-arrangement").addEventListener("click", () => {
+        resetFirstPattern();
+        resetSecondPattern();
+        resetQuestion(startQuestion, startFeedback);
+        resetQuestion(shapeQuestion, shapeFeedback);
+        resetQuestion(endAreaQuestion, endAreaFeedback);
+        resetQuestion(compareQuestion, compareFeedback);
+        startAreaLabels.setAttribute("hidden", "");
+        endSideLabels.setAttribute("hidden", "");
+        endAreaLabels.setAttribute("hidden", "");
+        angleLabels.removeAttribute("hidden");
+        markStudyCorner(angleLabels, "γ = ?");
+        shapeQuestion.hidden = false;
+        for (const element of [toSecondBuild, toEndArea, endAreaQuestion, toComparison, hinduResult, hinduCards]) {
+          element.hidden = true;
+        }
+        hinduCards.open = false;
+        resetAreaCards();
+        showArrangementStage("arr-start");
+      });
+
+      setupTrianglePuzzle({
+        id: "sum",
+        geometry: slantedGeometry,
+        innerPoints: finalSquare,
+        outerPoints: straightFrame,
+        locations: ["bal felső", "jobb felső", "bal alsó", "jobb alsó"],
+        cards: sumCards,
+        dimensions: [
+          svg("path", { d: "M0 -10 H" + size + " M0 -15 v10 M" + b + " -15 v10 M" + size + " -15 v10",
+            fill: "none", stroke: "#334148", "stroke-width": 1.5 }),
+          mathLabel(b / 2, -22, "b", true),
+          mathLabel(b + a / 2, -22, "a", true),
+          mathLabel((b + size) / 2 - 11, b / 2 + 19, "c", true)
+        ],
+        completedView: "-5 -34 310 339",
+        completedLabel: "Az elkészült kirakás. A külső négyzet oldala a plusz b, a belső négyzeté c.",
+        continueId: "sum-continue"
+      });
+
+      const sumTriangleQuestion = byId("sum-triangle-question");
+      const sumTriangleFeedback = byId("sum-triangle-feedback");
+      const sumProofTiles = byId("sum-proof-tiles");
+      const sumProofActions = byId("sum-proof-actions");
+      checkAnswer(sumTriangleQuestion, "triangle-area", sumTriangleFeedback,
+        "Helyes! A négy háromszög területe együtt 2ab.",
+        { "four-ab": "Egy háromszög területe ab/2. Ebből van négy.",
+          "half-ab": "Ez egy háromszög területe. Mennyit ad ki a négy együtt?" },
+        () => { sumProofActions.hidden = false; }, "two-ab");
+      byId("to-sum-proof").addEventListener("click", () => {
+        sumProofActions.hidden = true;
+        sumProofTiles.hidden = false;
+        byId("sum-proof-title").focus();
+      });
+      byId("reset-sum-build").addEventListener("click", () => {
+        resetQuestion(sumTriangleQuestion, sumTriangleFeedback);
+        sumProofActions.hidden = true;
+        sumProofTiles.hidden = true;
+      });
+
+      const differenceDimensions = [];
+      for (const [label, x, end] of [["a", b - 20, a], ["b", b + 22, b]]) {
+        differenceDimensions.push(
+          svg("path", { d: "M " + b + " 0 H " + x + " M " + b + " " + end + " H " + x,
+            stroke: "#334148", "stroke-dasharray": "3 3" }),
+          svg("path", { d: "M " + (x - 6) + " 0 h 12 M " + x + " 0 V " + end +
+            " M " + (x - 6) + " " + end + " h 12", stroke: "#334148", "stroke-width": 2.5, fill: "none" }),
+          mathLabel(x - 11, end / 2, label, true)
+        );
+      }
+      const innerLabel = mathLabel(size / 2, size / 2, "a − b", true);
+      innerLabel.classList.add("build-inner-label");
+      differenceDimensions.push(innerLabel, mathLabel((b + size) / 2, b / 2 + 18, "c", true));
+
+      setupTrianglePuzzle({
+        id: "difference",
+        geometry: [
+          [[b, 0], [size, b], [b, b]],
+          [[size, b], [a, size], [a, b]],
+          [[a, size], [0, a], [a, a]],
+          [[0, a], [b, 0], [b, a]]
+        ],
+        innerPoints: [[b, b], [a, b], [a, a], [b, a]],
+        outerPoints: finalSquare,
+        locations: ["jobb felső", "jobb alsó", "bal alsó", "bal felső"],
+        cards: differenceCards,
+        dimensions: differenceDimensions,
+        completedView: "-5 -5 310 310",
+        completedLabel: "Az elkészült kirakás. A belső négyzet oldala a mínusz b, a külső négyzeté c.",
+        continueId: "difference-continue"
+      });
+    })();
+  </script>
 </body>
 </html>

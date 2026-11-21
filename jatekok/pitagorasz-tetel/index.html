@@ -188,10 +188,15 @@
     .replay-count { color: var(--muted); font-size: .88rem; }
 
     .proof-nav { display: flex; flex-wrap: wrap; gap: 8px; margin: 16px 0 20px; }
-    .proof-nav button[aria-pressed="true"] {
+    .proof-nav button[aria-pressed="true"], .mode-nav button[aria-pressed="true"] {
       background: var(--accent-soft);
       border-color: var(--accent);
       color: var(--accent);
+    }
+    .mode-nav { display: flex; flex-wrap: wrap; gap: 8px; margin: 16px 0 20px; }
+    .mode-pane:not([hidden]) { animation: show-mode .2s ease-out; }
+    @keyframes show-mode {
+      from { opacity: .45; transform: perspective(920px) rotateY(-4deg); }
     }
 
     .algebra-layout {
@@ -357,6 +362,37 @@
     .card-actions { margin-top: 14px; }
     .card-sentence, .card-actions button { scroll-margin-top: 170px; }
 
+    .converse-layout { grid-template-columns: minmax(0, 3fr) minmax(0, 2fr); }
+    .converse-figures {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(min(100%, 145px), 1fr));
+      gap: 12px;
+      min-width: 0;
+    }
+    .converse-figures figure { min-width: 0; margin: 0; text-align: center; }
+    .converse-figures .board { width: min(100%, 280px); }
+    .converse-figures .converse-alignment { width: min(100%, 470px); }
+    .converse-figures figcaption { font-weight: 700; }
+    .converse-panel h3 { margin: 0 0 10px; }
+    .converse-panel .question { margin-top: 12px; }
+    .converse-panel input[type="range"] { width: 100%; min-height: 36px; accent-color: var(--accent); }
+    .converse-angles { display: flex; align-items: baseline; justify-content: space-between; gap: 8px; }
+    #converse-angle-value { font-weight: 750; font-variant-numeric: tabular-nums; }
+    .converse-side { fill: none; stroke-width: 3; stroke-linejoin: round; }
+    .converse-a { stroke: #744394; }
+    .converse-b { stroke: #155f82; }
+    .converse-c { stroke: #324848; }
+    .converse-arc { fill: none; stroke: var(--accent); stroke-width: 2; }
+    .converse-track { fill: none; stroke: #aab7b2; stroke-dasharray: 4 4; }
+    .converse-vertex { fill: #324848; }
+    .converse-marks { fill: none; stroke: var(--ink); stroke-width: 2; }
+    .converse-alignment-helper { fill: none; stroke: var(--accent); stroke-width: 3; stroke-dasharray: 6 4; }
+    .converse-figure-label { text-anchor: middle; font: 650 13px system-ui, sans-serif; fill: var(--muted); }
+    .converse-equalities { margin-block: 12px; font-size: 1.2rem; }
+    #converse-handle { cursor: grab; }
+    #converse-handle circle { touch-action: none; }
+    #converse-handle[data-dragging] { cursor: grabbing; }
+
     @media (max-width: 620px) {
       .algebra-layout { display: flex; flex-direction: column; align-items: stretch; gap: 10px; }
       .hindu-puzzle { display: block; }
@@ -377,6 +413,7 @@
 
     @media (prefers-reduced-motion: reduce) {
       .tile { transition: none; }
+      .mode-pane:not([hidden]) { animation: none; }
       #slide-final-diagonals { animation: none; }
       #einstein-result { animation: none; }
     }
@@ -389,6 +426,12 @@
       <h1>Pitagorasz-tétel</h1>
     </header>
 
+    <nav class="mode-nav" aria-label="Játékmód">
+      <button type="button" id="mode-theorem" aria-controls="theorem-mode" aria-pressed="true">Pitagorasz-tétel</button>
+      <button type="button" id="mode-converse" aria-controls="converse-mode" aria-pressed="false">Megfordítás</button>
+    </nav>
+
+    <div class="mode-pane" id="theorem-mode">
     <nav class="proof-nav" aria-label="Bizonyítások">
       <button type="button" id="open-rearrangement" aria-controls="rearrangement" aria-pressed="true">1. Hindu bizonyítás</button>
       <button type="button" id="open-sliding" aria-controls="sliding" aria-pressed="false">2. Csúsztatásos</button>
@@ -879,7 +922,164 @@
       </div>
     </section>
 
-    <noscript><p>A kirakáshoz engedélyezd a JavaScriptet a böngésződben.</p></noscript>
+    </div>
+
+    <section class="mode-pane" id="converse-mode" aria-labelledby="converse-title" hidden>
+      <div class="board-title">
+        <h2 id="converse-title">A Pitagorasz-tétel megfordítása</h2>
+        <div class="proof-header-actions">
+          <button type="button" id="converse-back" hidden>← Vissza</button>
+          <button type="button" id="converse-reset">Újrakezdés</button>
+        </div>
+      </div>
+      <div class="algebra-layout converse-layout">
+        <div class="panel converse-figures">
+          <figure id="converse-sketch">
+            <figcaption>Adott háromszög</figcaption>
+            <svg class="board" viewBox="0 0 290 196" role="img" aria-label="Vázlat az adott háromszögről. A kérdéses gamma szöget az a és b oldal zárja be, szemközt a c oldal van.">
+              <path d="M114 166 L105 55 L259 166 Z" fill="#f4f1e8"/>
+              <path class="converse-side converse-a" d="M114 166 L105 55"/>
+              <path class="converse-side converse-b" d="M114 166 H259"/>
+              <path class="converse-side converse-c" d="M105 55 L259 166"/>
+              <path class="converse-arc" d="M139 166 A25 25 0 0 0 111.98 141.08"/>
+              <text class="math-label side-label" x="95" y="114">a</text>
+              <text class="math-label side-label" x="186" y="182">b</text>
+              <text class="math-label side-label" x="195" y="102">c</text>
+              <text class="math-label side-label" x="144" y="135">γ = ?</text>
+              <g class="converse-marks" id="converse-sketch-marks" hidden/>
+            </svg>
+            <p class="card-formula" aria-label="Adott, hogy a négyzet plusz b négyzet egyenlő c négyzet">a<sup>2</sup> + b<sup>2</sup> = c<sup>2</sup></p>
+            <p class="caption">Vázlat</p>
+          </figure>
+          <figure id="converse-helper-figure" hidden>
+            <figcaption>Segédháromszög</figcaption>
+            <svg class="board" id="converse-board" viewBox="0 0 290 196" role="img" aria-label="A segédháromszög két rögzített hosszúságú szakasza közös végpontból indul. Az a hosszúságú szakasz elforgatható.">
+              <path id="converse-fill" fill="#e5f2ef" hidden/>
+              <path class="converse-track" id="converse-track"/>
+              <path id="converse-leg-a" class="converse-side converse-a"/>
+              <path class="converse-side converse-b" d="M114 166 H259"/>
+              <path id="converse-hypotenuse" class="converse-side converse-c" hidden/>
+              <path id="converse-angle-mark" class="converse-arc"/>
+              <circle class="converse-vertex" cx="114" cy="166" r="3"/>
+              <circle class="converse-vertex" cx="259" cy="166" r="3"/>
+              <text id="converse-label-a" class="math-label side-label">a</text>
+              <text class="math-label side-label" x="186" y="182">b</text>
+              <text id="converse-label-c" class="math-label side-label" x="191" y="101" hidden>c′</text>
+              <g class="converse-marks" id="converse-helper-marks" hidden/>
+              <g id="converse-handle" aria-hidden="true">
+                <circle r="21" fill="transparent"/>
+                <circle r="7" fill="#744394" stroke="white" stroke-width="2"/>
+              </g>
+            </svg>
+          </figure>
+          <figure id="converse-alignment-figure" hidden>
+            <figcaption>Egymásra illesztés</figcaption>
+            <svg class="board converse-alignment" id="converse-alignment-board" viewBox="0 0 434 205" role="img" aria-label="A három egyenlő hosszú oldalpár egymásra kerül.">
+              <defs><path id="converse-alignment-outline"/></defs>
+              <g id="converse-alignment-original" aria-hidden="true">
+                <use href="#converse-alignment-outline" fill="#f4f1e8" stroke="#324848" stroke-width="3"/>
+                <text class="converse-figure-label" x="186.5" y="188">Adott háromszög</text>
+                <g id="converse-original-right-angle" hidden>
+                  <path class="converse-arc" d="M114 153 h13 v13"/>
+                  <text class="math-label side-label" x="163" y="142">γ = 90°</text>
+                </g>
+              </g>
+              <g id="converse-alignment-helper" aria-hidden="true">
+                <use class="converse-alignment-helper" href="#converse-alignment-outline"/>
+                <text class="converse-figure-label" id="converse-alignment-helper-label" x="186.5" y="188">Segédháromszög</text>
+              </g>
+            </svg>
+          </figure>
+        </div>
+        <div class="panel converse-panel">
+          <div id="converse-guess-stage">
+            <h3 id="converse-guess-title" tabindex="-1">1. Tippelj!</h3>
+            <form class="question" id="converse-guess">
+              <fieldset>
+                <legend>Szerinted mekkora a γ szög?</legend>
+                <label class="option"><input type="radio" name="gamma" value="acute"> Kisebb 90°-nál</label>
+                <label class="option"><input type="radio" name="gamma" value="right"> Éppen 90°</label>
+                <label class="option"><input type="radio" name="gamma" value="obtuse"> Nagyobb 90°-nál</label>
+              </fieldset>
+            </form>
+            <div class="actions"><button type="button" class="primary" id="converse-to-build">Tovább</button></div>
+          </div>
+          <div id="converse-build-stage" hidden>
+            <h3 id="converse-build-title" tabindex="-1">2. Építs segédháromszöget!</h3>
+            <p>Forgasd el a lila szakaszt, amíg az <i>a</i> és <i>b</i> hosszú szakasz derékszöget zár be!</p>
+            <div class="converse-angles caption">
+              <label for="converse-angle">A segédháromszög szöge</label>
+              <output id="converse-angle-value" for="converse-angle" aria-live="off">60°</output>
+            </div>
+            <input id="converse-angle" type="range" min="35" max="145" step="1" value="60">
+            <p id="converse-build-feedback" class="feedback" data-state="correct" role="status" hidden>Helyes! A segédháromszög átfogója <i>c′</i>.</p>
+            <div class="actions"><button type="button" class="primary" id="converse-to-equation" disabled>Tovább</button></div>
+          </div>
+          <div id="converse-equation-stage" hidden>
+            <h3 id="converse-equation-title" tabindex="-1">3. A segédháromszög átfogója</h3>
+            <form class="question" id="converse-equation-question" data-keep-question>
+              <fieldset>
+                <legend>Melyik egyenletet adja a Pitagorasz-tétel?</legend>
+                <label class="option"><input type="radio" name="hypotenuse" value="length" required> <span class="card-formula">c′ = a<sup>2</sup> + b<sup>2</sup></span></label>
+                <label class="option"><input type="radio" name="hypotenuse" value="sum"> <span class="card-formula">c′<sup>2</sup> = a<sup>2</sup> + b<sup>2</sup></span></label>
+                <label class="option"><input type="radio" name="hypotenuse" value="product"> <span class="card-formula">c′<sup>2</sup> = (a + b)<sup>2</sup></span></label>
+                <button type="submit">Ellenőrzés</button>
+              </fieldset>
+              <p class="feedback" id="converse-equation-feedback" role="status" tabindex="-1"></p>
+            </form>
+            <div class="actions" id="converse-compare-actions" hidden>
+              <button type="button" class="primary" id="converse-to-compare">Tovább</button>
+            </div>
+          </div>
+          <div id="converse-compare-stage" hidden>
+            <h3 id="converse-compare-title" tabindex="-1">4. Hasonlítsd össze az oldalhosszakat!</h3>
+            <div class="card-formula converse-equalities">
+              <p>c<sup>2</sup> = a<sup>2</sup> + b<sup>2</sup></p>
+              <p>c′<sup>2</sup> = a<sup>2</sup> + b<sup>2</sup></p>
+            </div>
+            <form class="question" id="converse-compare-question" data-keep-question>
+              <fieldset>
+                <legend>Miért következik ebből, hogy c′ = c?</legend>
+                <label class="option"><input type="radio" name="length-reason" value="any" required> Mert az egyenlő négyzetű számok mindig egyenlők.</label>
+                <label class="option"><input type="radio" name="length-reason" value="triangle"> Mert ha két háromszög két-két oldala egyenlő hosszú, a harmadik oldaluk is egyenlő.</label>
+                <label class="option"><input type="radio" name="length-reason" value="positive"> Mert mindkettő pozitív, és ugyanannak a számnak a négyzetgyöke.</label>
+                <button type="submit">Ellenőrzés</button>
+              </fieldset>
+              <p class="feedback" id="converse-compare-feedback" role="status" tabindex="-1"></p>
+            </form>
+            <div class="actions" id="converse-congruence-actions" hidden>
+              <button type="button" class="primary" id="converse-to-congruence">Tovább</button>
+            </div>
+          </div>
+          <div id="converse-congruence-stage" hidden>
+            <h3 id="converse-congruence-title" tabindex="-1">5. Egybevágó a két háromszög?</h3>
+            <p>Az <i>a</i> és a <i>b</i> oldalhossz a szerkesztésből egyezik. A harmadik oldalpárra <span class="card-formula">c′ = c</span>.</p>
+            <form class="question" id="converse-congruence-question" data-keep-question>
+              <fieldset>
+                <legend>Melyik egybevágósági alapesetet alkalmazhatod?</legend>
+                <label class="option"><input type="radio" name="congruence-reason" value="included" required> Két oldal és a közbezárt szög</label>
+                <label class="option"><input type="radio" name="congruence-reason" value="sides"> Oldal–oldal–oldal</label>
+                <label class="option"><input type="radio" name="congruence-reason" value="angles"> Egy oldal és a rajta fekvő két szög</label>
+                <button type="submit">Ellenőrzés</button>
+              </fieldset>
+              <p class="feedback" id="converse-congruence-feedback" role="status" tabindex="-1"></p>
+            </form>
+            <div class="actions" id="converse-alignment-actions" hidden>
+              <button type="button" class="primary" id="converse-to-alignment">Illeszd egymásra!</button>
+            </div>
+          </div>
+          <div id="converse-alignment-stage" hidden>
+            <h3 id="converse-alignment-title" tabindex="-1">6. Mekkora a γ szög?</h3>
+            <div id="converse-conclusion" role="status" hidden>
+              <p>A <i>c</i>-vel szemközti γ szög ugyanakkora, mint a <i>c′</i>-vel szemközti derékszög. Ezért</p>
+              <p class="equation">γ = 90°.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <noscript><p>A játékhoz engedélyezd a JavaScriptet a böngésződben.</p></noscript>
   </main>
 
   <script>
@@ -2656,6 +2856,268 @@
         completedLabel: "Az elkészült kirakás. A belső négyzet oldala a mínusz b, a külső négyzeté c.",
         continueId: "difference-continue"
       });
+
+      function setupConverse() {
+        const theoremMode = byId("theorem-mode");
+        const converseMode = byId("converse-mode");
+        const modeTheorem = byId("mode-theorem");
+        const modeConverse = byId("mode-converse");
+        const stageNames = ["guess", "build", "equation", "compare", "congruence", "alignment"];
+        const stages = stageNames.map(name => byId("converse-" + name + "-stage"));
+        const titles = stageNames.map(name => byId("converse-" + name + "-title"));
+        const alignmentStep = stages.length - 1;
+        const back = byId("converse-back");
+        const sketch = byId("converse-sketch");
+        const helper = byId("converse-helper-figure");
+        const sketchMarks = byId("converse-sketch-marks");
+        const helperMarks = byId("converse-helper-marks");
+        const helperBoard = byId("converse-board");
+        const handle = byId("converse-handle");
+        const angleInput = byId("converse-angle");
+        const angleValue = byId("converse-angle-value");
+        const track = byId("converse-track");
+        const leg = byId("converse-leg-a");
+        const legLabel = byId("converse-label-a");
+        const angleMark = byId("converse-angle-mark");
+        const hypotenuse = byId("converse-hypotenuse");
+        const triangle = byId("converse-fill");
+        const hypotenuseLabel = byId("converse-label-c");
+        const buildFeedback = byId("converse-build-feedback");
+        const toEquation = byId("converse-to-equation");
+        const guess = byId("converse-guess");
+        const equation = byId("converse-equation-question");
+        const equationFeedback = byId("converse-equation-feedback");
+        const compare = byId("converse-compare-question");
+        const compareFeedback = byId("converse-compare-feedback");
+        const congruence = byId("converse-congruence-question");
+        const congruenceFeedback = byId("converse-congruence-feedback");
+        const compareActions = byId("converse-compare-actions");
+        const congruenceActions = byId("converse-congruence-actions");
+        const alignmentActions = byId("converse-alignment-actions");
+        const alignmentFigure = byId("converse-alignment-figure");
+        const alignmentBoard = byId("converse-alignment-board");
+        const alignmentOriginal = byId("converse-alignment-original");
+        const alignmentHelper = byId("converse-alignment-helper");
+        const alignmentHelperLabel = byId("converse-alignment-helper-label");
+        const originalRightAngle = byId("converse-original-right-angle");
+        const conclusion = byId("converse-conclusion");
+        const origin = [114, 166];
+        const endB = [259, 166];
+        const lengthA = 108;
+        const rightEndA = [origin[0], origin[1] - lengthA];
+        const initialAngle = 60;
+        const minAngle = Number(angleInput.min);
+        const maxAngle = Number(angleInput.max);
+        const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)");
+        let step = 0;
+        let pointer = null;
+        let alignmentFrame = null;
+
+        function pointAt(angle, radius) {
+          const radians = angle * Math.PI / 180;
+          return [origin[0] + radius * Math.cos(radians), origin[1] - radius * Math.sin(radians)];
+        }
+
+        function drawHelper(angle) {
+          const value = Math.min(maxAngle, Math.max(minAngle, Math.round(angle)));
+          const right = value === 90;
+          angleInput.value = String(value);
+          angleValue.textContent = value + "°";
+          angleInput.setAttribute("aria-valuetext", value + " fok");
+          const endA = right ? rightEndA : pointAt(value, lengthA);
+          leg.setAttribute("d", `M${origin} L${endA}`);
+          handle.setAttribute("transform", `translate(${endA})`);
+          legLabel.setAttribute("x", (origin[0] + endA[0]) / 2 - 14);
+          legLabel.setAttribute("y", (origin[1] + endA[1]) / 2 - 5);
+          angleMark.setAttribute("d", right ? "M114 153 h13 v13" : `M138 166 A24 24 0 0 0 ${pointAt(value, 24)}`);
+          hypotenuse.setAttribute("d", `M${endA} L${endB}`);
+          triangle.setAttribute("d", `M${origin} L${endA} L${endB} Z`);
+          for (const element of [hypotenuse, triangle, hypotenuseLabel]) element.toggleAttribute("hidden", !right);
+          buildFeedback.hidden = !right;
+          toEquation.disabled = !right;
+          helperBoard.setAttribute("aria-label", right
+            ? "Derékszögű segédháromszög, befogói a és b, átfogója c vessző."
+            : "Az a és a b hosszúságú szakasz " + value + " fokos szöget zár be.");
+        }
+
+        function moveHandle(event, snap = false) {
+          const matrix = helperBoard.getScreenCTM();
+          if (!matrix) return;
+          const point = new DOMPoint(event.clientX, event.clientY).matrixTransform(matrix.inverse());
+          const angle = Math.atan2(origin[1] - point.y, point.x - origin[0]) * 180 / Math.PI;
+          drawHelper(snap && Math.abs(angle - 90) <= 3 ? 90 : angle);
+        }
+
+        function releaseHandle() {
+          if (pointer === null) return;
+          const id = pointer;
+          pointer = null;
+          handle.removeAttribute("data-dragging");
+          if (handle.hasPointerCapture(id)) handle.releasePointerCapture(id);
+        }
+
+        function drawSideMarks(group, endA) {
+          const sides = [[origin, endA], [origin, endB], [endA, endB]];
+          for (const [index, [[x1, y1], [x2, y2]]] of sides.entries()) {
+            const count = index + 1;
+            const length = Math.hypot(x2 - x1, y2 - y1);
+            const dx = (x2 - x1) / length;
+            const dy = (y2 - y1) / length;
+            for (let i = 0; i < count; i++) {
+              const offset = 6 * (i - (count - 1) / 2);
+              const x = (x1 + x2) / 2 + dx * offset;
+              const y = (y1 + y2) / 2 + dy * offset;
+              group.append(svg("line", { x1: x - dy * 5, y1: y + dx * 5, x2: x + dy * 5, y2: y - dx * 5 }));
+            }
+          }
+        }
+
+        function cancelAlignment() {
+          if (alignmentFrame === null) return;
+          window.cancelAnimationFrame(alignmentFrame);
+          alignmentFrame = null;
+        }
+
+        function drawAlignment(progress) {
+          const centerOffset = 30.5;
+          const originalOffset = -74 + (centerOffset + 74) * progress;
+          const helperOffset = 136 + (centerOffset - 136) * progress;
+          alignmentOriginal.setAttribute("transform", `translate(${originalOffset} 0)`);
+          alignmentHelper.setAttribute("transform", `translate(${helperOffset} 0)`);
+        }
+
+        function finishAlignment() {
+          cancelAlignment();
+          drawAlignment(1);
+          originalRightAngle.removeAttribute("hidden");
+          alignmentHelperLabel.setAttribute("hidden", "");
+          alignmentBoard.setAttribute("aria-label", "A két egybevágó háromszög fedi egymást. Az adott háromszög gamma szöge 90 fok.");
+          conclusion.hidden = false;
+        }
+
+        function playAlignment() {
+          showStep(alignmentStep);
+          conclusion.hidden = true;
+          originalRightAngle.setAttribute("hidden", "");
+          alignmentHelperLabel.removeAttribute("hidden");
+          alignmentBoard.setAttribute("aria-label", "A három egyenlő hosszú oldalpár egymásra kerül.");
+          drawAlignment(0);
+          if (reducedMotion.matches) {
+            finishAlignment();
+            return;
+          }
+          let start;
+          function animate(time) {
+            start ??= time;
+            const progress = Math.min((time - start) / 700, 1);
+            if (progress === 1) finishAlignment();
+            else {
+              drawAlignment(progress);
+              alignmentFrame = window.requestAnimationFrame(animate);
+            }
+          }
+          alignmentFrame = window.requestAnimationFrame(animate);
+        }
+
+        function showStep(index, focus = true) {
+          releaseHandle();
+          cancelAlignment();
+          step = index;
+          stages.forEach((stage, i) => { stage.hidden = i !== step; });
+          sketch.hidden = step === alignmentStep;
+          helper.hidden = step === 0 || step === alignmentStep;
+          alignmentFigure.hidden = step !== alignmentStep;
+          const showMarks = step === alignmentStep - 1;
+          sketchMarks.toggleAttribute("hidden", !showMarks);
+          helperMarks.toggleAttribute("hidden", !showMarks);
+          back.hidden = step === 0;
+          handle.toggleAttribute("hidden", step !== 1);
+          track.toggleAttribute("hidden", step !== 1);
+          if (focus) titles[step].focus({ preventScroll: true });
+        }
+
+        function setMode(converse) {
+          if (converse) {
+            cancelDrag();
+            if (replayTimer !== null) {
+              stopReplay();
+              renderReplay();
+            }
+          } else {
+            releaseHandle();
+            if (alignmentFrame !== null) finishAlignment();
+          }
+          theoremMode.hidden = converse;
+          converseMode.hidden = !converse;
+          modeTheorem.setAttribute("aria-pressed", String(!converse));
+          modeConverse.setAttribute("aria-pressed", String(converse));
+        }
+
+        track.setAttribute("d", `M${pointAt(minAngle, lengthA)} A${lengthA} ${lengthA} 0 0 0 ${pointAt(maxAngle, lengthA)}`);
+        byId("converse-alignment-outline").setAttribute("d", `M${origin} L${rightEndA} L${endB} Z`);
+        drawSideMarks(sketchMarks, [105, 55]);
+        drawSideMarks(helperMarks, rightEndA);
+        angleInput.addEventListener("input", () => drawHelper(Number(angleInput.value)));
+        handle.addEventListener("pointerdown", event => {
+          if (event.button !== 0 || pointer !== null || step !== 1) return;
+          event.preventDefault();
+          pointer = event.pointerId;
+          handle.setPointerCapture(pointer);
+          handle.setAttribute("data-dragging", "");
+        });
+        handle.addEventListener("pointermove", event => {
+          if (event.pointerId === pointer) moveHandle(event);
+        });
+        handle.addEventListener("pointerup", event => {
+          if (event.pointerId !== pointer) return;
+          moveHandle(event, true);
+          releaseHandle();
+        });
+        for (const type of ["pointercancel", "lostpointercapture"]) {
+          handle.addEventListener(type, event => {
+            if (event.pointerId === pointer) releaseHandle();
+          });
+        }
+
+        modeTheorem.addEventListener("click", () => setMode(false));
+        modeConverse.addEventListener("click", () => setMode(true));
+        byId("converse-to-build").addEventListener("click", () => showStep(1));
+        toEquation.addEventListener("click", () => {
+          if (!toEquation.disabled) showStep(2);
+        });
+        back.addEventListener("click", () => {
+          if (step > 0) showStep(step - 1);
+        });
+        checkAnswer(equation, "hypotenuse", equationFeedback, "Helyes! A befogók négyzetösszege az átfogó négyzete.", {
+          length: "A tételben az átfogó melyik hatványa szerepel?",
+          product: "A két oldal négyzetét add össze!"
+        }, () => { compareActions.hidden = false; }, "sum");
+        byId("converse-to-compare").addEventListener("click", () => showStep(3));
+        checkAnswer(compare, "length-reason", compareFeedback, "Helyes! c′ = c.", {
+          any: "Gondolj a 3 és a −3 négyzetére! Mit tudunk az oldalhosszak előjeléről?",
+          triangle: "Két oldal hossza önmagában kevés. Itt a harmadik oldalak négyzetéről is tudunk valamit."
+        }, () => { congruenceActions.hidden = false; }, "positive");
+        byId("converse-to-congruence").addEventListener("click", () => showStep(4));
+        checkAnswer(congruence, "congruence-reason", congruenceFeedback, "Helyes! A két háromszög egybevágó.", {
+          included: "Az adott háromszög γ szöge még ismeretlen. Mely adatokról tudjuk, hogy páronként egyenlők?",
+          angles: "Az adott háromszög szögei még ismeretlenek. Mit tudunk a három oldalpárról?"
+        }, () => { alignmentActions.hidden = false; }, "sides");
+        byId("converse-to-alignment").addEventListener("click", playAlignment);
+        byId("converse-reset").addEventListener("click", () => {
+          guess.reset();
+          resetQuestion(equation, equationFeedback);
+          resetQuestion(compare, compareFeedback);
+          resetQuestion(congruence, congruenceFeedback);
+          for (const actions of [compareActions, congruenceActions, alignmentActions]) actions.hidden = true;
+          drawHelper(initialAngle);
+          showStep(0);
+        });
+
+        drawHelper(initialAngle);
+        showStep(0, false);
+      }
+
+      setupConverse();
     })();
   </script>
 </body>

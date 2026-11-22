@@ -125,9 +125,251 @@
     .empty { margin-top: 22px; padding: 20px; }
     .empty p { margin-top: 6px; }
 
+    #mixed-tests, #mixed-quiz, #algebra-tests, #algebra-quiz,
+    #coordinates-tests, #coordinates-quiz, #construction-tests, #construction-quiz,
+    #application-tests, #application-quiz { margin-top: 24px; }
+    .test-card, .quiz-panel {
+      border: 1px solid var(--line);
+      border-radius: 15px;
+      background: var(--paper);
+    }
+    .test-card {
+      display: grid;
+      align-content: start;
+      gap: 7px;
+      padding: 16px;
+    }
+    .test-card p, .quiz-intro, .score-note { color: var(--muted); font-size: .92rem; }
+    .test-card button { justify-self: start; margin-top: 4px; }
+    .primary {
+      color: #fff;
+      background: var(--accent);
+      border-color: var(--accent);
+    }
+    .primary:hover { background: #10594f; }
+    .chip:disabled { opacity: .55; cursor: default; }
+    .quiz-panel { padding: clamp(14px, 3vw, 24px); }
+    .quiz-toolbar, .quiz-actions {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 8px;
+    }
+    .quiz-toolbar { justify-content: space-between; margin-bottom: 15px; }
+    .quiz-actions { margin-top: 14px; }
+    .quiz-intro { margin-top: 6px; }
+    .quiz-rubric { margin-top: 10px; font-size: .9rem; }
+    .quiz-rubric summary { color: var(--accent); font-weight: 700; cursor: pointer; }
+    .quiz-rubric p { margin-top: 4px; max-width: 62ch; }
+    .question-nav {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+      margin: 17px 0;
+    }
+    .question-nav .chip { min-width: 42px; justify-content: center; padding: 4px 8px; }
+    .question-nav [data-answered] { border-color: #85a6a0; }
+    .question-nav [data-checked] { box-shadow: inset 0 -3px #85a6a0; }
+    .question-label { color: var(--accent); font-size: .88rem; font-weight: 750; margin-bottom: 4px; }
+    .question-text { max-width: 68ch; margin-top: 6px; }
+    .question-expressions { margin-top: 7px; font: 1.1rem / 1.5 Georgia, serif; }
+    .options {
+      display: grid;
+      gap: 7px;
+      min-width: 0;
+      margin: 12px 0 0;
+      padding: 0;
+      border: 0;
+    }
+    .options legend { padding: 0 0 5px; font-size: .88rem; font-weight: 700; }
+    #quiz-options { margin: 0; }
+    .answer-option {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 5px 9px;
+      min-height: 42px;
+      padding: 8px 10px;
+      border: 1px solid var(--line);
+      border-radius: 9px;
+      cursor: pointer;
+    }
+    .answer-option:has(input:checked) { border-color: var(--accent); background: var(--accent-soft); }
+    .answer-option:has(input:focus-visible) { outline: 2px solid var(--accent); outline-offset: 2px; }
+    .answer-option input { margin: 0; accent-color: var(--accent); }
+    .options:disabled .answer-option { cursor: default; }
+    .answer-option[data-state="correct"], .answer-option[data-state="missed"] {
+      border-color: #85a69a;
+      background: #edf7f0;
+    }
+    .answer-option[data-state="wrong"] { border-color: #c79073; background: #fbf1ea; }
+    .answer-state { margin-left: auto; color: var(--muted); font-size: .8rem; font-weight: 650; }
+    .review {
+      margin-top: 12px;
+      padding: 12px 14px;
+      border-radius: 10px;
+      background: var(--accent-soft);
+    }
+    .review p + p { margin-top: 4px; }
+    .score {
+      color: var(--accent);
+      font: 800 clamp(2rem, 7vw, 3.2rem) / 1.2 Georgia, serif;
+      margin: 8px 0;
+    }
+    .topic-scores { margin: 12px 0 0; padding: 0; list-style: none; }
+    .topic-scores li {
+      display: flex;
+      justify-content: space-between;
+      gap: 10px;
+      padding: 8px 0;
+      border-top: 1px solid var(--line);
+    }
+    .topic-scores strong { white-space: nowrap; }
+
+    .algebra-formula {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 5px 10px;
+      margin: 9px 0;
+      font: 1.16rem / 1.45 Georgia, serif;
+    }
+    .fraction { display: inline-grid; text-align: center; line-height: 1.3; }
+    .fraction span { padding: 1px 5px; }
+    .fraction span:first-child { border-bottom: 1px solid currentColor; }
+    .algebra-fields { display: grid; gap: 11px; max-width: 670px; margin-top: 12px; }
+    .algebra-field {
+      display: grid;
+      gap: 5px;
+      min-width: 0;
+      margin: 0;
+      padding: 10px 12px;
+      border: 1px solid var(--line);
+      border-radius: 9px;
+    }
+    .algebra-field[data-state="correct"] { border-color: #85a69a; background: #edf7f0; }
+    .algebra-field[data-state="incorrect"] { border-color: #c79073; background: #fbf1ea; }
+    .algebra-field legend { font-weight: 650; padding: 0 4px; }
+    .algebra-field input[type="text"] {
+      width: min(100%, 22rem);
+      padding: 8px;
+      border: 1px solid var(--line);
+      border-radius: 6px;
+      background: var(--paper);
+      color: inherit;
+      font: inherit;
+    }
+    .algebra-field input:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+    .algebra-field input:disabled { color: var(--ink); }
+    .field-feedback { color: var(--muted); font-size: .88rem; }
+
+    .geometry-layout {
+      display: grid;
+      grid-template-columns: minmax(0, 1.08fr) minmax(0, 1fr);
+      align-items: start;
+      gap: 16px 24px;
+      margin-top: 12px;
+    }
+    .geometry-layout:has(.geometry-board[hidden]) { grid-template-columns: minmax(0, 1fr); }
+    .geometry-board {
+      margin: 0;
+      border: 1px solid var(--line);
+      border-radius: 12px;
+      background: #fafbf8;
+      overflow: hidden;
+    }
+    .coordinate-plot, .construction-plot { display: block; width: 100%; height: auto; }
+    .coordinate-plot[tabindex] { cursor: crosshair; }
+    .coordinate-plot:focus-visible { outline: 3px solid var(--accent); outline-offset: -4px; }
+    :is(.coordinate-plot, .construction-plot) text {
+      font: 13px system-ui, sans-serif;
+      fill: #45565e;
+      paint-order: stroke;
+      stroke: #fafbf8;
+      stroke-width: 3px;
+      stroke-linejoin: round;
+    }
+    .coordinate-plot .plot-label { font-size: 15px; font-weight: 750; }
+    .plot-grid { stroke: #dce4e1; fill: none; }
+    .plot-axis { stroke: #536268; stroke-width: 1.55; fill: none; }
+    .plot-original { stroke: #16695f; stroke-width: 2.5; }
+    .plot-reflected { stroke: #534891; stroke-width: 2.5; stroke-dasharray: 7 4; }
+    .plot-drawn { stroke: #9a591c; stroke-width: 2.6; }
+    .plot-drawn[data-reviewed] { opacity: .55; }
+    .plot-region { fill: #daeae1; fill-opacity: .85; stroke: #467a75; stroke-width: 1.8; }
+    .plot-triangle { fill: #f3deb3; fill-opacity: .8; stroke: #936b36; stroke-dasharray: 5 4; }
+    .plot-point { fill: #2d605a; stroke: white; stroke-width: 1.5; }
+    .plot-choice { fill: #a3601c; stroke: white; stroke-width: 1.5; }
+    .plot-cursor { fill: none; stroke: #9a591c; stroke-width: 2; }
+    .coordinate-tools {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: space-between;
+      gap: 6px 8px;
+      padding: 0 12px 10px;
+      font-size: .86rem;
+    }
+    .coordinate-tools p { flex: 1 1 12rem; }
+    #coordinates-draw-hint { margin: 7px 0 0; }
+
+    .construction-tools { display: grid; align-content: start; gap: 9px; }
+    .construction-tools input { width: 100%; accent-color: var(--accent); }
+    .construction-tools label { font-weight: 650; }
+    .construction-tools label output { margin-left: 6px; color: var(--muted); font-weight: 500; }
+    .construction-tools p { min-height: 2.8em; }
+    .construction-plot text { font-size: 19px; font-weight: 700; }
+    .construction-plot .plot-label { font-size: 19px; }
+    .construction-side { fill: #edf1eb; stroke: #45565e; stroke-width: 2; }
+    .construction-active-side { stroke: #16695f; stroke-width: 3; }
+    .construction-arc { fill: none; stroke: #5467a1; stroke-width: 1.8; stroke-dasharray: 5 4; }
+    .construction-arc + .construction-arc { stroke: #865896; }
+    .construction-ruler { stroke: #895820; stroke-width: 2.5; }
+    .construction-solution { fill: none; stroke: #16695f; stroke-width: 2.4; stroke-dasharray: 6 4; }
+    .construction-median { stroke: #5467a1; stroke-width: 2.2; }
+    .construction-midline { stroke: #16695f; stroke-width: 3; }
+    .construction-altitude { fill: none; stroke: #895820; stroke-width: 2; }
+    .construction-extension { stroke: #72828b; stroke-width: 1.8; stroke-dasharray: 5 4; }
+    .construction-hit { cursor: pointer; }
+    .construction-hit circle:first-child { fill: transparent; }
+    .construction-hit:hover .plot-point { fill: #895820; }
+    .construction-plot .plot-choice { fill: #895820; }
+
+    .field-parts {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 8px 12px;
+    }
+    .field-parts label { display: grid; gap: 4px; }
+    .application-plot { display: block; width: 100%; height: auto; }
+    .application-plot text {
+      fill: #30494b;
+      font: 700 15px system-ui, sans-serif;
+      paint-order: stroke;
+      stroke: #fafbf8;
+      stroke-width: 4px;
+      stroke-linejoin: round;
+    }
+    .solid-edge { stroke: #45565e; stroke-width: 1.8; stroke-linejoin: round; }
+    .solid-wall-front { fill: #deebe1; }
+    .solid-wall-side { fill: #bddacc; }
+    .solid-wall-top { fill: #edf4ee; }
+    .solid-roof-front { fill: #f5e7c6; }
+    .solid-roof-side { fill: #e6cb98; }
+    .solid-dimension { fill: none; stroke: #51646b; stroke-width: 1.4; }
+    .solid-guide { fill: none; stroke: #51646b; stroke-width: 1.25; stroke-dasharray: 5 4; }
+    .application-tools { padding: 0 12px 12px; }
+    .photo-board { padding: 20px 12px 13px; text-align: center; }
+    .photo-board p { margin-top: 12px; font-size: .84rem; }
+    .photo-row { display: flex; justify-content: center; flex-wrap: wrap; gap: 7px; }
+    .photo-row + .photo-row { margin-top: 9px; }
+    .photo-row button { justify-content: center; font-weight: 650; min-width: min(5.1rem, 100%); }
+    .photo-row button[aria-pressed="true"] { border-color: var(--accent); background: var(--accent-soft); }
+
     @media (max-width: 660px) {
       .grid { grid-template-columns: 1fr; }
       .section-heading { align-items: flex-start; }
+      .geometry-layout { grid-template-columns: minmax(0, 1fr); }
     }
   </style>
 </head>
@@ -146,10 +388,262 @@
       <p id="year-summary" role="status"></p>
     </div>
 
-    <section id="year-content" aria-labelledby="topics-title">
-      <div class="section-heading"><h2 id="topics-title">Vizsgatémák</h2></div>
-      <div class="grid" id="topic-groups"></div>
-    </section>
+    <div id="year-content">
+      <section id="mixed-tests" aria-labelledby="mixed-title" hidden>
+        <div class="section-heading"><h2 id="mixed-title" tabindex="-1">Vegyes teszt</h2></div>
+        <div class="grid" id="mixed-test-packs"></div>
+      </section>
+
+      <section id="mixed-quiz" class="quiz-panel" aria-labelledby="quiz-title" hidden>
+        <div class="quiz-toolbar">
+          <button class="chip" type="button" id="quiz-back">← Tesztek</button>
+          <button class="chip primary" type="button" id="quiz-finish">Beadás és eredmény</button>
+        </div>
+        <h2 id="quiz-title" tabindex="-1"></h2>
+        <div id="quiz-question-pane">
+          <p class="quiz-intro">Jelöld be az összes helyes választ!</p>
+          <details class="quiz-rubric">
+            <summary>Pontozás</summary>
+            <p id="quiz-rubric"></p>
+          </details>
+          <nav id="quiz-nav" class="question-nav" aria-label="Feladatok"></nav>
+          <p class="question-label" id="quiz-position"></p>
+          <h3 id="quiz-question" tabindex="-1"></h3>
+          <p class="question-expressions" id="quiz-expressions" hidden></p>
+          <fieldset id="quiz-choices" class="options">
+            <legend>Válaszlehetőségek</legend>
+            <div id="quiz-options" class="options"></div>
+          </fieldset>
+          <div class="review" id="quiz-review" tabindex="-1" hidden>
+            <p id="quiz-points"></p>
+            <p id="quiz-key"></p>
+            <p id="quiz-explanation"></p>
+          </div>
+          <div class="quiz-actions">
+            <button class="chip" type="button" id="quiz-prev">← Előző</button>
+            <button class="chip primary" type="button" id="quiz-check">Ellenőrzés</button>
+            <button class="chip" type="button" id="quiz-next">Következő →</button>
+          </div>
+        </div>
+        <div id="quiz-result" hidden>
+          <p class="score" id="quiz-total" tabindex="-1"></p>
+          <p class="score-note" id="quiz-result-note"></p>
+          <div class="section-heading"><h3>Pontok témánként</h3></div>
+          <ul class="topic-scores" id="quiz-topics"></ul>
+          <div class="quiz-actions">
+            <button class="chip primary" type="button" id="quiz-show-answers">Válaszok áttekintése</button>
+            <button class="chip" type="button" id="quiz-restart">Újrakezdés</button>
+          </div>
+        </div>
+      </section>
+
+      <section id="algebra-tests" aria-labelledby="algebra-menu-title" hidden>
+        <div class="section-heading"><h2 id="algebra-menu-title" tabindex="-1">Algebra</h2></div>
+        <div class="grid" id="algebra-packs"></div>
+      </section>
+
+      <section id="algebra-quiz" class="quiz-panel" aria-labelledby="algebra-title" hidden>
+        <div class="quiz-toolbar">
+          <button class="chip" type="button" id="algebra-back-menu">← Gyakorlók</button>
+        </div>
+        <h2 id="algebra-title" tabindex="-1"></h2>
+        <div id="algebra-task-view">
+          <p class="question-label" id="algebra-position"></p>
+          <h3 id="algebra-task-title" tabindex="-1"></h3>
+          <p class="question-text" id="algebra-prompt"></p>
+          <p class="algebra-formula" id="algebra-formula"></p>
+          <p class="quiz-intro" id="algebra-notation">A hatványokat <code>a^2</code> alakban is beírhatod.</p>
+          <form id="algebra-form">
+            <div class="algebra-fields" id="algebra-fields"></div>
+            <div class="review" id="algebra-review" tabindex="-1" hidden>
+              <p id="algebra-points"></p>
+              <p class="algebra-formula" id="algebra-solution"></p>
+              <p id="algebra-explanation"></p>
+            </div>
+            <div class="quiz-actions">
+              <button class="chip" type="button" id="algebra-prev">← Előző</button>
+              <button class="chip primary" type="submit" id="algebra-check">Ellenőrzés</button>
+              <button class="chip primary" type="button" id="algebra-next" hidden>Következő →</button>
+            </div>
+          </form>
+        </div>
+        <div id="algebra-result" hidden>
+          <p class="score" id="algebra-total" tabindex="-1"></p>
+          <ul class="topic-scores" id="algebra-task-scores"></ul>
+          <div class="quiz-actions">
+            <button class="chip primary" type="button" id="algebra-show-answers">Megoldások áttekintése</button>
+            <button class="chip" type="button" id="algebra-restart">Újrakezdés</button>
+          </div>
+        </div>
+      </section>
+
+      <section id="coordinates-tests" aria-labelledby="coordinates-menu-title" hidden>
+        <div class="section-heading"><h2 id="coordinates-menu-title" tabindex="-1">Koordinátageometria</h2></div>
+        <div class="grid" id="coordinates-packs"></div>
+      </section>
+
+      <section id="coordinates-quiz" class="quiz-panel" aria-labelledby="coordinates-title" hidden>
+        <div class="quiz-toolbar">
+          <button class="chip" type="button" id="coordinates-back-menu">← Gyakorlók</button>
+        </div>
+        <h2 id="coordinates-title" tabindex="-1"></h2>
+        <div id="coordinates-task-view">
+          <p class="question-label" id="coordinates-position"></p>
+          <h3 id="coordinates-task-title" tabindex="-1"></h3>
+          <p class="question-text" id="coordinates-prompt"></p>
+          <p class="algebra-formula" id="coordinates-formula" hidden></p>
+          <p class="quiz-intro" id="coordinates-draw-hint" hidden>Billentyűzettel a nyilakkal mozogj, és az Enterrel jelölj.</p>
+          <div class="geometry-layout">
+            <figure class="geometry-board" id="coordinates-board" hidden>
+              <svg class="coordinate-plot" id="coordinates-plot" viewBox="0 0 448 354" xmlns="http://www.w3.org/2000/svg"></svg>
+              <figcaption class="coordinate-tools" id="coordinates-tools" hidden>
+                <p id="coordinates-selection" aria-live="polite"></p>
+                <button class="chip" type="button" id="coordinates-undo">Utolsó pont törlése</button>
+              </figcaption>
+            </figure>
+            <form id="coordinates-form">
+              <div class="algebra-fields" id="coordinates-fields"></div>
+              <div class="review" id="coordinates-review" tabindex="-1" hidden>
+                <p id="coordinates-points"></p>
+                <p class="algebra-formula" id="coordinates-solution"></p>
+                <p id="coordinates-explanation"></p>
+              </div>
+              <div class="quiz-actions">
+                <button class="chip" type="button" id="coordinates-prev">← Előző</button>
+                <button class="chip primary" type="submit" id="coordinates-check">Ellenőrzés</button>
+                <button class="chip primary" type="button" id="coordinates-next" hidden>Következő →</button>
+              </div>
+            </form>
+          </div>
+        </div>
+        <div id="coordinates-result" hidden>
+          <p class="score" id="coordinates-total" tabindex="-1"></p>
+          <ul class="topic-scores" id="coordinates-task-scores"></ul>
+          <div class="quiz-actions">
+            <button class="chip primary" type="button" id="coordinates-show-answers">Megoldások áttekintése</button>
+            <button class="chip" type="button" id="coordinates-restart">Újrakezdés</button>
+          </div>
+        </div>
+      </section>
+
+      <section id="construction-tests" aria-labelledby="construction-menu-title" hidden>
+        <div class="section-heading"><h2 id="construction-menu-title" tabindex="-1">Szerkesztés</h2></div>
+        <div class="grid" id="construction-packs"></div>
+      </section>
+
+      <section id="construction-quiz" class="quiz-panel" aria-labelledby="construction-title" hidden>
+        <div class="quiz-toolbar">
+          <button class="chip" type="button" id="construction-back-menu">← Gyakorlók</button>
+        </div>
+        <h2 id="construction-title" tabindex="-1"></h2>
+        <div id="construction-task-view">
+          <p class="question-label" id="construction-position"></p>
+          <h3 id="construction-task-title" tabindex="-1"></h3>
+          <p class="question-text" id="construction-prompt"></p>
+          <p class="algebra-formula" id="construction-formula" hidden></p>
+          <div class="geometry-layout">
+            <figure class="geometry-board">
+              <svg class="construction-plot" id="construction-plot" viewBox="0 0 620 550" role="img" aria-label="Az ABC háromszög szerkesztési ábrája" xmlns="http://www.w3.org/2000/svg"></svg>
+            </figure>
+            <form id="construction-form">
+              <div class="construction-tools" id="construction-tools" hidden>
+                <label for="construction-radius">Körzőnyílás <output id="construction-radius-value" for="construction-radius"></output></label>
+                <input type="range" id="construction-radius" min="35" max="80" value="60">
+                <div class="controls">
+                  <button class="chip" type="button" id="construction-arc-first"></button>
+                  <button class="chip" type="button" id="construction-arc-second"></button>
+                </div>
+                <div class="controls" id="construction-ruler" hidden>
+                  <button class="chip" type="button" id="construction-ruler-first">1. ívmetszet</button>
+                  <button class="chip" type="button" id="construction-ruler-second">2. ívmetszet</button>
+                </div>
+                <div class="controls">
+                  <button class="chip" type="button" id="construction-mark" hidden></button>
+                  <button class="chip" type="button" id="construction-clear">Ábra törlése</button>
+                </div>
+                <p class="quiz-intro" id="construction-status" aria-live="polite"></p>
+              </div>
+              <div class="algebra-fields" id="construction-fields"></div>
+              <div class="review" id="construction-review" tabindex="-1" hidden>
+                <p id="construction-points"></p>
+                <p class="algebra-formula" id="construction-solution"></p>
+                <p id="construction-explanation"></p>
+              </div>
+              <div class="quiz-actions">
+                <button class="chip" type="button" id="construction-prev">← Előző</button>
+                <button class="chip primary" type="submit" id="construction-check">Ellenőrzés</button>
+                <button class="chip primary" type="button" id="construction-next" hidden>Következő →</button>
+              </div>
+            </form>
+          </div>
+        </div>
+        <div id="construction-result" hidden>
+          <p class="score" id="construction-total" tabindex="-1"></p>
+          <ul class="topic-scores" id="construction-task-scores"></ul>
+          <div class="quiz-actions">
+            <button class="chip primary" type="button" id="construction-show-answers">Megoldások áttekintése</button>
+            <button class="chip" type="button" id="construction-restart">Újrakezdés</button>
+          </div>
+        </div>
+      </section>
+
+      <section id="application-tests" aria-labelledby="application-menu-title" hidden>
+        <div class="section-heading"><h2 id="application-menu-title" tabindex="-1">Térgeometria és szöveges feladatok</h2></div>
+        <div class="grid" id="application-packs"></div>
+      </section>
+
+      <section id="application-quiz" class="quiz-panel" aria-labelledby="application-title" hidden>
+        <div class="quiz-toolbar">
+          <button class="chip" type="button" id="application-back-menu">← Gyakorlók</button>
+        </div>
+        <h2 id="application-title" tabindex="-1"></h2>
+        <div id="application-task-view">
+          <p class="question-label" id="application-position"></p>
+          <h3 id="application-task-title" tabindex="-1"></h3>
+          <p class="question-text" id="application-prompt"></p>
+          <p class="algebra-formula" id="application-formula" hidden></p>
+          <div class="geometry-layout">
+            <figure class="geometry-board" id="application-board" hidden>
+              <svg class="application-plot" id="application-plot" viewBox="0 0 460 360" role="img" xmlns="http://www.w3.org/2000/svg"></svg>
+              <div class="application-tools" id="application-tools" hidden>
+                <button class="chip" type="button" id="application-lift-roof" aria-pressed="false">Tető külön</button>
+              </div>
+              <div class="photo-board" id="application-photos" hidden>
+                <div class="photo-row" id="application-parents" role="group" aria-label="Szülők sora"></div>
+                <div class="photo-row" id="application-children" role="group" aria-label="Gyerekek sora"></div>
+                <p id="application-photo-status" aria-live="polite"></p>
+              </div>
+            </figure>
+            <form id="application-form">
+              <div class="algebra-fields" id="application-fields"></div>
+              <div class="review" id="application-review" tabindex="-1" hidden>
+                <p id="application-points"></p>
+                <p class="algebra-formula" id="application-solution"></p>
+                <p id="application-explanation"></p>
+              </div>
+              <div class="quiz-actions">
+                <button class="chip" type="button" id="application-prev">← Előző</button>
+                <button class="chip primary" type="submit" id="application-check">Ellenőrzés</button>
+                <button class="chip primary" type="button" id="application-next" hidden>Következő →</button>
+              </div>
+            </form>
+          </div>
+        </div>
+        <div id="application-result" hidden>
+          <p class="score" id="application-total" tabindex="-1"></p>
+          <ul class="topic-scores" id="application-task-scores"></ul>
+          <div class="quiz-actions">
+            <button class="chip primary" type="button" id="application-show-answers">Megoldások áttekintése</button>
+            <button class="chip" type="button" id="application-restart">Újrakezdés</button>
+          </div>
+        </div>
+      </section>
+
+      <section id="topics-panel" aria-labelledby="topics-title">
+        <div class="section-heading"><h2 id="topics-title">Vizsgatémák</h2></div>
+        <div class="grid" id="topic-groups"></div>
+      </section>
+    </div>
 
     <section class="empty" id="empty-year" aria-labelledby="empty-year-title" hidden>
       <h2 id="empty-year-title">Ehhez a tanévhez még nincs tematika</h2>
@@ -158,8 +652,255 @@
   </main>
 
   <script>
+    const examQuestions = [
+      {
+        topic: "4.2",
+        prompt: "Az alább felsorolt négyszögek közül melyek azok, amelyek biztosan tengelyesen szimmetrikusak?",
+        options: ["trapéz", "paralelogramma", "rombusz", "konkáv deltoid"],
+        answers: "cd",
+        explanation: "A rombusz mindkét átlója szimmetriatengely. A konkáv deltoidot az egyenlő hosszú oldalpárok közös csúcsain átmenő egyenes tükrözi önmagába. Az általános trapéznak és paralelogrammának lehet, hogy nincs szimmetriatengelye."
+      },
+      {
+        topic: "2.2",
+        prompt: "Egy természetes szám osztható 12-vel és 30-cal is. Az alábbiak közül melyik számmal osztható ez a szám biztosan?",
+        options: ["360", "20", "60", "24", "5"],
+        answers: "bce",
+        explanation: "A 12 és a 30 legkisebb közös többszöröse 60. A keresett szám minden esetben 60 többszöröse, ezért 20, 60 és 5 is osztja. A 60 maga ellenpélda a 360-ra és a 24-re."
+      },
+      {
+        topic: "2.2",
+        prompt: "Egy természetes szám 3-mal osztva 2 maradékot ad. Mennyi lehet a maradéka ugyanennek a számnak 6-tal osztva?",
+        options: ["0", "1", "2", "3", "5"],
+        answers: "ce",
+        explanation: "A 6 többszörösei 3-mal is oszthatók. A 0 és 5 közötti lehetséges maradékok közül a 2 és az 5 ad 3-mal osztva 2 maradékot."
+      },
+      {
+        topic: "4.4",
+        prompt: "Egy négyszög belső szögeinek az aránya 2 : 3 : 4 : 6. Mekkora ennek a négyszögnek a legnagyobb belső szöge?",
+        options: ["144°", "120°", "72°", "132°"],
+        answers: "a",
+        explanation: "A belső szögek összege 360°. Az arány összesen 15 részből áll, így egy rész 24°. A legnagyobb szög 6 · 24° = 144°."
+      },
+      {
+        topic: "4.6",
+        prompt: "Összeadjuk egy ötszög alapú hasáb éleinek, lapjainak és csúcsainak a számát. Mekkora ez az összeg?",
+        options: ["27", "30", "32", "35", "38"],
+        answers: "c",
+        explanation: "A két ötszög 10 csúcsot és 10 alapélt ad. Az 5 oldaléllel együtt 15 él van, a két alaplappal és az 5 oldallappal pedig 7 lap. Az összeg 10 + 15 + 7 = 32."
+      },
+      {
+        topic: "1.3",
+        prompt: "Az A, A, L, M betűkártyákból négybetűs (nem feltétlenül értelmes) „szavakat” gyártunk, egy „szóhoz” minden kártyát pontosan egyszer felhasználva. Hány különböző „szó” keletkezik?",
+        options: ["24", "12", "6", "1", "10"],
+        answers: "b",
+        explanation: "Az L helyére négy, az M helyére a megmaradt három lehetőség közül választunk. A másik két helyre A kerül. Ez 4 · 3 = 12 különböző szó."
+      },
+      {
+        topic: "2.6",
+        prompt: "Az alább felsorolt algebrai kifejezések között összesen hány összeg van?",
+        expressions: "(3 − x) · y   •   3x² − 5x   •   12 + (6x + y) · (x − y)   •   (2x + 4)²",
+        options: ["0", "1", "2", "3", "4"],
+        answers: "c",
+        explanation: "A javítókulcs az előjeles tagok összegét is összegnek veszi. Így a 3x² − 5x és a 12 + (6x + y) · (x − y) számít összegnek. A másik két kifejezés főművelete szorzás, illetve hatványozás."
+      },
+      {
+        topic: "1.3",
+        prompt: "A 0, 1, 2, 3, 4 számjegyek felhasználásával hány háromjegyű szám készíthető, ha egy számhoz minden számjegy legfeljebb egyszer használható fel?",
+        options: ["120", "100", "96", "60", "48"],
+        answers: "e",
+        explanation: "Az első helyre négyféle nemnulla számjegy kerülhet. A második helyre négy, a harmadikra három számjegy marad. Ez 4 · 4 · 3 = 48."
+      },
+      {
+        topic: "2.1",
+        prompt: "15,5 m³ hány dl?",
+        options: ["1,55 · 10³", "15,5 · 10⁴", "1,55 · 10⁵", "1,55 · 10⁻⁴"],
+        answers: "bc",
+        explanation: "1 m³ = 1000 l és 1 l = 10 dl. Így 15,5 m³ = 155 000 dl, amit a b) és a c) jelölés is megad."
+      },
+      {
+        topic: "2.3",
+        prompt: "A kedvenc nadrágom árát 17%-kal megváltoztatták, így most 12035 Ft-ba kerül. Mennyibe kerülhetett ugyanez a nadrág az árváltoztatás előtt (egész Ft-ra kerekítve)?",
+        options: ["14500 Ft", "14081 Ft", "16965 Ft", "9989 Ft", "10286 Ft"],
+        answers: "ae",
+        explanation: "Árcsökkentésnél a mostani ár az eredeti 83%-a, így a régi ár 12035 / 0,83 = 14 500 Ft. Áremelésnél a mostani ár 117%, ezért a régi ár 12035 / 1,17 ≈ 10 286 Ft."
+      },
+      {
+        topic: "4.3",
+        prompt: "Egy egyenlő szárú háromszög egyik belső szöge kétszer akkora, mint egy másik belső szöge. Az alábbiak közül melyik lehet ennek a háromszögnek belső szöge?",
+        options: ["30°", "40°", "60°", "72°", "90°"],
+        answers: "de",
+        explanation: "Az egyenlő szögek lehetnek a kisebbek, ekkor a szögek 45°, 45° és 90°. Ha a nagyobbak egyenlők, a szögek 36°, 72° és 72°. A felsoroltak közül a 72° és a 90° lehetséges."
+      },
+      {
+        topic: "1.1",
+        prompt: "A szilveszteri bulin 10-en gyűltek össze. Közülük 5-en szeretik a túrós palacsintát, 8-an a kakaós palacsintát. Hányan szeretik mindkét fajtát, ha tudjuk, hogy Béla az egyetlen a társaságból, aki egyiket se szereti?",
+        options: ["5", "4", "9", "2", "3"],
+        answers: "b",
+        explanation: "Kilencen szeretik legalább az egyik fajtát. Az 5 + 8 = 13 számolásban a mindkét fajtát szeretők kétszer szerepelnek, ezért 13 − 9 = 4 ilyen ember van."
+      }
+    ];
+
+    const practiceQuestions = [
+      {
+        topic: "4.2",
+        prompt: "Mely négyszögek biztosan középpontosan szimmetrikusak?",
+        options: ["deltoid", "téglalap", "paralelogramma", "egyenlő szárú trapéz", "rombusz"],
+        answers: "bce",
+        explanation: "Minden paralelogramma középpontosan szimmetrikus az átlói metszéspontjára. A téglalap és a rombusz is paralelogramma."
+      },
+      {
+        topic: "2.2",
+        prompt: "Egy természetes szám osztható 18-cal és 24-gyel. Melyik szám osztja biztosan?",
+        options: ["36", "48", "72", "9", "144"],
+        answers: "acd",
+        explanation: "Az LKKT(18, 24) = 72. A 72-t a 36, a 72 és a 9 osztja, ezért a 72 minden többszörösét is osztják."
+      },
+      {
+        topic: "2.2",
+        prompt: "Egy természetes szám 4-gyel osztva 1 maradékot ad. Melyik lehet a maradéka 12-vel osztva?",
+        options: ["1", "3", "5", "8", "9"],
+        answers: "ace",
+        explanation: "A 12 többszörösei 4-gyel is oszthatók. A 0 és 11 közötti maradékokból az 1, az 5 és a 9 ad 4-gyel osztva 1 maradékot."
+      },
+      {
+        topic: "4.4",
+        prompt: "Egy négyszög belső szögeinek aránya 1 : 2 : 4 : 5. Mekkora a legnagyobb belső szög?",
+        options: ["120°", "135°", "150°", "180°"],
+        answers: "c",
+        explanation: "A 360° összesen 12 rész, ezért egy rész 30°. A legnagyobb szög 5 · 30° = 150°."
+      },
+      {
+        topic: "4.6",
+        prompt: "Mennyi egy hétszög alapú hasáb csúcsainak, éleinek és lapjainak száma összeadva?",
+        options: ["28", "42", "44", "50", "56"],
+        answers: "c",
+        explanation: "A két alapon 14 csúcs van. A 14 alapélhez 7 oldalél társul, ezért 21 él van. A két alaplap és a 7 oldallap összesen 9 lap. A keresett összeg 14 + 21 + 9 = 44."
+      },
+      {
+        topic: "1.3",
+        prompt: "A K, K, E, E kártyákból hány különböző sorrend rakható ki, ha mind a négy kártyát felhasználjuk?",
+        options: ["4", "6", "8", "12", "24"],
+        answers: "b",
+        explanation: "A két K helyét választjuk ki a négy helyből. Az egyik K után három lehetőség marad a másiknak, és ugyanazt a két helyet két sorrendben számoljuk. Ez 4 · 3 / 2 = 6."
+      },
+      {
+        topic: "2.6",
+        prompt: "Melyik algebrai kifejezés főművelete összeadás?",
+        options: ["(x + 2) · (x + 3)", "5x + 2", "(x + 1)²", "3 + 2 · (x + 4)", "4x"],
+        answers: "bd",
+        explanation: "Az 5x + 2 és a 3 + 2 · (x + 4) értékének kiszámításakor az utolsó művelet összeadás. A többi kifejezés főművelete szorzás vagy hatványozás."
+      },
+      {
+        topic: "1.3",
+        prompt: "Hány négyjegyű szám készíthető a 0, 1, 2, 3, 4, 5 számjegyekből, ha egy számon belül egy számjegy csak egyszer szerepelhet?",
+        options: ["120", "240", "300", "360", "600"],
+        answers: "c",
+        explanation: "Az első helyre öt nemnulla számjegy közül választhatunk. A további helyekre rendre öt, négy és három lehetőség jut. Ez 5 · 5 · 4 · 3 = 300."
+      },
+      {
+        topic: "2.1",
+        prompt: "Melyik alak adja meg helyesen a 2,4 m³ térfogatot deciliterben?",
+        options: ["2,4 · 10⁴", "24 · 10³", "2,4 · 10³", "24 · 10⁴", "0,24 · 10⁵"],
+        answers: "abe",
+        explanation: "Egy köbméter 10 000 dl, ezért 2,4 m³ = 24 000 dl. Az a), b) és e) kifejezések mind ezt az értéket adják."
+      },
+      {
+        topic: "2.3",
+        prompt: "Egy cipő árát 25%-kal megváltoztatták. Az új ára 15 000 Ft. Mekkora lehetett az eredeti ár?",
+        options: ["11 250 Ft", "12 000 Ft", "16 000 Ft", "18 750 Ft", "20 000 Ft"],
+        answers: "be",
+        explanation: "Emelés esetén 15 000 / 1,25 = 12 000 Ft, csökkentés esetén 15 000 / 0,75 = 20 000 Ft volt a régi ár."
+      },
+      {
+        topic: "4.3",
+        prompt: "Egy egyenlő szárú háromszög egyik belső szöge háromszor akkora, mint egy másik. A felsoroltak közül melyik lehet a háromszög belső szöge?",
+        options: ["30°", "36°", "54°", "90°", "108°"],
+        answers: "be",
+        explanation: "Ha a két kisebb szög egyenlő, az arány 1 : 1 : 3, így a szögek 36°, 36° és 108°. Ha a két nagyobb egyenlő, az arány 1 : 3 : 3, így 180/7° és 540/7° fordul elő. Az utóbbi két érték nincs a felsorolásban."
+      },
+      {
+        topic: "1.1",
+        prompt: "Egy 14 fős csoportból 9-en szeretik a teát, 8-an a kakaót, és 2-en egyiket sem. Hányan szeretik mindkettőt?",
+        options: ["3", "4", "5", "6", "7"],
+        answers: "c",
+        explanation: "Legalább az egyik italt 14 − 2 = 12 fő szereti. A 9 + 8 = 17 összeg a mindkettőt szeretőket kétszer számolja, ezért 17 − 12 = 5 fő a metszet."
+      }
+    ];
+
+    const algebraSets = [
+      {
+        title: "Eredeti algebrai feladatok",
+        detail: "2026. február 4. · I. rész, 2–3. feladat",
+        expansion: [2, -3, 2, -4],
+        substitution: [1, -2],
+        equation: [[3, -6, 10], [-11, 4, 6], [2, -1]]
+      },
+      {
+        title: "Algebrai gyakorlósor A",
+        detail: "Új kifejezés és tört együtthatós egyenlet.",
+        expansion: [3, -2, 5, -7],
+        substitution: [-1, 2],
+        equation: [[5, -4, 8], [-9, 3, 12], [1, -3]]
+      }
+    ];
+
+    const coordinateSets = [
+      {
+        title: "Eredeti koordinátageometriai feladat",
+        detail: "2026. február 4. · II. rész, 4. feladat",
+        slope: [2, 3],
+        intercept: 4,
+        comparison: { slope: [1, 2], intercept: -1, points: [[4054, 2026], [-4046, -2026]] }
+      },
+      {
+        title: "Koordinátageometriai gyakorlósor A",
+        detail: "Új grafikon, tükrözés és távoli pontok.",
+        slope: [3, 4],
+        intercept: -3,
+        comparison: { slope: [-1, 2], intercept: 2, points: [[2406, -1202], [-1608, 808]] }
+      }
+    ];
+
+    const constructionSets = [
+      {
+        title: "Eredeti szerkesztési feladat",
+        detail: "2026. február 4. · II. rész, 5. feladat",
+        vertices: [[156, 328], [448, 366], [355, 173]]
+      },
+      {
+        title: "Szerkesztési gyakorlósor A",
+        detail: "Oldalfelezés és nevezetes vonalak egy új háromszögben.",
+        vertices: [[140, 300], [450, 317], [278, 170]]
+      }
+    ];
+
+    const applicationSets = [
+      {
+        title: "Eredeti vizsgafeladat · A ház bővítése",
+        detail: "2026. február 4. · II. rész, 6. feladat",
+        house: { width: 5, length: 8, oldWall: 4, increase: 3, fullHeight: 9.5 },
+        tank: { diameter: 70, height: 120, liters: 600 },
+        family: { oldest: 3, gap: 5, mother: 3, father: 10, total: 99 },
+        fixedPhoto: false
+      },
+      {
+        title: "Alkalmazási gyakorlósor A",
+        detail: "Új méretek, új életkorok és egy rögzített hely a fotótablón.",
+        house: { width: 6, length: 9, oldWall: 3.5, increase: 2.5, fullHeight: 9 },
+        tank: { diameter: 80, height: 100, liters: 500 },
+        family: { oldest: 4, gap: 7, mother: 3, father: 13, total: 95 },
+        fixedPhoto: true
+      }
+    ];
+
     const curricula = [
-      { year: "2025-2026", groups: [
+      { year: "2025-2026", mixed: {
+        pointsByErrors: [2, 1],
+        sets: [
+          { title: "Eredeti vizsgablokk", detail: "2026. február 4. · I. rész, 1. feladat", questions: examQuestions },
+          { title: "Gyakorlósor A", detail: "Ugyanazok a feladattípusok új kérdésekkel.", questions: practiceQuestions }
+        ]
+      }, algebra: algebraSets, coordinates: coordinateSets, construction: constructionSets, application: applicationSets, groups: [
         {
           name: "Gondolkodási és megismerési módszerek",
           topics: [
@@ -216,6 +957,996 @@
       return element;
     }
 
+    function showPracticeView(view) {
+      for (const [mode, packs] of [["mixed", "mixed-test-packs"], ["algebra", "algebra-packs"],
+        ["coordinates", "coordinates-packs"], ["construction", "construction-packs"], ["application", "application-packs"]]) {
+        document.getElementById(`${mode}-quiz`).hidden = view !== mode;
+        document.getElementById(`${mode}-tests`).hidden = view !== "menu" || !document.getElementById(packs).children.length;
+      }
+      document.getElementById("topics-panel").hidden = view !== "menu";
+    }
+
+    const mathNumber = value => String(value).replace("-", "−").replace(".", ",");
+    const term = (coefficient, variable = "") => {
+      if (coefficient === 0) return "0";
+      const magnitude = Math.abs(coefficient);
+      return (coefficient < 0 ? "−" : "") + (magnitude === 1 && variable ? "" : mathNumber(magnitude)) + variable;
+    };
+    const signedTerm = (coefficient, variable = "") => (coefficient < 0 ? " − " : " + ") + term(Math.abs(coefficient), variable);
+    const linear = ([coefficient, constant]) => coefficient
+      ? term(coefficient, "x") + (constant ? signedTerm(constant) : "")
+      : mathNumber(constant);
+    const factor = value => value < 0 ? `(${mathNumber(value)})` : mathNumber(value);
+    const gcd = (a, b) => b ? gcd(b, a % b) : a;
+    const mark = (label, answer, points = 1, expanded = false) => ({ label, answer, points, expanded });
+    const pick = (label, options, expected) => ({ label, options, answer: options[expected], points: 1 });
+
+    function createAlgebraStages({ expansion, substitution, equation }) {
+      const [innerA, innerB, outsideB, outsideA] = expansion;
+      const [a, b] = substitution;
+      const combinedA = innerA + outsideA;
+      const combinedB = innerB + outsideB;
+      const expression = `ab²(${term(innerA, "a")}${signedTerm(innerB, "b")})` +
+        signedTerm(outsideB, "ab³") + signedTerm(outsideA, "a²b²");
+      const expanded = term(innerA, "a²b²") + signedTerm(innerB, "ab³") +
+        signedTerm(outsideB, "ab³") + signedTerm(outsideA, "a²b²");
+      const simplified = term(combinedA, "a²b²") + signedTerm(combinedB, "ab³");
+      const substitutedA = term(combinedA) + ` · ${factor(a)}² · ${factor(b)}²`;
+      const substitutedB = (coefficient, exponent) => {
+        const magnitude = Math.abs(coefficient);
+        const multiplier = magnitude === 1 ? "" : `${mathNumber(magnitude)} · `;
+        return (coefficient < 0 ? " − " : " + ") + multiplier + `${factor(a)} · ${factor(b)}${exponent}`;
+      };
+      const substituted = substitutedA + substitutedB(combinedB, "³");
+      const valueA = combinedA * a ** 2 * b ** 2;
+      const valueB = combinedB * a * b ** 3;
+
+      const [first, second, right] = equation;
+      const common = first[2] * second[2] / gcd(first[2], second[2]);
+      const scaled = (parts, denominator) => parts.slice(0, 2).map(coefficient => coefficient * common / denominator);
+      const [firstNum, secondNum, rightNum] = [scaled(first, first[2]), scaled(second, second[2]), scaled(right, 1)];
+      const left = firstNum.map((coefficient, index) => coefficient - secondNum[index]);
+      const movedCoefficient = left[0] - rightNum[0];
+      const movedConstant = rightNum[1] - left[1];
+      const solution = movedConstant / movedCoefficient;
+      const solutionText = movedConstant % movedCoefficient === 0 ? mathNumber(solution) :
+        `${mathNumber(movedConstant)} / ${factor(movedCoefficient)}`;
+      const evaluateLine = ([coefficient, constant]) => coefficient * solution + constant;
+      const substituteX = ([coefficient, constant]) =>
+        `${mathNumber(coefficient)} · ${factor(solution)}${constant ? signedTerm(constant) : ""}`;
+      const valueLeft = evaluateLine(first) / first[2] - evaluateLine(second) / second[2];
+      const valueRight = evaluateLine(right);
+      const fractions = [
+        [linear(first), first[2]], "−", [linear(second), second[2]], `= ${linear(right)}`
+      ];
+      const commonFractions = [
+        [linear(firstNum), common], "−", [linear(secondNum), common], "=", [linear(rightNum), common]
+      ];
+
+      return [
+        {
+          task: "2/a", title: "Kifejezés egyszerűsítése",
+          prompt: "Bontsd fel a zárójelet, majd vond össze az egynemű tagokat!",
+          formula: [expression],
+          fields: [
+            mark(`Az ab² és a ${term(innerA, "a")} szorzata`, term(innerA, "a²b²")),
+            mark(`Az ab² és a ${term(innerB, "b")} szorzata`, term(innerB, "ab³")),
+            mark("Az összevont a²b²-es tag", term(combinedA, "a²b²")),
+            mark("Az összevont ab³-as tag", term(combinedB, "ab³"))
+          ],
+          solution: [`${expanded} = ${simplified}`],
+          explanation: "Az ab² a zárójel mindkét tagját megszorozza. Ezután az azonos betűrészű tagokat vonjuk össze."
+        },
+        {
+          task: "2/b", title: "Helyettesítési érték",
+          prompt: `Számítsd ki a kifejezés értékét, ha a = ${mathNumber(a)} és b = ${mathNumber(b)}!`,
+          formula: [simplified],
+          fields: [
+            pick("Melyik a helyes behelyettesítés?", [
+              term(combinedA) + ` · ${factor(a)}² · ${factor(b)}³` + substitutedB(combinedB, "²"),
+              substituted,
+              substitutedA + substitutedB(-combinedB, "³")
+            ], 1),
+            mark("Az első tag értéke előjellel együtt", valueA),
+            mark("A második tag értéke előjellel együtt", valueB),
+            mark("A teljes kifejezés értéke", valueA + valueB)
+          ],
+          solution: [`${substituted} = ${term(valueA)}${signedTerm(valueB)} = ${mathNumber(valueA + valueB)}`],
+          explanation: "A negatív alapot zárójelben emeljük hatványra. Mindkét tag értékébe beleszámít az előjele."
+        },
+        {
+          task: "3", title: "Egyenlet · közös nevező",
+          prompt: "Oldd meg az egyenletet a valós számok halmazán! Kezdd a közös nevezővel.",
+          formula: fractions,
+          fields: [
+            mark("A legkisebb pozitív közös nevező", common),
+            mark("Az első tört számlálója bővítés után", linear(firstNum)),
+            mark("A második tört számlálója bővítés után, a külső mínusz nélkül", linear(secondNum)),
+            mark("A jobb oldal számlálója közös nevezővel", linear(rightNum))
+          ],
+          solution: commonFractions,
+          explanation: "A közös nevező a két nevező legkisebb közös többszöröse. A jobb oldalt 1 nevezőjű törtként bővítjük."
+        },
+        {
+          task: "3", title: "Egyenlet · zárójel és összevonás",
+          prompt: "Hagyd el a nevezőket, bontsd fel a kivonás zárójelét, majd vond össze a bal oldalt!",
+          formula: commonFractions,
+          fields: [
+            mark("Mivel szorzod meg mindkét oldalt, hogy elmaradjon a nevező?", common),
+            pick("Melyik alakban hagyod el a második tört nevezőjét?", [
+              `+(${linear(secondNum)})`,
+              `−(${linear(secondNum)})`,
+              `−(${linear([secondNum[0], -secondNum[1]])})`
+            ], 1),
+            mark("A kivont számláló zárójel nélküli alakja, előjellel együtt", linear(secondNum.map(value => -value)), 1, true),
+            mark("Az összevont bal oldalon az x együtthatója", left[0], .5),
+            mark("Az összevont bal oldalon az állandó tag előjellel", left[1], .5)
+          ],
+          solution: [`${linear(firstNum)} − (${linear(secondNum)}) = ${linear(rightNum)} → ${linear(left)} = ${linear(rightNum)}`],
+          explanation: "A második számláló minden tagjának előjele megfordul a zárójel felbontásakor."
+        },
+        {
+          task: "3", title: "Egyenlet · rendezés és megoldás",
+          prompt: "Rendezd úgy az egyenletet, hogy balra csak x-es tag, jobbra csak szám maradjon!",
+          formula: [`${linear(left)} = ${linear(rightNum)}`],
+          fields: [
+            mark("Melyik x-es tagot adod mindkét oldalhoz?", term(-rightNum[0], "x")),
+            mark("Melyik számot adod mindkét oldalhoz?", -left[1]),
+            mark("A kapott egyenlet bal oldalán az x együtthatója", movedCoefficient),
+            mark("A kapott egyenlet jobb oldala", movedConstant),
+            mark("Melyik számmal osztod mindkét oldalt?", movedCoefficient),
+            mark("Az x megoldásértéke", solution)
+          ],
+          solution: [`${term(movedCoefficient, "x")} = ${mathNumber(movedConstant)} → x = ${solutionText}`],
+          explanation: "Az egyenlőség mindkét oldalán ugyanazt a műveletet végezzük. A végén az x együtthatójával osztunk."
+        },
+        {
+          task: "3", title: "Egyenlet · ellenőrzés",
+          prompt: `Helyettesítsd be az x = ${solutionText} értéket az eredeti egyenlet mindkét oldalába!`,
+          formula: fractions,
+          fields: [mark("A bal oldal értéke", valueLeft), mark("A jobb oldal értéke", valueRight)],
+          solution: [[substituteX(first), first[2]], "−", [substituteX(second), second[2]], `= ${mathNumber(valueLeft)}`],
+          explanation: `A jobb oldalon ${substituteX(right)} = ${mathNumber(valueRight)}. A két oldal értéke megegyezik, így a kapott szám valóban megoldás.`
+        }
+      ];
+    }
+
+    const coordinateText = point => `(${point.map(mathNumber).join("; ")})`;
+    const roundedLength = value => Number(value.toFixed(2));
+    const graphEquation = (name, [numerator, denominator], intercept) =>
+      [`${name}(x) =`, [mathNumber(numerator), denominator], `x${signedTerm(intercept)}`];
+
+    function coordinateGeometry({ slope, intercept }) {
+      const [numerator, denominator] = slope;
+      const axisPoints = [[0, intercept], [-intercept * denominator / numerator, 0]];
+      if (intercept < 0) axisPoints.reverse();
+      const [p, q] = axisPoints;
+      const opposite = ([x, y]) => [-x, -y];
+      const [r, s] = [opposite(p), opposite(q)];
+      return { p, q, r, s, intercept, slope: numerator / denominator };
+    }
+
+    function createCoordinateStages(pack) {
+      const { p, q, r, s, slope, intercept } = coordinateGeometry(pack);
+      const run = Math.abs(p[0] - q[0]);
+      const rise = Math.abs(p[1] - q[1]);
+      const sideSquared = run ** 2 + rise ** 2;
+      const side = Math.sqrt(sideSquared);
+      const triangleArea = run * rise / 2;
+      const area = 4 * triangleArea;
+      const classes = ["Deltoid", "Négyzet", "Paralelogramma", "Rombusz", "Téglalap", "Trapéz", "Konvex négyszög"];
+      const correctClasses = [classes[0], classes[2], classes[3], classes[5], classes[6]];
+      const gradeClasses = checked => {
+        const errors = classes.filter(shape => checked.includes(shape) !== correctClasses.includes(shape)).length;
+        return Math.max(0, 2 - errors * .5);
+      };
+      const gradeLine = points => {
+        const [numerator, denominator] = pack.slope;
+        const distinct = points.length === 2 && points[0].some((value, index) => value !== points[1][index]);
+        return distinct && points.every(([x, y]) => denominator * (y + intercept) === numerator * x) ? 2 : 0;
+      };
+      const compare = pack.comparison;
+      const positions = ["Alatta", "Rajta", "Fölötte"];
+      const comparisons = compare.points.map(([x, y], index) => {
+        const value = compare.slope[0] * x / compare.slope[1] + compare.intercept;
+        const name = "AB"[index];
+        const order = Math.sign(y - value);
+        return { name, x, y, value, order, position: positions[order + 1] };
+      });
+      return [
+        {
+          task: "4/a", title: "Olvasd le a függvény szabályát!",
+          prompt: "Add meg a meredekséget és azt, hogy melyik értéknél metszi az egyenes az y tengelyt!",
+          board: "original", formula: ["f(x) = mx + b"],
+          fields: [mark("Meredekség (m). Törtet is írhatsz, például 1/3.", slope), mark("A tengelymetszet y-koordinátája (b)", intercept)],
+          solution: graphEquation("f", pack.slope, intercept),
+          explanation: `Ha jobbra ${run} egységet lépsz az egyenesen, ${rise} egységgel jutsz feljebb.`
+        },
+        {
+          task: "4/b", title: "Keresd meg a P pontot!",
+          prompt: "Hol metszi f grafikonja valamelyik tengelyt úgy, hogy a metszéspont mindkét koordinátája nemnegatív?",
+          board: "point-p", fields: [mark("P x-koordinátája", p[0]), mark("P y-koordinátája", p[1])],
+          solution: [`P${coordinateText(p)}`], explanation: `A másik tengelymetszet Q${coordinateText(q)}.`
+        },
+        {
+          task: "4/c", title: "Tükrözd az egyenest az origóra!",
+          prompt: "Jelölj ki két rácspontot a tükrözött f′ egyenesen!",
+          board: "draw", fields: [{ draw: true, points: 2, grade: gradeLine }],
+          solution: graphEquation("f′", pack.slope, -intercept),
+          explanation: `A tükrözés (x; y) képe (−x; −y). Például a két tengelymetszet képe ${coordinateText(r)} és ${coordinateText(s)}.`
+        },
+        {
+          task: "4/d", title: "Keresd meg az R pontot!",
+          prompt: "Az f′ egyenes melyik tengelymetszeténél kisebb a koordináták összege az összeg abszolútértékénél?",
+          board: "point-r", fields: [mark("R x-koordinátája", r[0]), mark("R y-koordinátája", r[1])],
+          solution: [`R${coordinateText(r)}`],
+          explanation: "A keresett tengelymetszet koordinátáinak összege negatív."
+        },
+        {
+          task: "4/e", title: "Milyen négyszöget kaptál?",
+          prompt: "Jelöld az összes halmazt, amelybe a PQRS négyszög tartozik! Minden felesleges vagy kihagyott jelölés fél pontot von le, a minimum 0 pont.",
+          board: "polygon",
+          fields: [{ label: "A PQRS négyszög besorolása", multiple: true, options: classes, answer: correctClasses, points: 2, grade: gradeClasses }],
+          solution: [correctClasses.join(" · ")],
+          explanation: "Az átlók merőlegesek és felezik egymást, az oldalak egyenlő hosszúak. A két átló különböző hosszúságú."
+        },
+        {
+          task: "4/f", title: "Számítsd ki a kerületet és a területet!",
+          prompt: "Használd az ábra derékszögű háromszögeit! Ahol szükséges, kerekíts két tizedesjegyre.",
+          board: "triangles",
+          fields: [
+            mark("A rombusz oldalhosszának négyzete (a²)", sideSquared),
+            mark("A rombusz oldalhossza (a)", roundedLength(side)),
+            mark("A rombusz kerülete (K)", roundedLength(4 * side)),
+            mark("Hány egybevágó derékszögű háromszögre osztják az átlók a rombuszt?", 4),
+            mark("Egy háromszög területe", triangleArea),
+            mark("A rombusz területe (T)", area)
+          ],
+          solution: [`K = 4√${sideSquared} ${side % 1 ? "≈" : "="} ${mathNumber(roundedLength(4 * side))}`,
+            ` · T = 4 · (${run} · ${rise} / 2) = ${mathNumber(area)}`],
+          explanation: `Egy oldal annak a derékszögű háromszögnek az átfogója, amelynek befogói ${run} és ${rise} egység hosszúak.`
+        },
+        {
+          task: "4/g", title: "A grafikon alatt, rajta vagy fölötte?",
+          prompt: `Számolj, majd hasonlítsd össze a kapott értékeket! A${coordinateText(compare.points[0])} és B${coordinateText(compare.points[1])}.`,
+          formula: graphEquation("g", compare.slope, compare.intercept),
+          fields: comparisons.flatMap(({ name, x, value, order }) => [
+            mark(`Mennyi g(${mathNumber(x)})?`, value),
+            pick(`Hol van ${name === "A" ? "az" : "a"} ${name} pont a grafikonhoz képest?`, positions, order + 1)
+          ]),
+          solution: comparisons.map(({ name, x, y, value, position }) => {
+            const relation = y < value ? ">" : y > value ? "<" : "=";
+            return `g(${mathNumber(x)}) = ${mathNumber(value)} ${relation} ${mathNumber(y)} · ${name} ${position.toLocaleLowerCase("hu")}`;
+          }),
+          explanation: "A pont y-koordinátáját a függvény ugyanahhoz az x-hez tartozó értékével hasonlítsd össze."
+        }
+      ];
+    }
+
+    function svgElement(tag, attributes, label) {
+      const element = document.createElementNS("http://www.w3.org/2000/svg", tag);
+      for (const [key, value] of Object.entries(attributes)) element.setAttribute(key, value);
+      if (label) element.textContent = label;
+      return element;
+    }
+
+    function setupCoordinateBoard() {
+      const board = document.getElementById("coordinates-board");
+      const plot = document.getElementById("coordinates-plot");
+      const tools = document.getElementById("coordinates-tools");
+      const hint = document.getElementById("coordinates-draw-hint");
+      const selection = document.getElementById("coordinates-selection");
+      const undo = document.getElementById("coordinates-undo");
+      const bounds = [10, 8];
+      const origin = [224, 177];
+      const step = 18;
+      const svg = svgElement;
+      const screen = ([x, y]) => [origin[0] + x * step, origin[1] - y * step];
+      const limit = (value, axis) => Math.max(-bounds[axis], Math.min(bounds[axis], value));
+      const samePoint = (a, b) => a[0] === b[0] && a[1] === b[1];
+      const [left, top] = screen([-bounds[0], bounds[1]]);
+      const [right, bottom] = screen([bounds[0], -bounds[1]]);
+      const gridLines = [];
+      for (let x = left; x <= right; x += step) gridLines.push(`M ${x} ${top} V ${bottom}`);
+      for (let y = top; y <= bottom; y += step) gridLines.push(`M ${left} ${y} H ${right}`);
+      let chosen;
+      let cursor;
+      let updateSelection;
+
+      function circle(point, className, r) {
+        const [cx, cy] = screen(point);
+        return svg("circle", { cx, cy, r, class: className });
+      }
+
+      function line(parent, a, b, className, attributes = {}) {
+        const [x1, y1] = screen(a);
+        const [x2, y2] = screen(b);
+        parent.append(svg("line", { x1, y1, x2, y2, class: className, ...attributes }));
+      }
+
+      function extendedLine(parent, [x1, y1], [x2, y2], className, attributes) {
+        const dx = x2 - x1;
+        const dy = y2 - y1;
+        const extension = 2 * (bounds[0] + bounds[1]);
+        line(parent, [x1 - dx * extension, y1 - dy * extension],
+          [x2 + dx * extension, y2 + dy * extension], className, attributes);
+      }
+
+      function choose(point) {
+        if (!updateSelection || chosen.length === 2 || chosen.some(other => samePoint(other, point))) return;
+        chosen.push(point);
+        updateSelection();
+      }
+
+      plot.addEventListener("click", event => {
+        if (!updateSelection) return;
+        const transform = plot.getScreenCTM();
+        if (!transform) return;
+        const pointer = plot.createSVGPoint();
+        pointer.x = event.clientX;
+        pointer.y = event.clientY;
+        const { x, y } = pointer.matrixTransform(transform.inverse());
+        const point = [Math.round((x - origin[0]) / step), Math.round((origin[1] - y) / step)];
+        if (point.every((value, axis) => value === limit(value, axis))) {
+          cursor = point;
+          choose(point);
+        }
+      });
+      const directions = { ArrowLeft: [-1, 0], ArrowRight: [1, 0], ArrowUp: [0, 1], ArrowDown: [0, -1] };
+      plot.addEventListener("keydown", event => {
+        if (!updateSelection) return;
+        if (Object.hasOwn(directions, event.key)) {
+          event.preventDefault();
+          cursor = cursor.map((value, axis) => limit(value + directions[event.key][axis], axis));
+          updateSelection(true);
+        } else if (event.key === "Enter" || event.key === " ") {
+          event.preventDefault();
+          choose(cursor);
+        }
+      });
+      undo.addEventListener("click", () => {
+        if (!updateSelection || !chosen.length) return;
+        chosen.pop();
+        updateSelection();
+        plot.focus();
+      });
+
+      return (pack, stage, answers, grades) => {
+        const mode = stage.board;
+        const editable = mode === "draw" && !grades;
+        updateSelection = null;
+        board.hidden = !mode;
+        tools.hidden = mode !== "draw";
+        hint.hidden = !editable;
+        if (!mode) return;
+        chosen = mode === "draw" ? answers[0] : [];
+        cursor = chosen.at(-1) ?? [0, 0];
+        const { p, q, r, s, slope, intercept } = coordinateGeometry(pack);
+        const frame = svg("svg", { x: left, y: top, width: right - left, height: bottom - top,
+          viewBox: `${left} ${top} ${right - left} ${bottom - top}`, overflow: "hidden" });
+        frame.append(svg("path", { class: "plot-grid", d: gridLines.join(" ") }));
+        if (mode === "polygon" || mode === "triangles") {
+          frame.append(svg("polygon", { class: "plot-region", points: [p, q, r, s].map(point => screen(point).join(",")).join(" ") }));
+          if (mode === "triangles") {
+            frame.append(svg("polygon", { class: "plot-triangle", points: [[0, 0], p, q].map(point => screen(point).join(",")).join(" ") }));
+          }
+        }
+        const [ox, oy] = origin;
+        const axes = svg("path", { class: "plot-axis", d:
+          `M ${left - 6} ${oy} H ${right + 9} m -6 -4 l 6 4 -6 4 M ${ox} ${bottom + 6} V ${top - 9} m -4 6 l 4 -6 4 6` });
+        const lineLayer = frame.cloneNode(false);
+        const annotation = svg("g", {});
+        const studentLayer = lineLayer.cloneNode(false);
+        const studentPoints = svg("g", {});
+        const axisText = (x, y, label, extra = {}) => svg("text", { x, y, ...extra }, label);
+        for (let x = -bounds[0]; x <= bounds[0]; x += 2) {
+          if (x !== 0) annotation.append(axisText(screen([x, 0])[0], oy + 16, mathNumber(x), { "text-anchor": "middle" }));
+        }
+        for (let y = -bounds[1]; y <= bounds[1]; y += 2) {
+          if (y !== 0) annotation.append(axisText(ox - 8, screen([0, y])[1] + 4, mathNumber(y), { "text-anchor": "end" }));
+        }
+        annotation.append(axisText(ox - 8, oy + 16, "0", { "text-anchor": "end" }),
+          axisText(right + 14, oy + 4, "x"), axisText(ox + 9, top - 11, "y"));
+        const showLine = (constant, label, className) => {
+          extendedLine(lineLayer, [-1, constant - slope], [1, constant + slope], className);
+          const x = Math.min(bounds[0] - 1, (bounds[1] - 0.9 - constant) / slope);
+          const [sx, sy] = screen([x, x * slope + constant]);
+          annotation.append(axisText(sx + 6, sy - 7, label, { class: "plot-label" }));
+        };
+        showLine(intercept, "f", "plot-original");
+        if (mode === "point-r" || mode === "polygon" || mode === "triangles" || (mode === "draw" && grades)) {
+          showLine(-intercept, "f′", "plot-reflected");
+        }
+        const pointLabel = (point, label) => {
+          const [x, y] = screen(point);
+          const dx = point[0] < 0 ? -11 : 10;
+          const dy = point[1] < 0 ? 13 : -10;
+          annotation.append(circle(point, "plot-point", 4.5), axisText(x + dx, y + dy, label, {
+            class: "plot-label", "text-anchor": dx < 0 ? "end" : "start"
+          }));
+        };
+        if (mode === "draw" || mode === "point-r" || mode === "polygon" || mode === "triangles" || (mode === "point-p" && grades)) {
+          pointLabel(p, "P");
+          pointLabel(q, "Q");
+        }
+        if (mode === "polygon" || mode === "triangles" || (mode === "point-r" && grades)) {
+          pointLabel(r, "R");
+          pointLabel(s, "S");
+        }
+        plot.replaceChildren(frame, axes, studentLayer, lineLayer, annotation, studentPoints);
+        plot.setAttribute("role", editable ? "group" : "img");
+        plot.setAttribute("aria-label", editable ? "Rácspontok kijelölése az f′ egyeneshez" : "Koordináta-rendszer a feladat ábrájával");
+        plot.toggleAttribute("tabindex", editable);
+        plot.toggleAttribute("aria-describedby", editable);
+        if (editable) {
+          plot.setAttribute("tabindex", "0");
+          plot.setAttribute("aria-describedby", "coordinates-draw-hint coordinates-selection");
+        }
+
+        if (mode === "draw") {
+          const renderSelection = (keyboard = false) => {
+            studentLayer.replaceChildren();
+            if (chosen.length === 2) extendedLine(studentLayer, chosen[0], chosen[1], "plot-drawn", grades ? { "data-reviewed": "" } : {});
+            studentPoints.replaceChildren(...chosen.map(point => circle(point, "plot-choice", 5)));
+            if (editable) studentPoints.append(circle(cursor, "plot-cursor", 7.5));
+            undo.hidden = !editable;
+            undo.disabled = chosen.length === 0;
+            selection.textContent = (chosen.length ? `Kijelölve ${chosen.map(coordinateText).join(" és ")}` : "Még nincs kijelölt pont.") +
+              (keyboard ? ` Kurzor ${coordinateText(cursor)}.` : "");
+          };
+          if (editable) updateSelection = renderSelection;
+          renderSelection();
+        }
+      };
+    }
+
+    const difference = (a, b) => [a[0] - b[0], a[1] - b[1]];
+    const translated = (a, b, proportion = 1) => [a[0] + proportion * b[0], a[1] + proportion * b[1]];
+    const perpendicular = ([x, y]) => [-y, x];
+    const dotProduct = (a, b) => a[0] * b[0] + a[1] * b[1];
+
+    function triangleConstructionGeometry({ vertices: [a, b, c] }) {
+      const ab = difference(b, a), ac = difference(c, a), bc = difference(c, b);
+      const abSquared = dotProduct(ab, ab), acSquared = dotProduct(ac, ac), bcSquared = dotProduct(bc, bc);
+      const determinant = 2 * (ab[0] * ac[1] - ab[1] * ac[0]);
+      const relativeCenter = [
+        (abSquared * ac[1] - acSquared * ab[1]) / determinant,
+        (acSquared * ab[0] - abSquared * ac[0]) / determinant
+      ];
+      const heightPosition = dotProduct(ab, ac) / acSquared;
+      const longestSquared = Math.max(abSquared, acSquared, bcSquared);
+      return {
+        a, b, c, f: translated(a, ac, .5), g: translated(b, bc, .5),
+        center: translated(a, relativeCenter), circumradius: Math.hypot(...relativeCenter),
+        foot: translated(a, ac, heightPosition), heightPosition,
+        angleType: Math.sign(abSquared + acSquared + bcSquared - 2 * longestSquared)
+      };
+    }
+
+    function compassIntersections(start, end, [first, second]) {
+      if (!first || !second || first + second <= 100) return null;
+      const side = difference(end, start);
+      const r1 = first / 100, r2 = second / 100;
+      const projection = (1 + r1 ** 2 - r2 ** 2) / 2;
+      const heightSquared = r1 ** 2 - projection ** 2;
+      if (heightSquared <= 0) return null;
+      const crossing = translated(start, side, projection);
+      const normal = perpendicular(side);
+      const height = Math.sqrt(heightSquared);
+      return { crossing, points: [translated(crossing, normal, height), translated(crossing, normal, -height)] };
+    }
+
+    function createConstructionStages(pack) {
+      const { a, b, c, angleType } = triangleConstructionGeometry(pack);
+      const types = ["Tompaszögű", "Derékszögű", "Hegyesszögű"];
+      const positions = ["A háromszögön kívül", "Az egyik oldalon", "A háromszögön belül"];
+      const index = angleType + 1;
+      const bisect = (name, vertex, start) => ({
+        task: "5/a", title: `${name} felezőpont szerkesztése`,
+        prompt: `Felezd meg ${vertex === "A" ? "az" : "a"} ${vertex}C oldalt körzővel és vonalzóval!`,
+        board: name,
+        fields: [{
+          draw: true, points: 2, newResponse: () => ({ opening: 60, radii: [null, null], selected: [], marked: false }),
+          grade: ({ radii, selected, marked }) =>
+            marked && selected.length === 2 && radii[0] === radii[1] && compassIntersections(start, c, radii) ? 2 : 0
+        }],
+        solution: [`${name} ${vertex === "A" ? "az" : "a"} ${vertex}C oldal és a felezőmerőlegese metszéspontja.`],
+        explanation: "A két oldalvégpontból azonos körzőnyílással húzott ívek metszéspontjai egyenlő távol vannak az oldal végpontjaitól."
+      });
+      return [
+        bisect("F", "A", a),
+        bisect("G", "B", b),
+        {
+          task: "5/b", title: "Ismerd fel a nevezetes szakaszokat!",
+          prompt: "Nézd meg a BF, az AG és az FG szakaszt!",
+          board: "segments",
+          fields: [
+            pick("Mik a BF és az AG szakaszok?", ["Magasságvonalak", "Súlyvonalak", "Szögfelezők"], 1),
+            pick("Mi az FG szakasz neve?", ["Középvonal", "Oldalfelező merőleges", "Súlyvonal"], 0),
+            pick("Hogyan helyezkedik el az FG az AB oldalhoz képest?", ["Merőleges rá", "Metszi az egyenesét", "Párhuzamos vele"], 2)
+          ],
+          solution: ["BF és AG súlyvonal · FG középvonal · FG ∥ AB"],
+          explanation: "A súlyvonal egy csúcsot köt össze a szemközti oldal felezőpontjával. A középvonal két oldalfelező pontot köt össze."
+        },
+        {
+          task: "5/b", title: "Vizsgáld meg a háromszöget!",
+          prompt: "A szögekből következtess a köréírt kör középpontjának helyére!",
+          board: "triangle",
+          fields: [
+            pick("Milyen az ABC háromszög a szögei szerint?", types, index),
+            pick("Hol van a köréírt kör középpontja?", positions, index),
+            pick("Melyik nevezetes egyenes halad át B-n merőlegesen az AC egyenesére?", ["Súlyvonal", "Magasságvonal", "Oldalfelező merőleges"], 1)
+          ],
+          solution: [`${types[index]} háromszög · O ${positions[index].toLocaleLowerCase("hu")} · BH magasságvonal`],
+          explanation: "Az O pont egyenlő távol van az A, B és C csúcstól. A B-ből húzott merőleges a H pontban éri el az AC egyenesét."
+        }
+      ];
+    }
+
+    function setupConstructionBoard() {
+      const node = id => document.getElementById(`construction-${id}`);
+      const plot = node("plot");
+      const controls = node("tools");
+      const radius = node("radius");
+      const arcButtons = [node("arc-first"), node("arc-second")];
+      const rulerButtons = [node("ruler-first"), node("ruler-second")];
+      const mark = node("mark");
+      const clear = node("clear");
+      let edit;
+
+      function dot([x, y], className, r = 5.5) {
+        return svgElement("circle", { cx: x, cy: y, r, class: className });
+      }
+      function line([x1, y1], [x2, y2], className) {
+        return svgElement("line", { x1, y1, x2, y2, class: className });
+      }
+
+      radius.addEventListener("input", () => edit?.("opening", Number(radius.value)));
+      arcButtons.forEach((button, index) => button.addEventListener("click", () => edit?.("arc", index)));
+      rulerButtons.forEach((button, index) => button.addEventListener("click", () => {
+        edit?.("ruler", index);
+        if (button.disabled) {
+          const target = rulerButtons.find(option => !option.disabled) ?? mark;
+          target.focus();
+        }
+      }));
+      mark.addEventListener("click", () => edit?.("mark"));
+      clear.addEventListener("click", () => edit?.("clear"));
+      plot.addEventListener("click", event => {
+        if (!edit) return;
+        const target = event.target.closest("[data-construction-action]");
+        if (target) {
+          const [action, index] = target.getAttribute("data-construction-action").split("-");
+          edit(action, Number(index));
+          return;
+        }
+        const transform = plot.getScreenCTM();
+        if (!transform) return;
+        const pointer = plot.createSVGPoint();
+        pointer.x = event.clientX;
+        pointer.y = event.clientY;
+        const { x, y } = pointer.matrixTransform(transform.inverse());
+        edit("point", [x, y]);
+      });
+
+      return (pack, stage, answers, grades) => {
+        const mode = stage.board;
+        const building = mode === "F" || mode === "G";
+        const editable = building && !grades;
+        const { a, b, c, f, g, center, circumradius, foot, heightPosition } = triangleConstructionGeometry(pack);
+        const start = mode === "F" ? a : b;
+        const midpoint = mode === "F" ? f : g;
+        const response = building ? answers[0] : null;
+        const side = difference(c, start);
+        const sideLength = Math.hypot(...side);
+        controls.hidden = !editable;
+        edit = null;
+
+        function namedPoint(name, [x, y], dx, dy, action, className = "plot-point") {
+          const group = svgElement("g", action ? { class: "construction-hit", "data-construction-action": action } : {});
+          if (action) group.append(dot([x, y], "", 16));
+          group.append(dot([x, y], className), svgElement("text", { x: x + dx, y: y + dy, "text-anchor": dx < 0 ? "end" : "start" }, name));
+          return group;
+        }
+
+        function draw() {
+          const elements = [svgElement("polygon", { class: "construction-side", points: [a, b, c].map(p => p.join(",")).join(" ") })];
+          if (building) {
+            const intersection = compassIntersections(start, c, response.radii);
+            elements.push(line(start, c, "construction-active-side"));
+            response.radii.forEach((value, index) => {
+              if (value) elements.push(dot(index ? c : start, "construction-arc", sideLength * value / 100));
+            });
+            if (intersection) {
+              const [p, q] = intersection.points;
+              if (response.selected.length === 2) {
+                const between = difference(q, p);
+                const length = Math.hypot(...between);
+                elements.push(line(translated(p, between, -16 / length), translated(q, between, 16 / length), "construction-ruler"));
+              }
+              intersection.points.forEach((point, index) => {
+                const selected = response.selected.includes(index);
+                elements.push(namedPoint(String(index + 1), point, index === 0 ? 11 : -11, -9,
+                  editable && !selected ? `ruler-${index}` : null, selected ? "plot-choice" : "plot-point"));
+              });
+              if (response.marked && (editable || !grades[0])) {
+                elements.push(namedPoint(grades ? `${mode}′` : mode, intersection.crossing, 10, 20, null, "plot-choice"));
+              }
+            }
+            if (grades) {
+              if (!grades[0]) {
+                const normal = perpendicular(side);
+                elements.push(line(translated(midpoint, normal, -.34), translated(midpoint, normal, .34), "construction-solution"));
+              }
+              elements.push(namedPoint(mode, midpoint, -11, -10));
+            }
+            if (mode === "G") elements.push(namedPoint("F", f, -10, -10));
+            if (editable) {
+              radius.value = String(response.opening);
+              node("radius-value").textContent = `${response.opening}% az oldal hosszából`;
+              [mode === "F" ? "A" : "B", "C"].forEach((name, index) => {
+                const value = response.radii[index];
+                arcButtons[index].textContent = `Ív ${name} pontból${value ? ` · ${value}%` : ""}`;
+              });
+              node("ruler").hidden = !intersection;
+              rulerButtons.forEach((button, index) => {
+                button.disabled = response.selected.includes(index);
+              });
+              mark.textContent = `${mode} megjelölése a metszésnél`;
+              mark.hidden = response.selected.length !== 2 || response.marked;
+              clear.disabled = !response.radii.some(Boolean);
+              const reached = response.radii.every(Boolean);
+              node("status").textContent = response.marked ? "Ellenőrizd a szerkesztésedet!" :
+                response.selected.length === 2 ? "Jelöld meg, ahol a vonalzó egyenese metszi az oldalt!" :
+                intersection ? "Jelöld ki mindkét ívmetszetet a vonalzóhoz!" :
+                reached ? "A két ívnek két pontban kell metszenie egymást. Próbálj nagyobb körzőnyílást!" :
+                "Húzz egy-egy ívet a kiemelt oldal két végpontjából!";
+            }
+          } else {
+            if (mode === "segments") {
+              elements.push(line(b, f, "construction-median"), line(a, g, "construction-median"), line(f, g, "construction-midline"));
+            }
+            if (mode === "triangle" && grades) {
+              elements.push(dot(center, "construction-arc", circumradius));
+              if (heightPosition > 1) elements.push(line(c, foot, "construction-extension"));
+              if (heightPosition < 0) elements.push(line(a, foot, "construction-extension"));
+              elements.push(line(b, foot, "construction-altitude"));
+              const alongAC = difference(heightPosition === 0 ? c : a, foot);
+              const towardsB = difference(b, foot);
+              const x = translated(foot, alongAC, 12 / Math.hypot(...alongAC));
+              const y = translated(foot, towardsB, 12 / Math.hypot(...towardsB));
+              const corner = translated(x, difference(y, foot));
+              elements.push(svgElement("polyline", { class: "construction-altitude", points: [x, corner, y].map(p => p.join(",")).join(" ") }));
+              elements.push(namedPoint("O", center, -10, 19), namedPoint("H", foot, 10, -8));
+            }
+            elements.push(namedPoint("F", f, -10, -10), namedPoint("G", g, 11, -9));
+          }
+          const cLabelOffset = mode === "triangle" && grades && heightPosition > 1 ? -10 : 9;
+          elements.push(
+            namedPoint("A", a, -14, 12, editable && mode === "F" ? "arc-0" : null),
+            namedPoint("B", b, 13, 16, editable && mode === "G" ? "arc-0" : null),
+            namedPoint("C", c, cLabelOffset, -13, editable ? "arc-1" : null)
+          );
+          plot.replaceChildren(...elements);
+        }
+
+        if (editable) edit = (action, value) => {
+          switch (action) {
+            case "opening": response.opening = value; break;
+            case "arc":
+              response.radii[value] = response.opening;
+              response.selected = [];
+              response.marked = false;
+              break;
+            case "ruler":
+              if (compassIntersections(start, c, response.radii) && !response.selected.includes(value)) response.selected.push(value);
+              break;
+            case "mark": response.marked = response.selected.length === 2; break;
+            case "point": {
+              if (response.selected.length !== 2) return;
+              const { crossing } = compassIntersections(start, c, response.radii);
+              if (Math.hypot(...difference(crossing, value)) > 20) return;
+              response.marked = true;
+              break;
+            }
+            case "clear":
+              response.radii = [null, null];
+              response.selected = [];
+              response.marked = false;
+              break;
+          }
+          draw();
+        };
+        draw();
+      };
+    }
+
+    function markGroup(label, parts) {
+      return {
+        label, parts, points: 1,
+        answer: parts.map(part => `${part.label} ${typeof part.answer === "number" ? mathNumber(part.answer) : part.answer}`).join(" · "),
+        newResponse: () => parts.map(() => ""),
+        grade: answers => parts.every((part, i) => checkAlgebraField(part, answers[i])) ? 1 : 0
+      };
+    }
+
+    function markCylinderVolume(label, multiplier, unit) {
+      const precision = unit === "cm³" ? 0 : 1;
+      const rounded = Math.PI * multiplier;
+      const exact = `${mathNumber(multiplier)}π`;
+      const answer = `${exact} ${unit} ≈ ${mathNumber(Number(rounded.toFixed(precision)))} ${unit}`;
+      return {
+        label, answer, points: 1,
+        grade: response => {
+          const result = parseAlgebra(response, true);
+          if (!result || result.size !== 1 || !result.has("")) return 0;
+          const tolerance = .5 * 10 ** -precision + 1e-9;
+          return [Math.PI, 3.14, 3.1416].some(pi => Math.abs(result.get("") - pi * multiplier) < tolerance) ? 1 : 0;
+        }
+      };
+    }
+
+    function createApplicationStages({ house, tank, family, fixedPhoto }) {
+      const { width, length, oldWall, increase, fullHeight } = house;
+      const wall = oldWall + increase;
+      const roofHeight = fullHeight - wall;
+      const lowerVolume = width * length * wall;
+      const roofArea = width * roofHeight / 2;
+      const roofVolume = roofArea * length;
+      const houseVolume = lowerVolume + roofVolume;
+      const { diameter, height, liters } = tank;
+      const radius = diameter / 2;
+      const multiplier = radius ** 2 * height;
+      const capacity = Math.PI * multiplier / 1000;
+      const fits = capacity >= liters;
+      const cylinderCm = markCylinderVolume("A tároló térfogata cm³-ben", multiplier, "cm³");
+      const cylinderDm = markCylinderVolume("A tároló térfogata dm³-ben", multiplier / 1000, "dm³");
+
+      const { oldest, gap, mother, father, total } = family;
+      const motherFactor = mother * oldest;
+      const totalFactor = 1 + oldest + oldest + motherFactor + father;
+      const youngestNow = (total + gap) / totalFactor;
+      const middleTerm = linear([oldest, -gap]);
+      const times = count => ({ 3: "háromszor", 4: "négyszer", 10: "tízszer", 13: "tizenháromszor" })[count] ?? `${count}×`;
+      const combined = linear([totalFactor, -gap]);
+      const ageEquation = `x + ${term(oldest, "x")} + (${middleTerm}) + ${term(motherFactor, "x")} + ${term(father, "x")} = ${mathNumber(total)}`;
+      const oldestThen = (oldest - 1) * youngestNow;
+      const motherThen = (motherFactor - 1) * youngestNow;
+      const fatherThen = (father - 1) * youngestNow;
+      const middleThen = oldestThen - gap;
+      const photoWays = fixedPhoto ? 2 : 6;
+
+      return [
+        {
+          task: "6/a", title: "A ház alsó része",
+          prompt: `A ${mathNumber(width)} m × ${mathNumber(length)} m alapú, lapostetős ház ${mathNumber(oldWall)} m magas falát ${mathNumber(increase)} m-rel megemelték. Mekkora lett a tető alatti téglatest térfogata?`,
+          board: "house",
+          fields: [mark("A fal magassága az emelés után (m)", wall), mark("A téglatest térfogata (m³)", lowerVolume)],
+          solution: [`${mathNumber(oldWall)} + ${mathNumber(increase)} = ${mathNumber(wall)} m`,
+            ` · ${mathNumber(width)} · ${mathNumber(length)} · ${mathNumber(wall)} = ${mathNumber(lowerVolume)} m³`],
+          explanation: "A falak közötti téglatest térfogata az alapterület és a megemelt falmagasság szorzata."
+        },
+        {
+          task: "6/a", title: "A tető és a teljes ház térfogata",
+          prompt: `A gerinc ${mathNumber(fullHeight)} m magasan van. Számolj a tető alatti háromszög alapú hasábbal is!`,
+          board: "house",
+          fields: [
+            mark("A tető háromszögének magassága (m)", roofHeight),
+            mark("A tető háromszögének területe (m²)", roofArea),
+            mark("A tető alatti hasáb térfogata (m³)", roofVolume),
+            mark("A teljes ház térfogata (m³)", houseVolume)
+          ],
+          solution: [`${mathNumber(fullHeight)} − ${mathNumber(wall)} = ${mathNumber(roofHeight)} m`,
+            ` · ${mathNumber(width)} · ${mathNumber(roofHeight)} / 2 = ${mathNumber(roofArea)} m²`,
+            ` · ${mathNumber(roofArea)} · ${mathNumber(length)} = ${mathNumber(roofVolume)} m³`,
+            ` · ${mathNumber(lowerVolume)} + ${mathNumber(roofVolume)} = ${mathNumber(houseVolume)} m³`],
+          explanation: "A két test térfogatát összeadjuk."
+        },
+        {
+          task: "6/b", title: "Belefér a víz a hengerbe?",
+          prompt: `A henger belső átmérője ${mathNumber(diameter)} cm, magassága ${mathNumber(height)} cm. Elfér benne ${mathNumber(liters)} liter víz? Írhatsz π-t, vagy használhatod a 3,14-et. Kerekíts egész cm³-re, illetve tized dm³-re.`,
+          board: "tank",
+          fields: [
+            mark("A henger belső sugara (cm)", radius),
+            pick("Melyik képlettel számolsz térfogatot?", ["2πrh", "πr²h", "πrh²"], 1),
+            cylinderCm, cylinderDm,
+            mark("Az összegyűjtendő víz térfogata (dm³)", liters),
+            pick("Elfér a víz a hengerben?", ["Igen", "Nem"], fits ? 0 : 1)
+          ],
+          solution: [`V = π · ${mathNumber(radius)}² · ${mathNumber(height)} cm³ = ${cylinderCm.answer}`,
+            ` · Átváltva ${cylinderDm.answer}`],
+          explanation: `1 liter = 1 dm³ és 1 dm³ = 1000 cm³. A víz ${fits ? "elfér" : "nem fér el"}, mert ${mathNumber(liters)} ${fits ? "≤" : ">"} ${mathNumber(Number(capacity.toFixed(1)))}.`
+        },
+        {
+          task: "6/c", title: "Írd fel a családtagok életkorát!",
+          prompt: `A legidősebb gyerek ${times(oldest)} annyi idős, mint a legfiatalabb. A középső ${gap} évvel a legidősebb után született. Az anya ${times(mother)} annyi idős, mint a legidősebb, az apa pedig ${times(father)} annyi idős, mint a legfiatalabb.`,
+          fields: [
+            pick("Az x azt az életkort jelöli, amelyből a legidősebbét és az apáét közvetlenül kiszámíthatjuk. Melyik ez?",
+              ["A legidősebbéből", "A középsőéből", "A legfiatalabbéból"], 2),
+            markGroup("Add meg a másik négy családtag életkorát x-szel!",
+              [mark("Legidősebb", term(oldest, "x")), mark("Középső", middleTerm),
+                mark("Anya", term(motherFactor, "x")), mark("Apa", term(father, "x"))])
+          ],
+          solution: [`Legidősebb ${term(oldest, "x")} · Középső ${middleTerm} · Anya ${term(motherFactor, "x")} · Apa ${term(father, "x")}`],
+          explanation: "Az anya életkorát a legidősebb gyerek életkorából kapjuk meg."
+        },
+        {
+          task: "6/c", title: "Állítsd össze az egyenletet!",
+          prompt: `A család öt tagjának életkora összesen ${mathNumber(total)} év. Az x a legfiatalabb mostani életkora.`,
+          fields: [
+            pick("Melyik egyenlet adódik az öt életkor összeadásából?", [
+              ageEquation.replace(`(${middleTerm})`, `(${linear([oldest, gap])})`),
+              ageEquation,
+              ageEquation.replace(` + ${term(father, "x")}`, "")
+            ], 1),
+            mark(`Az összevonás utáni bal oldal, ha a jobb oldal ${mathNumber(total)} marad`, combined)
+          ],
+          solution: [ageEquation, ` → ${combined} = ${mathNumber(total)}`],
+          explanation: "Add össze az x-es tagok együtthatóit, és tartsd meg az állandó tag előjelét."
+        },
+        {
+          task: "6/c", title: "Hány évesek voltak akkor?",
+          prompt: "Oldd meg az egyenletet! Add meg, hány éves volt a két szülő és a két nagyobb testvér a legfiatalabb születésekor!",
+          formula: [`${combined} = ${mathNumber(total)}`],
+          fields: [
+            mark("A legfiatalabb mostani életkora (év)", youngestNow),
+            markGroup("Életkorok a legfiatalabb születésekor (év)",
+              [mark("Anya", motherThen), mark("Apa", fatherThen), mark("Legidősebb", oldestThen), mark("Középső", middleThen)])
+          ],
+          solution: [`${term(totalFactor, "x")} = ${mathNumber(total + gap)} → x = ${mathNumber(youngestNow)}`,
+            ` · Anya ${mathNumber(motherThen)} · Apa ${mathNumber(fatherThen)} · Legidősebb ${mathNumber(oldestThen)} · Középső ${mathNumber(middleThen)}`],
+          explanation: `A többiek mai életkorából egyenként ${mathNumber(youngestNow)} évet vonunk le.`
+        },
+        {
+          task: "6/d", title: "Hányféle fotótabló készülhet?",
+          prompt: "Felül a két szülő, alul a három gyerek kap helyet." +
+            (fixedPhoto ? " A legfiatalabb képe rögzítve van az alsó sor közepén." : ""),
+          board: "photos",
+          fields: [
+            mark("Hányféle lehet a szülők sorrendje?", 2),
+            mark("Hányféle lehet a gyerekek sorrendje?", photoWays),
+            pick("Hogyan kapcsolod össze a két sor lehetőségeinek számát?", ["Összeadom", "Összeszorzom"], 1),
+            mark("Hány különböző fotótabló készülhet?", 2 * photoWays)
+          ],
+          solution: [`Felső sor 2 · Alsó sor ${fixedPhoto ? "2 · 1 = 2" : "3 · 2 · 1 = 6"}`,
+            ` · Összesen 2 · ${photoWays} = ${2 * photoWays}`],
+          explanation: "A felső sor minden sorrendjéhez az alsó sor bármelyik sorrendje választható."
+        }
+      ];
+    }
+
+    function drawHouse(house, separated) {
+      const { width, length, oldWall, increase, fullHeight } = house;
+      const wall = oldWall + increase;
+      const project = ([x, y, z]) => [107 + 23 * x + 16 * y, 290 + 5 * x - 8 * y - 18 * z];
+      const frontLeft = project([0, 0, 0]);
+      const frontRight = project([width, 0, 0]);
+      const backRight = project([width, length, 0]);
+      const leftTop = project([0, 0, wall]);
+      const rightTop = project([width, 0, wall]);
+      const farTop = project([width, length, wall]);
+      const farLeft = project([0, length, wall]);
+      const ridge = project([width / 2, 0, fullHeight]);
+      const farRidge = project([width / 2, length, fullHeight]);
+      const groundMid = project([width / 2, 0, 0]);
+      const face = (points, className) => svgElement("polygon", {
+        points: points.map(point => point.join(",")).join(" "), class: `solid-edge ${className}`
+      });
+      const roof = svgElement("g", { transform: separated ? "translate(0 -28)" : "translate(0 0)" });
+      roof.append(face([ridge, farRidge, farTop, rightTop], "solid-roof-side"),
+        face([leftTop, ridge, rightTop], "solid-roof-front"));
+      const diagram = svgElement("g", {});
+      diagram.append(face([frontRight, backRight, farTop, rightTop], "solid-wall-side"),
+        face([frontLeft, frontRight, rightTop, leftTop], "solid-wall-front"),
+        face([leftTop, rightTop, farTop, farLeft], "solid-wall-top"), roof);
+
+      const label = ([x, y], text, anchor = "middle") => svgElement("text", { x, y, "text-anchor": anchor }, text);
+      const line = ([x1, y1], [x2, y2], className = "solid-dimension") =>
+        svgElement("line", { x1, y1, x2, y2, class: className });
+      function dimension(a, b, text, offset) {
+        const along = difference(b, a);
+        const normal = perpendicular(along);
+        const tick = translated([0, 0], normal, 4 / Math.hypot(...normal));
+        const midpoint = translated(a, along, .5);
+        diagram.append(line(a, b), line(difference(a, tick), translated(a, tick)), line(difference(b, tick), translated(b, tick)),
+          label(translated(midpoint, offset), text));
+      }
+      const oldLeft = project([0, 0, oldWall]);
+      diagram.append(line(oldLeft, project([width, 0, oldWall]), "solid-guide"));
+      dimension(translated(frontLeft, [-19, 0]), translated(oldLeft, [-19, 0]), `${mathNumber(oldWall)} m`, [-29, 5]);
+      dimension(translated(oldLeft, [-19, 0]), translated(leftTop, [-19, 0]), `${mathNumber(increase)} m`, [-29, 5]);
+      dimension(translated(frontLeft, [0, 21]), translated(frontRight, [0, 21]), `${mathNumber(width)} m`, [0, 18]);
+      dimension(translated(frontRight, [21, 15]), translated(backRight, [21, 15]), `${mathNumber(length)} m`, [11, 17]);
+      diagram.append(line(ridge, groundMid, "solid-guide"), label(translated(ridge, [8, 34]), `${mathNumber(fullHeight)} m`, "start"));
+      return diagram;
+    }
+
+    function drawTank({ diameter, height, liters }) {
+      return [
+        svgElement("path", { d: "M 102 95 A 98 27 0 0 1 298 95 V 270 A 98 27 0 0 1 102 270 Z", class: "solid-edge solid-wall-side" }),
+        svgElement("ellipse", { cx: 200, cy: 95, rx: 98, ry: 27, class: "solid-edge solid-wall-top" }),
+        svgElement("path", { d: "M 102 95 H 298 M 102 90 V 100 M 298 90 V 100 M 325 95 V 270 M 319 95 H 331 M 319 270 H 331", class: "solid-dimension" }),
+        svgElement("text", { x: 200, y: 82, "text-anchor": "middle" }, `d = ${mathNumber(diameter)} cm`),
+        svgElement("text", { x: 336, y: 185 }, `${mathNumber(height)} cm`),
+        svgElement("text", { x: 200, y: 330, "text-anchor": "middle" }, `Összegyűjtendő víz · ${mathNumber(liters)} liter`)
+      ];
+    }
+
+    function setupApplicationBoard() {
+      const node = id => document.getElementById(`application-${id}`);
+      const board = node("board");
+      const plot = node("plot");
+      const liftRoof = node("lift-roof");
+      const photoPanel = node("photos");
+      const photoRows = [node("parents"), node("children")];
+      const roofStates = new WeakMap();
+      const photoStates = new WeakMap();
+      let toggleRoof;
+      liftRoof.addEventListener("click", () => toggleRoof?.());
+
+      function renderPhotos(state, fixedPhoto, message, focus) {
+        state.rows.forEach((row, rowIndex) => {
+          photoRows[rowIndex].replaceChildren(...row.map((person, column) => {
+            const fixed = fixedPhoto && rowIndex === 1 && column === 1;
+            const selected = state.selected?.[0] === rowIndex && state.selected[1] === column;
+            const button = textElement("button", "chip", person);
+            button.type = "button";
+            button.disabled = fixed;
+            button.setAttribute("aria-pressed", selected ? "true" : "false");
+            if (fixed) button.setAttribute("aria-label", `${person} · rögzített hely`);
+            button.addEventListener("click", () => {
+              const first = state.selected;
+              let notice = "";
+              if (selected) state.selected = null;
+              else if (first?.[0] === rowIndex) {
+                const from = first[1];
+                [row[from], row[column]] = [row[column], row[from]];
+                state.selected = null;
+                notice = "A két kép helyet cserélt.";
+              } else state.selected = [rowIndex, column];
+              renderPhotos(state, fixedPhoto, notice, [rowIndex, column]);
+            });
+            return button;
+          }));
+        });
+        node("photo-status").textContent = message || "A cseréhez válassz két képet ugyanabban a sorban.";
+        if (focus) photoRows[focus[0]].children[focus[1]].focus();
+      }
+
+      return (pack, stage, answers) => {
+        board.hidden = !stage.board;
+        plot.hidden = stage.board !== "house" && stage.board !== "tank";
+        node("tools").hidden = stage.board !== "house";
+        photoPanel.hidden = stage.board !== "photos";
+        toggleRoof = null;
+        if (stage.board === "house") {
+          const redraw = () => {
+            const separated = roofStates.get(answers) ?? false;
+            liftRoof.setAttribute("aria-pressed", String(separated));
+            plot.replaceChildren(drawHouse(pack.house, separated));
+          };
+          const { width, length, oldWall, increase, fullHeight } = pack.house;
+          plot.setAttribute("aria-label", `A ház alapja ${mathNumber(width)} × ${mathNumber(length)} m, eredeti falmagassága ${mathNumber(oldWall)} m, az emelés ${mathNumber(increase)} m. A tetőgerinc ${mathNumber(fullHeight)} m magasan van.`);
+          toggleRoof = () => {
+            roofStates.set(answers, !roofStates.get(answers));
+            redraw();
+          };
+          redraw();
+        }
+        if (stage.board === "tank") {
+          plot.setAttribute("aria-label", `Henger ${mathNumber(pack.tank.diameter)} cm belső átmérővel és ${mathNumber(pack.tank.height)} cm magassággal.`);
+          plot.replaceChildren(...drawTank(pack.tank));
+        }
+        if (stage.board === "photos") {
+          if (!photoStates.has(answers)) {
+            const children = pack.fixedPhoto ? ["Legidősebb", "Legfiatalabb", "Középső"] : ["Legidősebb", "Középső", "Legfiatalabb"];
+            photoStates.set(answers, { rows: [["Anya", "Apa"], children], selected: null });
+          }
+          renderPhotos(photoStates.get(answers), pack.fixedPhoto);
+        }
+      };
+    }
+
     const yearLinks = curricula.map(({ year }) => {
       const link = textElement("a", "chip", year.replace("-", "–"));
       link.setAttribute("href", `#vizsga-${year}`);
@@ -250,6 +1981,547 @@
       groupGrid.replaceChildren(...rendered);
     }
 
+    function evaluateQuestion(question, selected, pointsByErrors) {
+      const omitted = [...question.answers].filter(letter => !selected.has(letter)).length;
+      const extra = [...selected].filter(letter => !question.answers.includes(letter)).length;
+      const errors = omitted + extra;
+      return { omitted, extra, errors, points: pointsByErrors[errors] ?? 0 };
+    }
+
+    function setupMixedQuiz() {
+      const node = id => document.getElementById(id);
+      const packs = node("mixed-test-packs");
+      const title = node("quiz-title");
+      const questionPane = node("quiz-question-pane");
+      const finish = node("quiz-finish");
+      const nav = node("quiz-nav");
+      const prompt = node("quiz-question");
+      const choices = node("quiz-choices");
+      const options = node("quiz-options");
+      const expressions = node("quiz-expressions");
+      const review = node("quiz-review");
+      const previous = node("quiz-prev");
+      const check = node("quiz-check");
+      const next = node("quiz-next");
+      const result = node("quiz-result");
+      const total = node("quiz-total");
+      const roman = ["I", "II", "III", "IV", "V", "VI", "VII", "VIII", "IX", "X", "XI", "XII"];
+      const attempts = new Map();
+      let edition;
+      let test;
+      let attempt;
+      let navButtons = [];
+
+      const pointsByErrors = () => edition.mixed.pointsByErrors;
+      const maxPerQuestion = () => pointsByErrors()[0];
+      const labelOf = index => roman[index] ?? String(index + 1);
+      const grade = index => evaluateQuestion(test.questions[index], attempt.answers[index], pointsByErrors());
+
+      function newAttempt(set) {
+        return { index: 0, answers: set.questions.map(() => new Set()), checked: new Set(), submitted: false };
+      }
+
+      function showMenu() {
+        const tests = edition.mixed?.sets ?? [];
+        packs.replaceChildren(...tests.map(set => {
+          const card = document.createElement("article");
+          card.className = "test-card";
+          const saved = attempts.get(set);
+          const button = textElement("button", "chip primary", saved?.submitted ? "Eredmény" : saved ? "Folytatás" : "Indítás");
+          button.type = "button";
+          button.setAttribute("aria-label", `${button.textContent} · ${set.title}`);
+          button.addEventListener("click", () => openTest(set));
+          card.append(textElement("h3", "", set.title),
+            textElement("p", "", set.detail),
+            textElement("p", "", `${set.questions.length} feladat · ${set.questions.length * maxPerQuestion()} pont`),
+            button);
+          return card;
+        }));
+        showPracticeView("menu");
+      }
+
+      function openTest(set) {
+        test = set;
+        attempt = attempts.get(set) ?? newAttempt(set);
+        attempts.set(set, attempt);
+        showPracticeView("mixed");
+        title.textContent = set.title;
+        const rules = pointsByErrors().map((points, errors) => `${errors} hibánál ${points} pont`);
+        node("quiz-rubric").textContent = rules.join(", ") + ", ennél több hibánál 0 pont. " +
+          "Minden kihagyott helyes válasz és minden bejelölt téves válasz egy hibának számít.";
+        navButtons = set.questions.map((_, index) => {
+          const button = textElement("button", "chip", labelOf(index));
+          button.type = "button";
+          button.addEventListener("click", () => showQuestion(index));
+          return button;
+        });
+        nav.replaceChildren(...navButtons);
+        if (attempt.submitted) showResults();
+        else {
+          showQuestion(attempt.index, false);
+          title.focus();
+        }
+      }
+
+      function updateNav() {
+        navButtons.forEach((button, index) => {
+          const marked = attempt.answers[index].size > 0;
+          const checked = attempt.checked.has(index);
+          button.toggleAttribute("data-answered", marked);
+          button.toggleAttribute("data-checked", checked);
+          if (index === attempt.index) button.setAttribute("aria-current", "true");
+          else button.removeAttribute("aria-current");
+          const status = checked ? ", ellenőrizve" : marked ? ", van jelölés" : "";
+          button.setAttribute("aria-label", `${labelOf(index)}. feladat${status}`);
+        });
+      }
+
+      function showQuestion(index, focus = true) {
+        attempt.index = index;
+        const question = test.questions[index];
+        const selected = attempt.answers[index];
+        const locked = attempt.checked.has(index);
+        questionPane.hidden = false;
+        result.hidden = true;
+        finish.hidden = false;
+        finish.textContent = attempt.submitted ? "Eredmény" : "Beadás és eredmény";
+        node("quiz-position").textContent = `${labelOf(index)}. feladat · ${index + 1} / ${test.questions.length}`;
+        prompt.textContent = question.prompt;
+        expressions.textContent = question.expressions ?? "";
+        expressions.hidden = !question.expressions;
+        choices.disabled = locked;
+        options.replaceChildren(...question.options.map((option, optionIndex) => {
+          const letter = String.fromCharCode(97 + optionIndex);
+          const label = document.createElement("label");
+          label.className = "answer-option";
+          const input = document.createElement("input");
+          input.type = "checkbox";
+          input.checked = selected.has(letter);
+          input.addEventListener("change", () => {
+            if (input.checked) selected.add(letter);
+            else selected.delete(letter);
+            updateNav();
+          });
+          label.append(input, document.createTextNode(`${letter}) ${option}`));
+          if (locked) {
+            const correct = question.answers.includes(letter);
+            const state = correct ? (input.checked ? "correct" : "missed") : input.checked ? "wrong" : "";
+            const labels = { correct: "Helyes", missed: "Kimaradt helyes", wrong: "Hibás jelölés" };
+            if (state) {
+              label.dataset.state = state;
+              label.append(textElement("span", "answer-state", labels[state]));
+            }
+          }
+          return label;
+        }));
+        review.hidden = !locked;
+        check.hidden = locked;
+        previous.disabled = index === 0;
+        next.disabled = index === test.questions.length - 1;
+        if (locked) {
+          const { points, errors, omitted, extra } = grade(index);
+          node("quiz-points").textContent = `${points} / ${maxPerQuestion()} pont · ${errors} hiba`;
+          const letters = [...question.answers].map(letter => letter + ")").join(", ");
+          node("quiz-key").textContent = `Helyes jelölések · ${letters}` +
+            (errors ? ` · Kihagyott helyes ${omitted} · Tévesen jelölt ${extra}` : "");
+          node("quiz-explanation").textContent = question.explanation;
+        }
+        updateNav();
+        if (focus) prompt.focus();
+      }
+
+      function showResults() {
+        const scores = new Map();
+        const names = new Map(edition.groups.flatMap(group => group.topics));
+        let points = 0;
+        let full = 0;
+        test.questions.forEach((question, index) => {
+          const item = scores.get(question.topic) ?? { points: 0, maximum: 0 };
+          const earned = grade(index).points;
+          points += earned;
+          if (earned === maxPerQuestion()) full++;
+          item.points += earned;
+          item.maximum += maxPerQuestion();
+          scores.set(question.topic, item);
+        });
+        const byScore = [...scores.entries()].sort(([, a], [, b]) => a.points / a.maximum - b.points / b.maximum);
+        node("quiz-topics").replaceChildren(...byScore.map(([code, item]) => {
+          const row = document.createElement("li");
+          row.append(textElement("span", "", names.get(code) ?? code),
+            textElement("strong", "", `${item.points} / ${item.maximum}`));
+          return row;
+        }));
+        total.textContent = `${points} / ${test.questions.length * maxPerQuestion()} pont`;
+        node("quiz-result-note").textContent = `${full} feladat teljes ponttal a ${test.questions.length}-ből.`;
+        questionPane.hidden = true;
+        finish.hidden = true;
+        result.hidden = false;
+        total.focus();
+      }
+
+      node("quiz-back").addEventListener("click", () => {
+        showMenu();
+        node("mixed-title").focus();
+      });
+      previous.addEventListener("click", () => showQuestion(attempt.index - 1));
+      next.addEventListener("click", () => showQuestion(attempt.index + 1));
+      check.addEventListener("click", () => {
+        attempt.checked.add(attempt.index);
+        showQuestion(attempt.index, false);
+        review.focus();
+      });
+      finish.addEventListener("click", () => {
+        test.questions.forEach((_, index) => attempt.checked.add(index));
+        attempt.submitted = true;
+        showResults();
+      });
+      node("quiz-show-answers").addEventListener("click", () => showQuestion(0));
+      node("quiz-restart").addEventListener("click", () => {
+        attempts.delete(test);
+        openTest(test);
+      });
+
+      return selectedEdition => {
+        if (edition === selectedEdition) return;
+        edition = selectedEdition;
+        showMenu();
+      };
+    }
+
+    const selectMixedEdition = setupMixedQuiz();
+
+    function parseAlgebra(source, allowPi = false) {
+      const superscripts = "⁰¹²³⁴⁵⁶⁷⁸⁹";
+      const normalized = String(source).toLowerCase().replace(/\s+/g, "")
+        .replace(/[−–]/g, "-").replace(/[·×⋅]/g, "*").replace(/[:÷]/g, "/")
+        .replace(/[⁰¹²³⁴⁵⁶⁷⁸⁹]+/g, digits => "^" + [...digits].map(digit => superscripts.indexOf(digit)).join(""));
+      const expression = allowPi ? normalized.replaceAll("pi", "π") : normalized;
+      if (expression.length > 100) return null;
+      const tokens = expression.match(/\d+(?:[.,]\d+)?|[.,]\d+|[abxπ+\-*/^()]/g) ?? [];
+      if (!tokens.length || tokens.join("") !== expression) return null;
+      let index = 0;
+      const number = value => new Map([["", value]]);
+      const isVariable = token => token === "a" || token === "b" || token === "x";
+      const isNumber = token => /^[\d.,]/.test(token ?? "");
+      const add = (result, key, value) => {
+        const coefficient = (result.get(key) ?? 0) + value;
+        if (key.length > 12 || !Number.isFinite(coefficient)) throw new Error("Outside supported algebra");
+        if (coefficient === 0) result.delete(key);
+        else result.set(key, coefficient);
+      };
+      const multiply = (left, right) => {
+        const result = new Map();
+        for (const [leftVariables, leftCoefficient] of left) {
+          for (const [rightVariables, rightCoefficient] of right) {
+            add(result, [...(leftVariables + rightVariables)].sort().join(""), leftCoefficient * rightCoefficient);
+          }
+        }
+        return result;
+      };
+
+      function atom() {
+        const token = tokens[index++];
+        if (token === "(") {
+          const inside = sum();
+          if (tokens[index++] !== ")") throw new Error("Missing parenthesis");
+          return inside;
+        }
+        if (isVariable(token)) return new Map([[token, 1]]);
+        if (allowPi && token === "π") return number(Math.PI);
+        if (isNumber(token)) return number(Number(token.replace(",", ".")));
+        throw new Error("Missing term");
+      }
+
+      function signedPower() {
+        const symbol = tokens[index];
+        if (symbol === "+" || symbol === "-") {
+          index++;
+          return multiply(number(symbol === "-" ? -1 : 1), signedPower());
+        }
+        const base = atom();
+        if (tokens[index] !== "^") return base;
+        index++;
+        const digits = tokens[index++] ?? "";
+        if (!/^\d+$/.test(digits) || Number(digits) > 12) throw new Error("Unsupported exponent");
+        let result = number(1);
+        for (let power = 0; power < Number(digits); power++) result = multiply(result, base);
+        return result;
+      }
+
+      function product() {
+        let result = signedPower();
+        while (index < tokens.length) {
+          const operation = tokens[index];
+          const implicit = isVariable(operation) || operation === "(" || (allowPi && operation === "π");
+          if (!implicit && operation !== "*" && operation !== "/") break;
+          if (!implicit) index++;
+          const right = signedPower();
+          if (operation === "/") {
+            const divisor = right.get("");
+            if (right.size !== 1 || !divisor) throw new Error("A numeric divisor is required");
+            result = multiply(result, number(1 / divisor));
+          } else result = multiply(result, right);
+        }
+        return result;
+      }
+
+      function sum() {
+        const result = product();
+        while (tokens[index] === "+" || tokens[index] === "-") {
+          const sign = tokens[index++] === "+" ? 1 : -1;
+          for (const [variables, coefficient] of product()) add(result, variables, sign * coefficient);
+        }
+        return result;
+      }
+
+      try {
+        const polynomial = sum();
+        return index === tokens.length ? polynomial : null;
+      } catch {
+        return null;
+      }
+    }
+
+    function checkAlgebraField(field, response) {
+      if (field.options) return response === field.answer;
+      if (field.expanded && response.includes("(")) return false;
+      const actual = parseAlgebra(response);
+      const expected = parseAlgebra(field.answer);
+      if (!actual || !expected) return false;
+      const keys = new Set([...expected.keys(), ...actual.keys()]);
+      return [...keys].every(key => Math.abs((actual.get(key) ?? 0) - (expected.get(key) ?? 0)) < 1e-9);
+    }
+
+    function setupGuidedQuiz(mode, createStages, detail, renderBoard) {
+      const node = id => document.getElementById(`${mode}-${id}`);
+      const packs = node("packs");
+      const title = node("title");
+      const taskTitle = node("task-title");
+      const question = node("task-view");
+      const answerFields = node("fields");
+      const feedback = node("review");
+      const result = node("result");
+      const prev = node("prev");
+      const check = node("check");
+      const next = node("next");
+      const attempts = new Map();
+      let edition;
+      let set;
+      let attempt;
+
+      function formula(target, parts) {
+        target.replaceChildren(...parts.map(part => {
+          if (typeof part === "string") return textElement("span", "", part);
+          const fraction = textElement("span", "fraction", "");
+          fraction.append(textElement("span", "", part[0]), textElement("span", "", part[1]));
+          return fraction;
+        }));
+      }
+
+      function textInput(labelId, value, onInput) {
+        const input = document.createElement("input");
+        input.type = "text";
+        input.maxLength = 100;
+        input.autocomplete = "off";
+        input.spellcheck = false;
+        input.setAttribute("aria-labelledby", labelId);
+        input.value = value;
+        input.addEventListener("input", () => onInput(input.value));
+        return input;
+      }
+
+      const sumPoints = points => points.reduce((total, value) => total + value, 0);
+      const maximum = stage => sumPoints(stage.fields.map(field => field.points));
+
+      function showMenu() {
+        packs.replaceChildren(...(edition[mode] ?? []).map(pack => {
+          const saved = attempts.get(pack);
+          const button = textElement("button", "chip primary", saved?.finished ? "Eredmény" : saved ? "Folytatás" : "Indítás");
+          button.type = "button";
+          button.setAttribute("aria-label", `${button.textContent} · ${pack.title}`);
+          button.addEventListener("click", () => open(pack));
+          const card = document.createElement("article");
+          card.className = "test-card";
+          card.append(textElement("h3", "", pack.title),
+            textElement("p", "", pack.detail), textElement("p", "", detail), button);
+          return card;
+        }));
+        showPracticeView("menu");
+      }
+
+      function open(pack) {
+        set = pack;
+        attempt = attempts.get(pack);
+        if (!attempt) {
+          const stages = createStages(pack);
+          const answers = stages.map(stage => stage.fields.map(field => field.newResponse?.() ?? (field.multiple || field.draw ? [] : "")));
+          attempt = { stages, index: 0, answers, grades: [], finished: false };
+          attempts.set(pack, attempt);
+        }
+        title.textContent = pack.title;
+        showPracticeView(mode);
+        if (attempt.finished) showResults();
+        else {
+          showStage(attempt.index, false);
+          title.focus();
+        }
+      }
+
+      function showStage(index, focus = true) {
+        attempt.index = index;
+        const stage = attempt.stages[index];
+        const responses = attempt.answers[index];
+        const grades = attempt.grades[index];
+        question.hidden = false;
+        result.hidden = true;
+        node("position").textContent = `${stage.task}. feladat · ${index + 1} / ${attempt.stages.length}. lépés`;
+        taskTitle.textContent = stage.title;
+        node("prompt").textContent = stage.prompt;
+        const notation = node("notation");
+        if (notation) notation.hidden = index !== 0 || Boolean(grades);
+        const expression = node("formula");
+        expression.hidden = !stage.formula?.length;
+        formula(expression, stage.formula ?? []);
+        renderBoard?.(set, stage, responses, grades);
+        answerFields.hidden = stage.fields.every(field => field.draw);
+        answerFields.replaceChildren(...stage.fields.flatMap((field, fieldIndex) => {
+          if (field.draw) return [];
+          const response = responses[fieldIndex];
+          const box = document.createElement("fieldset");
+          box.className = "algebra-field";
+          const label = textElement("legend", "", field.label);
+          label.id = `${mode}-label-${fieldIndex}`;
+          box.append(label);
+          if (field.options) {
+            field.options.forEach(option => {
+              const optionLabel = document.createElement("label");
+              optionLabel.className = "answer-option";
+              const input = document.createElement("input");
+              input.type = field.multiple ? "checkbox" : "radio";
+              input.name = `${mode}-choice-${fieldIndex}`;
+              input.checked = field.multiple ? response.includes(option) : response === option;
+              input.addEventListener("change", () => {
+                if (field.multiple) {
+                  const selected = responses[fieldIndex];
+                  responses[fieldIndex] = input.checked ? [...selected, option] : selected.filter(value => value !== option);
+                } else if (input.checked) responses[fieldIndex] = option;
+              });
+              optionLabel.append(input, document.createTextNode(option));
+              if (grades && field.multiple) {
+                if (field.answer.includes(option)) {
+                  optionLabel.dataset.state = input.checked ? "correct" : "missed";
+                  optionLabel.append(textElement("span", "answer-state", input.checked ? "Helyes" : "Kimaradt helyes"));
+                } else if (input.checked) {
+                  optionLabel.dataset.state = "wrong";
+                  optionLabel.append(textElement("span", "answer-state", "Hibás jelölés"));
+                }
+              }
+              box.append(optionLabel);
+            });
+          } else if (field.parts) {
+            const group = document.createElement("div");
+            group.className = "field-parts";
+            field.parts.forEach((part, index) => {
+              const partLabel = document.createElement("label");
+              const name = textElement("span", "", part.label);
+              name.id = `${label.id}-${index}`;
+              partLabel.append(name, textInput(name.id, response[index], value => { response[index] = value; }));
+              group.append(partLabel);
+            });
+            box.append(group);
+          } else {
+            box.append(textInput(label.id, response, value => { responses[fieldIndex] = value; }));
+          }
+          if (grades) {
+            const points = grades[fieldIndex];
+            box.disabled = true;
+            const full = points === field.points;
+            box.dataset.state = full ? "correct" : "incorrect";
+            const expected = typeof field.answer === "number" ? mathNumber(field.answer) : field.answer;
+            const explanation = full ? "Helyes · " : field.multiple ? "" : `Helyes válasz · ${expected} · `;
+            box.append(textElement("p", "field-feedback", `${explanation}${mathNumber(points)} / ${mathNumber(field.points)} pont`));
+          }
+          return box;
+        }));
+        feedback.hidden = !grades;
+        check.hidden = Boolean(grades);
+        next.hidden = !grades;
+        next.textContent = index === attempt.stages.length - 1 ? "Eredmény" : "Következő →";
+        prev.disabled = index === 0;
+        if (grades) {
+          const score = sumPoints(grades);
+          const full = maximum(stage);
+          const status = stage.fields[0].draw && score === full ? "Helyes! · " : "";
+          node("points").textContent = `${status}${mathNumber(score)} / ${full} pont`;
+          formula(node("solution"), stage.solution);
+          node("explanation").textContent = stage.explanation;
+        }
+        if (focus) taskTitle.focus();
+      }
+
+      function showResults() {
+        const totals = new Map();
+        attempt.stages.forEach((stage, index) => {
+          const task = totals.get(stage.task) ?? { points: 0, maximum: 0 };
+          task.points += sumPoints(attempt.grades[index]);
+          task.maximum += maximum(stage);
+          totals.set(stage.task, task);
+        });
+        const rows = [...totals.values()];
+        node("total").textContent = `${mathNumber(sumPoints(rows.map(row => row.points)))} / ${sumPoints(rows.map(row => row.maximum))} pont`;
+        node("task-scores").replaceChildren(...[...totals].map(([name, score]) => {
+          const row = document.createElement("li");
+          row.append(textElement("span", "", `${name}. feladat`),
+            textElement("strong", "", `${mathNumber(score.points)} / ${score.maximum} pont`));
+          return row;
+        }));
+        question.hidden = true;
+        result.hidden = false;
+        node("total").focus();
+      }
+
+      node("back-menu").addEventListener("click", () => {
+        showMenu();
+        node("menu-title").focus();
+      });
+      node("form").addEventListener("submit", event => {
+        event.preventDefault();
+        const { index } = attempt;
+        if (attempt.grades[index]) return;
+        const { fields } = attempt.stages[index];
+        attempt.grades[index] = fields.map((field, fieldIndex) => {
+          const response = attempt.answers[index][fieldIndex];
+          if (field.grade) return field.grade(response);
+          return checkAlgebraField(field, response) ? field.points : 0;
+        });
+        showStage(index, false);
+        feedback.focus();
+      });
+      prev.addEventListener("click", () => showStage(attempt.index - 1));
+      next.addEventListener("click", () => {
+        if (attempt.index === attempt.stages.length - 1) {
+          attempt.finished = true;
+          showResults();
+        } else showStage(attempt.index + 1);
+      });
+      node("show-answers").addEventListener("click", () => showStage(0));
+      node("restart").addEventListener("click", () => {
+        attempts.delete(set);
+        open(set);
+      });
+
+      return selectedEdition => {
+        if (edition === selectedEdition) return;
+        edition = selectedEdition;
+        showMenu();
+      };
+    }
+
+    const selectAlgebraEdition = setupGuidedQuiz("algebra", createAlgebraStages, "3 feladat · 24 pont");
+    const selectCoordinateEdition = setupGuidedQuiz("coordinates", createCoordinateStages, "7 részfeladat · 20 pont", setupCoordinateBoard());
+    const selectConstructionEdition = setupGuidedQuiz("construction", createConstructionStages, "2 részfeladat · 10 pont", setupConstructionBoard());
+    const selectApplicationEdition = setupGuidedQuiz("application", createApplicationStages, "4 részfeladat · 22 pont", setupApplicationBoard());
+
     function render() {
       const index = Math.max(0, yearLinks.findIndex(link => link.hash === location.hash));
       const selected = yearLinks[index];
@@ -264,6 +2536,11 @@
         ? `${groups.reduce((total, group) => total + group.topics.length, 0)} vizsgatéma`
         : "";
       if (groups.length) renderTopics(groups);
+      selectMixedEdition(curricula[index]);
+      selectAlgebraEdition(curricula[index]);
+      selectCoordinateEdition(curricula[index]);
+      selectConstructionEdition(curricula[index]);
+      selectApplicationEdition(curricula[index]);
     }
 
     window.addEventListener("hashchange", render);

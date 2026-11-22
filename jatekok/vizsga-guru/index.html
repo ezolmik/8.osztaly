@@ -129,6 +129,23 @@
     #coordinates-tests, #coordinates-quiz, #construction-tests, #construction-quiz,
     #application-tests, #application-quiz { margin-top: 24px; }
     #exam-menu, #exam-panel { margin-top: 24px; }
+    .bank-filters {
+      display: grid;
+      gap: 8px 12px;
+      grid-template-columns: repeat(auto-fit, minmax(min(100%, 200px), 1fr));
+      padding: 13px;
+      background: var(--paper);
+      border: 1px solid var(--line);
+      border-radius: 12px;
+    }
+    .bank-filters label { display: grid; min-width: 0; gap: 4px; font-size: .9rem; font-weight: 700; }
+    .bank-filters select { width: 100%; color: inherit; background: var(--paper); font: inherit;
+      min-height: 40px; padding: 5px 7px; border: 1px solid #aab6b2; border-radius: 7px; }
+    .bank-filters select:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+    .bank-results { margin-top: 10px; }
+    .bank-tags { display: flex; flex-wrap: wrap; gap: 5px; margin: 0; padding: 0; list-style: none; }
+    .bank-tags li { background: var(--accent-soft); border-radius: 6px; padding: 2px 6px; font-size: .8rem; }
+
     .test-card, .quiz-panel {
       border: 1px solid var(--line);
       border-radius: 15px;
@@ -387,7 +404,22 @@
         <span class="controls-label">Tanév</span>
       </nav>
       <p id="year-summary" role="status"></p>
+      <button id="bank-open" type="button" class="chip primary">Feladatbank</button>
     </div>
+    <section id="bank-panel" aria-labelledby="bank-title" hidden>
+      <div class="section-heading">
+        <h2 id="bank-title" tabindex="-1">Feladatbank</h2>
+        <button id="bank-back" type="button" class="chip">← Áttekintés</button>
+      </div>
+      <div class="bank-filters">
+        <label>Tanév <select id="bank-year"></select></label>
+        <label>Téma <select id="bank-tag"></select></label>
+        <label>Forrás <select id="bank-kind"></select></label>
+      </div>
+      <div id="bank-series" class="bank-results grid"></div>
+      <p id="bank-count" class="quiz-intro" role="status"></p>
+      <div id="bank-results" class="bank-results grid"></div>
+    </section>
 
     <div id="year-content">
 
@@ -923,7 +955,12 @@
     ];
 
     const curricula = [
-      { year: "2025-2026", mixed: {
+      { year: "2025-2026", papers: [
+        { id: "vizsga", kind: "original", index: 0, title: "A 2026-os vizsga",
+          description: "A február 4-i feladatsor digitális változata." },
+        { id: "gyakorlo-a", kind: "practice", index: 1, title: "Gyakorlósor A",
+          description: "Azonos feladatszerkezet új adatokkal és kérdésekkel." }
+      ], mixed: {
         pointsByErrors: [2, 1],
         sets: [
           { title: "Eredeti vizsgablokk", detail: "2026. február 4. · I. rész, 1. feladat", questions: examQuestions },
@@ -978,6 +1015,7 @@
     const summary = document.querySelector("#year-summary");
     const emptyYear = document.querySelector("#empty-year");
     const yearContent = document.querySelector("#year-content");
+    let currentEdition;
 
     function textElement(tag, className, text) {
       const element = document.createElement(tag);
@@ -987,6 +1025,13 @@
     }
 
     function showPracticeView(view) {
+      const menu = view === "menu";
+      const isBank = view === "bank";
+      const empty = !currentEdition?.groups.length;
+      yearContent.hidden = isBank || (menu && empty);
+      emptyYear.hidden = !menu || !empty;
+      document.getElementById("bank-open").hidden = !menu;
+      document.getElementById("bank-panel").hidden = !isBank;
       for (const [mode, packs] of [["mixed", "mixed-test-packs"], ["algebra", "algebra-packs"],
         ["coordinates", "coordinates-packs"], ["construction", "construction-packs"], ["application", "application-packs"]]) {
         document.getElementById(`${mode}-quiz`).hidden = view !== mode;
@@ -1966,8 +2011,9 @@
           redraw();
         }
         if (stage.board === "tank") {
-          plot.setAttribute("aria-label", `Henger ${mathNumber(pack.tank.diameter)} cm belső átmérővel és ${mathNumber(pack.tank.height)} cm magassággal.`);
-          plot.replaceChildren(...drawTank(pack.tank));
+          const tank = stage.tank ?? pack.tank;
+          plot.setAttribute("aria-label", `Henger ${mathNumber(tank.diameter)} cm belső átmérővel és ${mathNumber(tank.height)} cm magassággal.`);
+          plot.replaceChildren(...drawTank(tank));
         }
         if (stage.board === "photos") {
           if (!photoStates.has(answers)) {
@@ -2046,9 +2092,9 @@
       let attempt;
       let navButtons = [];
 
-      const pointsByErrors = () => edition.mixed.pointsByErrors;
+      const pointsByErrors = () => test?.bank?.paper.rubric ?? edition.mixed.pointsByErrors;
       const maxPerQuestion = () => pointsByErrors()[0];
-      const labelOf = index => roman[index] ?? String(index + 1);
+      const labelOf = index => test?.bank?.ref ?? roman[index] ?? String(index + 1);
       const grade = index => evaluateQuestion(test.questions[index], attempt.answers[index], pointsByErrors());
 
       function newAttempt(set) {
@@ -2067,7 +2113,7 @@
           button.addEventListener("click", () => openTest(set));
           card.append(textElement("h3", "", set.title),
             textElement("p", "", set.detail),
-            textElement("p", "", `${set.questions.length} feladat · ${set.questions.length * maxPerQuestion()} pont`),
+            textElement("p", "", `${set.questions.length} feladat · ${set.questions.length * edition.mixed.pointsByErrors[0]} pont`),
             button);
           return card;
         }));
@@ -2079,6 +2125,7 @@
         attempt = examAttempt ?? attempts.get(set) ?? newAttempt(set);
         if (!examAttempt) attempts.set(set, attempt);
         node("quiz-back").hidden = Boolean(examAttempt);
+        node("quiz-back").textContent = set.bank ? "← Feladatbank" : "← Tesztek";
         showPracticeView("mixed");
         title.textContent = set.title;
         const rules = pointsByErrors().map((points, errors) => `${errors} hibánál ${points} pont`);
@@ -2120,7 +2167,7 @@
         result.hidden = true;
         finish.hidden = Boolean(attempt.exam);
         finish.textContent = attempt.submitted ? "Eredmény" : "Beadás és eredmény";
-        node("quiz-position").textContent = `${labelOf(index)}. feladat · ${index + 1} / ${test.questions.length}`;
+        node("quiz-position").textContent = `${labelOf(index)}. feladat` + (test.bank ? "" : ` · ${index + 1} / ${test.questions.length}`);
         prompt.textContent = question.prompt;
         expressions.textContent = question.expressions ?? "";
         expressions.hidden = !question.expressions;
@@ -2167,7 +2214,7 @@
 
       function showResults() {
         const scores = new Map();
-        const names = new Map(edition.groups.flatMap(group => group.topics));
+        const names = new Map((test.bank?.edition ?? edition).groups.flatMap(group => group.topics));
         let points = 0;
         let full = 0;
         test.questions.forEach((question, index) => {
@@ -2195,6 +2242,7 @@
       }
 
       node("quiz-back").addEventListener("click", () => {
+        if (test.bank) return showTaskBank();
         showMenu();
         node("mixed-title").focus();
       });
@@ -2219,7 +2267,7 @@
       });
 
       examBlocks.mixed = {
-        newAttempt, open: openTest,
+        newAttempt, open: openTest, list: pack => pack.questions,
         score(set, state, rubric) {
           set.questions.forEach((_, index) => state.checked.add(index));
           const points = set.questions.reduce((total, question, index) =>
@@ -2396,7 +2444,7 @@
       }
 
       function newAttempt(pack, exam = false) {
-        const stages = createStages(pack);
+        const stages = readTaskStages(pack);
         if (exam) prepareExamStages(mode, stages);
         const answers = stages.map(stage => stage.fields.map(field => field.newResponse?.() ?? (field.multiple || field.draw ? [] : "")));
         return { stages, index: 0, answers, grades: [], finished: false, exam };
@@ -2415,6 +2463,7 @@
         attempt = examAttempt ?? attempts.get(pack) ?? newAttempt(pack);
         if (!examAttempt) attempts.set(pack, attempt);
         node("back-menu").hidden = Boolean(examAttempt);
+        node("back-menu").textContent = pack.bank ? "← Feladatbank" : "← Gyakorlók";
         title.textContent = pack.title;
         showPracticeView(mode);
         if (attempt.finished) showResults();
@@ -2512,7 +2561,8 @@
           const status = stage.fields[0].draw && score === full ? "Helyes! · " : "";
           node("points").textContent = `${status}${mathNumber(score)} / ${full} pont`;
           formula(node("solution"), stage.solution);
-          node("explanation").textContent = stage.explanation;
+          const credit = set.bank ? creditLine(set.bank.paper) : "";
+          node("explanation").textContent = stage.explanation + (credit ? " (" + credit + ")" : "");
         }
         if (focus) taskTitle.focus();
       }
@@ -2539,6 +2589,7 @@
       }
 
       node("back-menu").addEventListener("click", () => {
+        if (set.bank) return showTaskBank();
         showMenu();
         node("menu-title").focus();
       });
@@ -2565,7 +2616,7 @@
       });
 
       examBlocks[mode] = {
-        newAttempt: pack => newAttempt(pack, true), open,
+        newAttempt: pack => newAttempt(pack, true), open, list: createStages,
         score(_pack, state) {
           state.grades = state.stages.map((stage, index) => gradeStage(stage, state.answers[index]));
           return {
@@ -2589,13 +2640,12 @@
     function render() {
       const index = Math.max(0, yearLinks.findIndex(link => link.hash === location.hash));
       const selected = yearLinks[index];
-      const { groups } = curricula[index];
+      currentEdition = curricula[index];
+      const { groups } = currentEdition;
       for (const link of yearLinks) {
         if (link === selected) link.setAttribute("aria-current", "true");
         else link.removeAttribute("aria-current");
       }
-      yearContent.hidden = groups.length === 0;
-      emptyYear.hidden = groups.length > 0;
       summary.textContent = groups.length
         ? `${groups.reduce((total, group) => total + group.topics.length, 0)} vizsgatéma`
         : "";
@@ -2606,6 +2656,7 @@
       selectConstructionEdition(curricula[index]);
       selectApplicationEdition(curricula[index]);
       selectExamEdition(curricula[index]);
+      showPracticeView("menu");
     }
 
 
@@ -2665,17 +2716,17 @@
       let interval;
       let isReview = false;
 
-      function newExam(index) {
-        const packs = groups.map(([mode]) => mode === "mixed" ? edition.mixed.sets[index] : edition[mode][index]);
+      function newExam(paper) {
+        const { packs, title, rubric } = paper;
         const states = packs.map((pack, i) => {
           const state = examBlocks[groups[i][0]].newAttempt(pack);
           state.exam = true;
           return state;
         });
         return {
-          title: index === 0 ? "Próbavizsga · Eredeti feladatok" : "Próbavizsga · Gyakorlósor A",
+          paper, title: "Próbavizsga · " + title,
           packs, states, index: 0, part: 0, phase: "running", expired: false,
-          rubric: edition.mixed.pointsByErrors,
+          rubric,
           deadline: Date.now() + examMinutes * 60_000
         };
       }
@@ -2688,25 +2739,21 @@
 
       function menu() {
         exit();
-        const packs = edition.mixed?.sets ?? [];
-        node("packs").replaceChildren(...packs.filter((_, index) =>
-          groups.slice(1).every(([mode]) => edition[mode]?.[index])
-        ).map((pack, index) => {
+        node("packs").replaceChildren(...taskBank.papers.get(edition).map(paper => {
           const card = document.createElement("article");
           card.className = "test-card";
-          const attempt = attempts.get(pack);
-          const caption = index === 0 ? "A 2026-os vizsga" : "Gyakorlósor A";
+          const attempt = attempts.get(paper);
+          const caption = paper.title;
           const button = textElement("button", "chip primary", attempt?.phase === "finished" ?
             "Eredmény" : attempt ? "Folytatás" : "Indítás");
           button.type = "button";
           button.setAttribute("aria-label", button.textContent + " · " + caption);
           button.addEventListener("click", () => {
-            if (!attempts.has(pack)) attempts.set(pack, newExam(index));
-            resume(attempts.get(pack));
+            if (!attempts.has(paper)) attempts.set(paper, newExam(paper));
+            resume(attempts.get(paper));
           });
           card.append(textElement("h3", "", caption),
-            textElement("p", "", index === 0 ? "A február 4-i feladatsor digitális változata." :
-              "Azonos feladatszerkezet új adatokkal és kérdésekkel."),
+            textElement("p", "", paper.description),
             button);
           return card;
         }));
@@ -2834,11 +2881,10 @@
         draw();
       });
       node("restart").addEventListener("click", () => {
-        const pack = active.packs[0];
+        const { paper } = active;
         menu();
-        const index = edition.mixed.sets.indexOf(pack);
-        attempts.set(pack, newExam(index));
-        resume(attempts.get(pack));
+        attempts.set(paper, newExam(paper));
+        resume(attempts.get(paper));
       });
 
       // Inputs are rejected if the deadline passed before a background tab can refresh the clock.
@@ -2859,6 +2905,290 @@
     }
 
     const selectExamEdition = setupExam();
+
+
+    const bankModes = ["mixed", "algebra", "coordinates", "construction", "application"];
+    const bankKinds = { original: "Eredeti vizsgafeladat", practice: "Gyakorlófeladat" };
+    const mixedTopics = [
+      ["Szimmetria", "Négyszögek"], ["Oszthatóság", "Legkisebb közös többszörös"],
+      ["Oszthatóság", "Maradék"], ["Négyszögek", "Szögek", "Arányosság"],
+      ["Hasáb", "Élek, lapok, csúcsok"], ["Kombinatorika", "Sorbarendezés"],
+      ["Algebrai kifejezések", "Főművelet"], ["Kombinatorika", "Leszámlálás"],
+      ["Térfogat", "Mértékegységváltás"], ["Százalékszámítás", "Szöveges feladat"],
+      ["Háromszögek", "Szögek"], ["Halmazok", "Szöveges feladat"]
+    ];
+    const guidedTopics = {
+      "2/a": ["Algebrai kifejezések", "Egyszerűsítés"],
+      "2/b": ["Algebrai kifejezések", "Helyettesítés"],
+      "3": ["Egyenletek", "Törtek"],
+      "4/a": ["Lineáris függvény", "Grafikon", "Meredekség"],
+      "4/b": ["Lineáris függvény", "Grafikon", "Tengelymetszet"],
+      "4/c": ["Lineáris függvény", "Koordinátageometria", "Középpontos tükrözés"],
+      "4/d": ["Lineáris függvény", "Tengelymetszet", "Abszolútérték"],
+      "4/e": ["Koordinátageometria", "Négyszögek"],
+      "4/f": ["Koordinátageometria", "Kerület", "Terület", "Pitagorasz-tétel"],
+      "4/g": ["Lineáris függvény", "Grafikon", "Helyettesítés"],
+      "5/a": ["Szerkesztés", "Háromszögek", "Oldalfelezés"],
+      "5/b": ["Háromszögek", "Nevezetes vonalak", "Köréírt kör"],
+      "6/a": ["Hasáb", "Térfogat", "Szöveges feladat"],
+      "6/b": ["Henger", "Térfogat", "Mértékegységváltás", "Szöveges feladat"],
+      "6/c": ["Egyenletek", "Életkor", "Szöveges feladat"],
+      "6/d": ["Kombinatorika", "Sorbarendezés", "Szöveges feladat"]
+    };
+    const bankPartTitles = {
+      "3": "Tört együtthatós egyenlet",
+      "5/a": "Két oldal felezőpontjának szerkesztése",
+      "5/b": "A háromszög nevezetes vonalai és köréírt köre",
+      "6/a": "A ház térfogata",
+      "6/c": "A családtagok életkora"
+    };
+
+
+    const importedPapers = [{
+      year: "2025-2026", id: "gyakorlo-b", title: "Gyakorlósor B", kind: "practice",
+      solutionOrigin: "authored", scoringOrigin: "authored",
+      tasks: [
+        {
+          ref: "1", title: "Vásárlás akcióban",
+          prompt: "Egy 16 000 Ft-os kabát árát 15%-kal csökkentik. Ezután kuponnal a csökkentett árból további 10% kedvezményt kapsz.",
+          tags: ["Százalékszámítás", "Szöveges feladat"],
+          fields: [
+            ["Az első akció utáni ár (Ft)", 13600, 1],
+            ["A fizetendő összeg (Ft)", 12240, 1],
+            ["A teljes kedvezmény az eredeti ár százalékában", 23.5, 1]
+          ],
+          solution: ["16 000 · 0,85 = 13 600", "13 600 · 0,90 = 12 240 Ft"],
+          explanation: "Az eredeti ár 0,85 · 0,90 = 0,765-szörösét fizetjük, így a kedvezmény 23,5%."
+        },
+        {
+          ref: "2", title: "Tört együtthatós egyenlet",
+          prompt: "Oldd meg az egyenletet, majd helyettesítéssel ellenőrizd!",
+          tags: ["Egyenletek", "Törtek", "Helyettesítés"],
+          formula: [["x + 2", "3"], "−", ["x − 1", "4"], "=", "1"],
+          fields: [
+            ["A legkisebb közös nevező", 12, 1],
+            ["Az x értéke", 1, 2],
+            ["A bal oldal értéke az ellenőrzéskor", 1, 1]
+          ],
+          solution: ["4(x + 2) − 3(x − 1) = 12 → x + 11 = 12 → x = 1"],
+          explanation: "Az eredeti egyenlet bal oldala 3/3 − 0/4 = 1, ami egyenlő a jobb oldallal."
+        },
+        {
+          ref: "3", title: "Egy pont és egy egyenes",
+          prompt: "Vizsgáld meg az f(x) = −2x + 6 függvényt és a P(4; −1) pontot!",
+          tags: ["Lineáris függvény", "Tengelymetszet", "Helyettesítés"],
+          fields: [
+            ["Melyik x-nél metszi az egyenes az x tengelyt?", 3, 1],
+            ["Melyik értéknél metszi az y tengelyt?", 6, 1],
+            ["Az f(4) értéke", -2, 1],
+            ["Hol van P a grafikonhoz képest?", "Fölötte", 1, ["Alatta", "Rajta", "Fölötte"]]
+          ],
+          solution: ["f(3) = 0 · f(0) = 6 · f(4) = −2"],
+          explanation: "A P pont y-koordinátája −1, ami nagyobb a −2 függvényértéknél."
+        },
+        {
+          ref: "4", title: "Víz a kerti hordóban",
+          prompt: "Egy egyenes henger alakú hordó belső átmérője 40 cm, magassága 35 cm. Elfér benne 40 liter víz? A térfogatot literben, pontosan π-vel vagy egy tizedesre kerekítve add meg!",
+          tags: ["Henger", "Térfogat", "Mértékegységváltás", "Szöveges feladat"],
+          board: "tank", tank: { diameter: 40, height: 35, liters: 40 },
+          fields: [
+            ["A hordó belső sugara (cm)", 20, 1],
+            ["Az alapkör területe kπ cm². Mennyi k?", 400, 1],
+            ["A hordó térfogata literben", 14, 2, "liters-pi"],
+            ["Elfér a 40 liter víz?", "Igen", 1, ["Igen", "Nem"]]
+          ],
+          solution: ["V = 20²π · 35 = 14 000π cm³ = 14π liter ≈ 44,0 liter"],
+          explanation: "1000 cm³ = 1 liter. A hordó térfogata nagyobb 40 liternél."
+        },
+        {
+          ref: "5", title: "Fényképek két sorban",
+          prompt: "Két tanár képe kerül a felső sorba és négy különböző diáké az alsóba. Az alsó sor bal szélén Nóri képe áll. Hány különböző tabló készülhet?",
+          tags: ["Kombinatorika", "Sorbarendezés"],
+          fields: [
+            ["A tanárok lehetséges sorrendjeinek száma", 2, 1],
+            ["A diákok lehetséges sorrendjeinek száma", 6, 1],
+            ["A lehetséges tablók száma", 12, 2]
+          ],
+          solution: ["2 · (3 · 2 · 1) = 12"],
+          explanation: "Nóri helye rögzített. A három másik diák hatféle sorrendje mindkét tanári sorrenddel párosítható."
+        }
+      ]
+    }];
+
+    function importedStage({ ref, title, prompt, formula, board, tank, fields, solution, explanation }) {
+      return {
+        task: ref, title, prompt, formula, board, tank,
+        fields: fields.map(([label, answer, points, format]) => {
+          if (Array.isArray(format)) return { label, answer, points, options: format };
+          if (format === "liters-pi") {
+            const field = markCylinderVolume(label, answer, "dm³");
+            return { ...field, answer: String(answer) + "π l ≈ " + (answer * Math.PI).toFixed(1).replace(".", ",") + " l",
+              grade: value => field.grade(value) ? points : 0, points };
+          }
+          return mark(label, answer, points);
+        }),
+        solution, explanation
+      };
+    }
+
+    function importTaskPapers(editions, sources, register, packIds) {
+      return sources.map(paper => {
+        const edition = editions.find(item => item.year === paper.year);
+        if (!edition || !Object.hasOwn(bankKinds, paper.kind) || !paper.id || !paper.title ||
+            !["official", "authored"].includes(paper.solutionOrigin) ||
+            !["official", "authored"].includes(paper.scoringOrigin) || !paper.tasks?.length) {
+          throw Error("Hiányos feladatsor: " + paper.id);
+        }
+        const pack = { title: paper.title, bank: { edition, paper } };
+        const ids = paper.tasks.map(task => {
+          if (!task.ref || !task.title || !task.prompt || !task.tags?.length || !task.solution?.length || !task.fields?.length ||
+              task.fields.some(([label, answer, points, format]) => !label || !(Number.isFinite(points) && points > 0) ||
+                (Array.isArray(format) ? !format.includes(answer) :
+                  format === "liters-pi" ? !(Number.isFinite(answer) && answer > 0) : format !== undefined || !parseAlgebra(answer)))) {
+            throw Error("Hiányos feladat: " + paper.id + "/" + task.ref);
+          }
+          return register(edition, paper, "application", pack, task.ref, [importedStage(task)], task.tags);
+        });
+        packIds.set(pack, ids);
+        return { edition, paper, pack, ids };
+      });
+    }
+
+    const creditLine = paper => [
+      paper.solutionOrigin === "authored" ? "Saját megoldás" : paper.solutionOrigin === "official" ? "Hivatalos megoldás" : "",
+      paper.scoringOrigin === "authored" ? "Saját pontozás" : paper.scoringOrigin === "official" ? "Hivatalos pontozás" : ""
+    ].filter(Boolean).join(" · ");
+
+    function buildTaskBank(editions) {
+      const records = new Map();
+      const papers = new Map();
+      const packIds = new WeakMap();
+      function register(edition, paper, mode, pack, number, stages, importedTags) {
+        const ref = mode === "mixed" ? "1/" + number : number;
+        const id = edition.year + "/" + paper.id + "/" + ref;
+        const tags = importedTags ?? (mode === "mixed" ? mixedTopics[number - 1] : guidedTopics[number]);
+        const title = mode === "mixed" ? stages[0].prompt : importedTags ? stages[0].title : bankPartTitles[number] ?? stages[0].title;
+        const points = mode === "mixed" ? paper.rubric[0] : stages.flatMap(stage => stage.fields)
+          .reduce((total, field) => total + field.points, 0);
+        const bank = { id, ref, mode, title, tags, points, edition, paper, stages };
+        const itemPack = { ...pack, title: mode === "mixed" ? "Feladatbank · " + ref : title, bank };
+        if (mode === "mixed") itemPack.questions = stages;
+        if (records.has(id)) throw new Error("Ismétlődő feladatazonosító: " + id);
+        records.set(id, { ...bank, pack: itemPack });
+        packIds.set(itemPack, [id]);
+        return id;
+      }
+      for (const edition of editions) {
+        const available = [];
+        papers.set(edition, available);
+        for (const source of edition.papers ?? []) {
+          const { index } = source;
+          const paper = { ...source, rubric: edition.mixed?.pointsByErrors, packs: [] };
+          for (const mode of bankModes) {
+            const seed = mode === "mixed" ? edition.mixed?.sets[index] : edition[mode]?.[index];
+            if (!seed) continue;
+            const sections = new Map();
+            examBlocks[mode].list(seed).forEach((stage, i) => {
+              const number = mode === "mixed" ? i + 1 : stage.task;
+              if (!sections.has(number)) sections.set(number, []);
+              sections.get(number).push(stage);
+            });
+            const ids = [...sections].map(([number, stages]) =>
+              register(edition, paper, mode, seed, number, stages));
+            packIds.set(seed, ids);
+            const pack = { ...seed };
+            packIds.set(pack, ids);
+            if (mode === "mixed") pack.questions = ids.flatMap(id => records.get(id).stages);
+            paper.packs.push(pack);
+          }
+          if (paper.packs.length === bankModes.length) available.push(paper);
+        }
+      }
+      const series = importTaskPapers(editions, importedPapers, register, packIds);
+      return { records, papers, packIds, series };
+    }
+
+    function readTaskStages(pack) {
+      return taskBank.packIds.get(pack).flatMap(id => taskBank.records.get(id).stages)
+        .map(stage => ({ ...stage, fields: stage.fields.map(field => ({ ...field })) }));
+    }
+
+    function filterBank(records, year, tag, kind) {
+      return [...records.values()].filter(item =>
+        (!year || item.edition.year === year) && (!tag || item.tags.includes(tag)) &&
+        (!kind || item.paper.kind === kind));
+    }
+
+    const taskBank = buildTaskBank(curricula);
+
+    function setupTaskBank() {
+      const node = name => document.getElementById("bank-" + name);
+      const year = node("year"), tag = node("tag"), kind = node("kind");
+      const labels = new Intl.Collator("hu");
+      const populate = (select, first, pairs) => {
+        select.replaceChildren(...[["", first], ...pairs].map(([value, label]) => {
+          const option = textElement("option", "", label);
+          option.value = value;
+          return option;
+        }));
+      };
+      populate(year, "Minden tanév", curricula.map(edition => [edition.year, edition.year.replace("-", "–")]));
+      populate(tag, "Minden téma", [...new Set([...taskBank.records.values()].flatMap(item => item.tags))]
+        .sort(labels.compare).map(value => [value, value]));
+      populate(kind, "Minden forrás", Object.entries(bankKinds));
+
+      function renderBank() {
+        const series = taskBank.series.filter(({ edition, paper }) => !tag.value &&
+          (!year.value || edition.year === year.value) && (!kind.value || paper.kind === kind.value));
+        node("series").replaceChildren(...series.map(({ paper, pack, ids }) => {
+          const card = document.createElement("article");
+          card.className = "test-card";
+          const points = ids.reduce((sum, id) => sum + taskBank.records.get(id).points, 0);
+          const button = textElement("button", "chip primary", "Teljes sor indítása");
+          button.type = "button";
+          button.addEventListener("click", () => examBlocks.application.open(pack));
+          card.append(textElement("h3", "", paper.title), textElement("p", "", ids.length + " feladat · " + points + " pont"),
+            textElement("p", "", creditLine(paper)), button);
+          return card;
+        }));
+        const items = filterBank(taskBank.records, year.value, tag.value, kind.value);
+        node("count").textContent = items.length ? items.length + " feladat" : "Ezekkel a szűrőkkel nincs feladat.";
+        node("results").replaceChildren(...items.map(item => {
+          const card = document.createElement("article");
+          card.className = "test-card";
+          const chips = document.createElement("ul");
+          chips.className = "bank-tags";
+          chips.append(...item.tags.map(value => textElement("li", "", value)));
+          const button = textElement("button", "chip primary", "Megoldom");
+          button.type = "button";
+          button.setAttribute("aria-label", "Megoldom · " + item.title);
+          button.addEventListener("click", () => examBlocks[item.mode].open(item.pack));
+          card.append(textElement("p", "", item.edition.year.replace("-", "–") + " · " +
+            bankKinds[item.paper.kind] + " · " + item.ref + " · " + item.points + " pont"),
+            textElement("h3", "", item.title));
+          if (item.paper.solutionOrigin) card.append(textElement("p", "", item.paper.title + " · " + creditLine(item.paper)));
+          card.append(chips, button);
+          return card;
+        }));
+      }
+      [year, tag, kind].forEach(control => control.addEventListener("change", renderBank));
+      const show = () => {
+        showPracticeView("bank");
+        renderBank();
+        node("title").focus();
+      };
+      node("open").addEventListener("click", () => {
+        year.value = currentEdition.year;
+        show();
+      });
+      node("back").addEventListener("click", () => {
+        showPracticeView("menu");
+        node("open").focus();
+      });
+      return show;
+    }
+
+    const showTaskBank = setupTaskBank();
 
     window.addEventListener("hashchange", render);
     render();

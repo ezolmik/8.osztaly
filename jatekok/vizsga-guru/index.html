@@ -85,6 +85,20 @@
       margin-bottom: 8px;
     }
     .topic-tags { margin: 7px 0 0 28px; }
+
+    #topic-guide, .guide-back { margin-top: 18px; }
+    .guide-content { grid-template-columns: minmax(0, 1fr) minmax(0, 1.1fr); }
+    .guide-content ul, .guide-content ol { padding-left: 1.3em; }
+    .guide-content li + li { margin-top: 4px; }
+    #guide-example { margin-top: 6px; }
+    #guide-figure { max-height: 225px; margin: 0 auto; }
+    .guide-question { margin: 12px 0; padding: 0; border: 0; min-width: 0; }
+    .guide-question legend { font-weight: 650; padding: 0; margin-bottom: 5px; }
+    .guide-question .answer-option + .answer-option { margin-top: 5px; }
+    .guide-answer { margin-top: 6px; }
+    .guide-answer[data-state="correct"] { color: #086348; }
+    .guide-answer[data-state="incorrect"] { color: #923b29; }
+
     .tag-link {
       cursor: pointer;
       font-family: inherit;
@@ -499,6 +513,34 @@
       </nav>
       <p id="year-summary" role="status"></p>
     </div>
+
+    <section id="topic-guide" aria-labelledby="guide-title" hidden>
+      <p class="guide-back"><a id="guide-back" href="#tematika">← Vissza a tematikához</a></p>
+      <div class="section-heading"><h2 id="guide-title" tabindex="-1"></h2></div>
+      <div class="grid guide-content">
+        <article class="quiz-panel">
+          <h3>Kisokos</h3>
+          <ul id="guide-notes"></ul>
+          <h3>Kidolgozott példa</h3>
+          <p id="guide-example"></p>
+          <ol id="guide-steps"></ol>
+          <svg id="guide-figure" class="application-plot" role="img" viewBox="76 46 314 260" hidden></svg>
+        </article>
+        <article class="quiz-panel" aria-labelledby="guide-quiz-title">
+          <h3 id="guide-quiz-title">Önellenőrzés</h3>
+          <form id="guide-quiz">
+            <div id="guide-questions"></div>
+            <p id="guide-score" class="quiz-intro" role="status"></p>
+            <div class="quiz-actions">
+              <button class="chip primary" type="submit">Ellenőrzés</button>
+              <button id="guide-retry" class="chip" type="button" hidden>Újrapróbálom</button>
+            </div>
+          </form>
+        </article>
+      </div>
+      <div class="quiz-actions"><a id="guide-practice" class="chip primary" href="#feladatbank">Gyakorlás a feladatbankban →</a></div>
+    </section>
+
     <section id="bank-panel" aria-labelledby="bank-title" hidden>
       <div class="section-heading">
         <h2 id="bank-title" tabindex="-1">Feladatbank</h2>
@@ -809,6 +851,7 @@
     <section class="empty" id="empty-year" aria-labelledby="empty-year-title" hidden>
       <h2 id="empty-year-title">Ehhez a tanévhez még nincs tematika</h2>
       <p><a id="latest-syllabus" href="#tematika">A legutóbbi elérhető tematika</a></p>
+      <div class="quiz-actions" id="empty-guide-links"></div>
     </section>
   </main>
 
@@ -1134,11 +1177,13 @@
       const exams = menu && currentPage === "probavizsga";
       const solutions = menu && currentPage === "megoldasok";
       const bank = view === "bank";
+      const topic = view === "guide";
       const node = id => document.getElementById(id);
       node("home-panel").hidden = !atHome;
       node("view-nav").hidden = atHome;
       node("year-bar").hidden = !(syllabus || practice || exams || solutions);
-      yearContent.hidden = atHome || bank || solutions;
+      yearContent.hidden = atHome || bank || solutions || topic;
+      node("topic-guide").hidden = !topic;
       emptyYear.hidden = !syllabus || Boolean(currentEdition?.groups.length);
       node("bank-panel").hidden = !bank;
       node("solutions-menu").hidden = !solutions;
@@ -2055,7 +2100,9 @@
         svgElement("path", { d: "M 102 95 H 298 M 102 90 V 100 M 298 90 V 100 M 325 95 V 270 M 319 95 H 331 M 319 270 H 331", class: "solid-dimension" }),
         svgElement("text", { x: 200, y: 82, "text-anchor": "middle" }, `d = ${mathNumber(diameter)} cm`),
         svgElement("text", { x: 336, y: 185 }, `${mathNumber(height)} cm`),
-        svgElement("text", { x: 200, y: 330, "text-anchor": "middle" }, `Összegyűjtendő víz · ${mathNumber(liters)} liter`)
+        ...(liters === undefined ? [] : [
+          svgElement("text", { x: 200, y: 330, "text-anchor": "middle" }, `Összegyűjtendő víz · ${mathNumber(liters)} liter`)
+        ])
       ];
     }
 
@@ -2164,7 +2211,11 @@
           const tags = topicBankTags[code] ?? [];
           if (tags.length) {
             const links = textElement("div", "controls topic-tags", "");
-            links.append(...tags.map(tag => pageLink(tag, "feladatbank", tag, "tag-link")));
+            links.append(...tags.map(tag => {
+              const guide = Object.values(topicGuides).find(item => item.tag === tag);
+              return guide ? guideLink(guide, currentEdition.year, "tag-link") :
+                pageLink(tag, "feladatbank", tag, "tag-link");
+            }));
             item.append(links);
           }
           list.append(item);
@@ -3384,16 +3435,18 @@
       if (renderedHash === hash) return;
       const focus = renderedHash !== undefined;
       renderedHash = hash;
-      const [slug, rawValue] = hash.slice(1).split("/");
+      const [slug, rawValue, originYear] = hash.slice(1).split("/");
       const legacy = /^vizsga-(\d{4}-\d{4})$/.exec(slug);
       let value = legacy?.[1] ?? "";
       try { if (rawValue) value = decodeURIComponent(rawValue); } catch { value = ""; }
-      currentPage = legacy ? "tematika" :
+      const guide = slug === "temalap" && Object.hasOwn(topicGuides, value) ? topicGuides[value] : null;
+      currentPage = guide ? "temalap" : legacy ? "tematika" :
         slug === "feladatbank" || Object.hasOwn(pageNames, slug) ? slug : "kezdolap";
       const fallback = currentPage === "probavizsga" ? curricula.findLast(edition => taskBank.papers.get(edition).length) :
         currentPage === "megoldasok" ? curricula.findLast(edition => findArchivedTasks(edition).length) :
         currentPage === "gyakorlosorok" ? curricula.findLast(edition => edition.groups.length) : curricula.at(-1);
-      currentEdition = (currentPage !== "feladatbank" && curricula.find(edition => edition.year === value)) ||
+      const requestedYear = guide ? originYear : value;
+      currentEdition = (currentPage !== "feladatbank" && curricula.find(edition => edition.year === requestedYear)) ||
         fallback || curricula.at(-1);
 
       const node = id => document.getElementById(id);
@@ -3406,7 +3459,7 @@
       }
       for (const [id, page] of [["nav-syllabus", "tematika"], ["nav-bank", "feladatbank"],
         ["nav-exam", "probavizsga"], ["nav-solutions", "megoldasok"]]) {
-        if (currentPage === page) node(id).setAttribute("aria-current", "true");
+        if (currentPage === page || (guide && page === "tematika")) node(id).setAttribute("aria-current", "true");
         else node(id).removeAttribute("aria-current");
       }
       const { groups, year } = currentEdition;
@@ -3421,13 +3474,15 @@
       node("exam-menu-title").textContent = yearLabel(year) + " · Próbavizsgák";
       node("solutions-title").textContent = yearLabel(year) + " · Megoldások";
       if (currentPage === "tematika" && groups.length) renderTopics(groups);
+      node("empty-guide-links").replaceChildren(...Object.values(topicGuides).map(item => guideLink(item, year)));
       selectMixedEdition(currentEdition);
       selectAlgebraEdition(currentEdition);
       selectCoordinateEdition(currentEdition);
       selectConstructionEdition(currentEdition);
       selectApplicationEdition(currentEdition);
       selectExamEdition(currentEdition, true);
-      if (currentPage === "feladatbank") showTaskBank(value);
+      if (guide) showTopicGuide(guide, year, focus);
+      else if (currentPage === "feladatbank") showTaskBank(value);
       else if (currentPage === "megoldasok") showSolutions(focus);
       else {
         showPracticeView("menu");
@@ -3436,6 +3491,145 @@
         if (focus) node(target).focus();
       }
     }
+
+
+    const topicGuides = {
+      henger: {
+        id: "henger", title: "Henger", tag: "Henger",
+        notes: [
+          "A sugár az átmérő fele. A térfogatképletben az r sugarat használjuk.",
+          "Az alapkör területe T = πr². A henger térfogata V = πr² · m, ahol m a henger magassága.",
+          "Először írd a hosszúságokat azonos mértékegységbe. 1000 cm³ = 1 dm³ = 1 liter."
+        ],
+        example: "Egy henger átmérője 6 cm, magassága 10 cm. Mekkora a térfogata?",
+        steps: ["A sugár r = 6 : 2 = 3 cm.", "Az alapkör területe T = π · 3² = 9π cm².",
+          "A térfogat V = 9π · 10 = 90π cm³, ami körülbelül 0,283 liter."],
+        tank: { diameter: 6, height: 10 },
+        questions: [
+          ["Egy henger átmérője 12 cm. Mekkora a sugara?", ["24 cm", "6 cm", "12 cm"], 1, "Az átmérő kétszer akkora, mint a sugár, ezért 12 : 2 = 6 cm."],
+          ["Mekkora a térfogata egy 2 cm sugarú, 5 cm magas hengernek?", ["10π cm³", "50π cm³", "20π cm³"], 2, "V = π · 2² · 5 = 20π cm³."],
+          ["750 cm³ hány liter?", ["0,75 liter", "7,5 liter", "75 liter"], 0, "1000 cm³ egy liter, ezért 750 : 1000 = 0,75 liter."]
+        ]
+      },
+      "elsofoku-egyenletek": {
+        id: "elsofoku-egyenletek", title: "Elsőfokú egyenletek", tag: "Egyenletek",
+        notes: [
+          "Összevonás után az elsőfokú egyenlet ax + b = 0 alakú, ahol a ≠ 0. A megoldás olyan x, amelyre az egyenlőség igaz.",
+          "Mindkét oldalhoz ugyanazt adhatod hozzá vagy ugyanazt vonhatod ki. Mindkét oldalt szorozhatod vagy oszthatod ugyanazzal a nullától különböző számmal.",
+          "A végén helyettesítsd a kapott értéket az eredeti egyenletbe, és hasonlítsd össze a két oldalt."
+        ],
+        example: "Oldd meg és ellenőrizd: 3x + 5 = 17.",
+        steps: ["Mindkét oldalból 5-öt vonunk ki: 3x = 12.", "Mindkét oldalt 3-mal osztjuk: x = 4.",
+          "Ellenőrzés: 3 · 4 + 5 = 17, így x = 4 megoldás."],
+        questions: [
+          ["Mit tegyél mindkét oldallal, hogy 4x − 3 = 9 bal oldalán csak 4x maradjon?",
+            ["Vonj ki 3-at!", "Adj hozzá 3-at!", "Oszd el 3-mal!"], 1, "Ha hozzáadsz 3-at mindkét oldalhoz, 4x = 12 adódik."],
+          ["Melyik szám oldja meg a 7x = 35 egyenletet?", ["42", "28", "5"], 2, "Mindkét oldalt 7-tel osztva x = 5."],
+          ["Melyik behelyettesítés igazolja, hogy x = 4 megoldása a 2x + 1 = 9 egyenletnek?",
+            ["2 · 4 + 1 = 9", "2 + 4 + 1 = 7", "2 · 4 = 8"], 0, "Az eredeti bal oldal 2 · 4 + 1 = 9, így megegyezik a jobb oldallal."]
+        ]
+      }
+    };
+
+    function guideLink(guide, year, className = "chip") {
+      const link = textElement("a", className, guide.title + " · Kisokos");
+      link.setAttribute("href", pageHash("temalap", guide.id) + "/" + year);
+      return link;
+    }
+
+    function setupTopicGuide() {
+      const node = name => document.getElementById("guide-" + name);
+      const states = new Map();
+      let active;
+      let state;
+      let answers = [];
+
+      function showFeedback() {
+        let hits = 0;
+        active.questions.forEach(([, , correct, reason], index) => {
+          const right = state.picks[index] === correct;
+          if (right) hits++;
+          const message = answers[index];
+          message.hidden = !state.checked;
+          message.dataset.state = right ? "correct" : "incorrect";
+          message.textContent = (right ? "Helyes. " : "A helyes megoldás: ") + reason;
+        });
+        node("score").textContent = state.checked ? hits + " / " + answers.length + " helyes válasz" : "";
+        node("retry").hidden = !state.checked;
+      }
+
+      function renderQuiz() {
+        answers = [];
+        node("questions").replaceChildren(...active.questions.map(([prompt, options], index) => {
+          const group = textElement("fieldset", "guide-question", "");
+          group.append(textElement("legend", "", prompt));
+          options.forEach((label, choice) => {
+            const option = textElement("label", "answer-option", "");
+            const input = document.createElement("input");
+            input.type = "radio";
+            input.name = "guide-question-" + index;
+            input.checked = state.picks[index] === choice;
+            input.addEventListener("change", () => {
+              state.picks[index] = choice;
+              state.checked = false;
+              showFeedback();
+            });
+            option.append(input, document.createTextNode(label));
+            group.append(option);
+          });
+          const message = textElement("p", "guide-answer", "");
+          message.hidden = true;
+          group.append(message);
+          answers.push(message);
+          return group;
+        }));
+        showFeedback();
+      }
+
+      node("quiz").addEventListener("submit", event => {
+        event.preventDefault();
+        if (!state) return;
+        const missing = state.picks.indexOf(null);
+        if (missing !== -1) {
+          node("score").textContent = "Válaszolj minden kérdésre az ellenőrzéshez.";
+          node("questions").children[missing].querySelector("input").focus();
+          return;
+        }
+        state.checked = true;
+        showFeedback();
+      });
+
+      node("retry").addEventListener("click", () => {
+        state.picks.fill(null);
+        state.checked = false;
+        renderQuiz();
+        node("questions").querySelector("input").focus();
+      });
+
+      return (guide, year, focus) => {
+        active = guide;
+        if (!states.has(guide.id)) states.set(guide.id, { picks: guide.questions.map(() => null), checked: false });
+        state = states.get(guide.id);
+        node("title").textContent = guide.title;
+        node("back").setAttribute("href", pageHash("tematika", year));
+        node("notes").replaceChildren(...guide.notes.map(note => textElement("li", "", note)));
+        node("example").textContent = guide.example;
+        node("steps").replaceChildren(...guide.steps.map(step => textElement("li", "", step)));
+        const fig = node("figure");
+        fig.hidden = !guide.tank;
+        fig.replaceChildren(...(guide.tank ? drawTank(guide.tank) : []));
+        if (guide.tank) {
+          const { diameter, height } = guide.tank;
+          fig.setAttribute("aria-label", "A példában szereplő henger. Átmérője " + diameter + " cm, magassága " + height + " cm.");
+        }
+        node("practice").setAttribute("href", pageHash("feladatbank", guide.tag));
+        renderQuiz();
+        showPracticeView("guide");
+        if (focus) node("title").focus();
+      };
+    }
+
+    const showTopicGuide = setupTopicGuide();
 
     setupHome();
     window.addEventListener("hashchange", render);

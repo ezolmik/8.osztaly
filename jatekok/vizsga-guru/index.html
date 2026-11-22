@@ -128,6 +128,7 @@
     #mixed-tests, #mixed-quiz, #algebra-tests, #algebra-quiz,
     #coordinates-tests, #coordinates-quiz, #construction-tests, #construction-quiz,
     #application-tests, #application-quiz { margin-top: 24px; }
+    #exam-menu, #exam-panel { margin-top: 24px; }
     .test-card, .quiz-panel {
       border: 1px solid var(--line);
       border-radius: 15px;
@@ -389,6 +390,34 @@
     </div>
 
     <div id="year-content">
+
+      <section id="exam-menu" aria-labelledby="exam-menu-title" hidden>
+        <div class="section-heading"><h2 id="exam-menu-title" tabindex="-1">Próbavizsga</h2></div>
+        <p class="quiz-intro">Két 45 perces rész, összesen 100 pont. Számológép mindkét részben használható. Pontszám és megoldások a teljes vizsga beadása után.</p>
+        <div id="exam-packs" class="grid" style="margin-top: 10px"></div>
+      </section>
+
+      <section id="exam-panel" class="quiz-panel" aria-labelledby="exam-title" hidden>
+        <div class="quiz-toolbar">
+          <button id="exam-back" class="chip" type="button">← Gyakorlók</button>
+          <div class="quiz-actions" style="margin: 0">
+            <span id="exam-clock" role="timer" aria-label="Hátralévő idő" style="font-variant-numeric: tabular-nums"></span>
+            <button id="exam-action" class="chip primary" type="button"></button>
+          </div>
+        </div>
+        <h2 id="exam-title" tabindex="-1"></h2>
+        <p class="quiz-intro" id="exam-status"></p>
+        <nav class="question-nav" aria-label="A próbavizsga feladatcsoportjai" id="exam-nav" hidden></nav>
+        <div id="exam-results" hidden>
+          <p class="score" id="exam-points"></p>
+          <ul class="topic-scores" id="exam-scores"></ul>
+          <div class="quiz-actions">
+            <button class="chip primary" id="exam-review" type="button">Válaszok és megoldások</button>
+            <button class="chip" id="exam-restart" type="button">Új próbavizsga</button>
+          </div>
+        </div>
+      </section>
+
       <section id="mixed-tests" aria-labelledby="mixed-title" hidden>
         <div class="section-heading"><h2 id="mixed-title" tabindex="-1">Vegyes teszt</h2></div>
         <div class="grid" id="mixed-test-packs"></div>
@@ -964,6 +993,9 @@
         document.getElementById(`${mode}-tests`).hidden = view !== "menu" || !document.getElementById(packs).children.length;
       }
       document.getElementById("topics-panel").hidden = view !== "menu";
+      const examMenu = document.getElementById("exam-menu");
+      examMenu.hidden = view !== "menu" || !document.getElementById("exam-packs").children.length;
+      document.getElementById("exam-panel").hidden = true;
     }
 
     const mathNumber = value => String(value).replace("-", "−").replace(".", ",");
@@ -1988,6 +2020,8 @@
       return { omitted, extra, errors, points: pointsByErrors[errors] ?? 0 };
     }
 
+    const examBlocks = {};
+
     function setupMixedQuiz() {
       const node = id => document.getElementById(id);
       const packs = node("mixed-test-packs");
@@ -2040,10 +2074,11 @@
         showPracticeView("menu");
       }
 
-      function openTest(set) {
+      function openTest(set, examAttempt) {
         test = set;
-        attempt = attempts.get(set) ?? newAttempt(set);
-        attempts.set(set, attempt);
+        attempt = examAttempt ?? attempts.get(set) ?? newAttempt(set);
+        if (!examAttempt) attempts.set(set, attempt);
+        node("quiz-back").hidden = Boolean(examAttempt);
         showPracticeView("mixed");
         title.textContent = set.title;
         const rules = pointsByErrors().map((points, errors) => `${errors} hibánál ${points} pont`);
@@ -2056,7 +2091,7 @@
           return button;
         });
         nav.replaceChildren(...navButtons);
-        if (attempt.submitted) showResults();
+        if (attempt.submitted && !examAttempt) showResults();
         else {
           showQuestion(attempt.index, false);
           title.focus();
@@ -2083,7 +2118,7 @@
         const locked = attempt.checked.has(index);
         questionPane.hidden = false;
         result.hidden = true;
-        finish.hidden = false;
+        finish.hidden = Boolean(attempt.exam);
         finish.textContent = attempt.submitted ? "Eredmény" : "Beadás és eredmény";
         node("quiz-position").textContent = `${labelOf(index)}. feladat · ${index + 1} / ${test.questions.length}`;
         prompt.textContent = question.prompt;
@@ -2115,7 +2150,7 @@
           return label;
         }));
         review.hidden = !locked;
-        check.hidden = locked;
+        check.hidden = locked || Boolean(attempt.exam);
         previous.disabled = index === 0;
         next.disabled = index === test.questions.length - 1;
         if (locked) {
@@ -2166,11 +2201,13 @@
       previous.addEventListener("click", () => showQuestion(attempt.index - 1));
       next.addEventListener("click", () => showQuestion(attempt.index + 1));
       check.addEventListener("click", () => {
+        if (attempt.exam) return;
         attempt.checked.add(attempt.index);
         showQuestion(attempt.index, false);
         review.focus();
       });
       finish.addEventListener("click", () => {
+        if (attempt.exam) return;
         test.questions.forEach((_, index) => attempt.checked.add(index));
         attempt.submitted = true;
         showResults();
@@ -2181,6 +2218,15 @@
         openTest(test);
       });
 
+      examBlocks.mixed = {
+        newAttempt, open: openTest,
+        score(set, state, rubric) {
+          set.questions.forEach((_, index) => state.checked.add(index));
+          const points = set.questions.reduce((total, question, index) =>
+            total + evaluateQuestion(question, state.answers[index], rubric).points, 0);
+          return { points, maximum: set.questions.length * rubric[0] };
+        }
+      };
       return selectedEdition => {
         if (edition === selectedEdition) return;
         edition = selectedEdition;
@@ -2349,15 +2395,26 @@
         showPracticeView("menu");
       }
 
-      function open(pack) {
+      function newAttempt(pack, exam = false) {
+        const stages = createStages(pack);
+        if (exam) prepareExamStages(mode, stages);
+        const answers = stages.map(stage => stage.fields.map(field => field.newResponse?.() ?? (field.multiple || field.draw ? [] : "")));
+        return { stages, index: 0, answers, grades: [], finished: false, exam };
+      }
+
+      function gradeStage(stage, answers) {
+        return stage.fields.map((field, index) => {
+          const response = answers[index];
+          if (field.grade) return field.grade(response);
+          return checkAlgebraField(field, response) ? field.points : 0;
+        });
+      }
+
+      function open(pack, examAttempt) {
         set = pack;
-        attempt = attempts.get(pack);
-        if (!attempt) {
-          const stages = createStages(pack);
-          const answers = stages.map(stage => stage.fields.map(field => field.newResponse?.() ?? (field.multiple || field.draw ? [] : "")));
-          attempt = { stages, index: 0, answers, grades: [], finished: false };
-          attempts.set(pack, attempt);
-        }
+        attempt = examAttempt ?? attempts.get(pack) ?? newAttempt(pack);
+        if (!examAttempt) attempts.set(pack, attempt);
+        node("back-menu").hidden = Boolean(examAttempt);
         title.textContent = pack.title;
         showPracticeView(mode);
         if (attempt.finished) showResults();
@@ -2444,9 +2501,10 @@
           return box;
         }));
         feedback.hidden = !grades;
-        check.hidden = Boolean(grades);
-        next.hidden = !grades;
-        next.textContent = index === attempt.stages.length - 1 ? "Eredmény" : "Következő →";
+        check.hidden = Boolean(grades) || attempt.exam;
+        const lastStage = index === attempt.stages.length - 1;
+        next.hidden = attempt.exam ? lastStage : !grades;
+        next.textContent = lastStage ? "Eredmény" : "Következő →";
         prev.disabled = index === 0;
         if (grades) {
           const score = sumPoints(grades);
@@ -2487,19 +2545,15 @@
       node("form").addEventListener("submit", event => {
         event.preventDefault();
         const { index } = attempt;
-        if (attempt.grades[index]) return;
-        const { fields } = attempt.stages[index];
-        attempt.grades[index] = fields.map((field, fieldIndex) => {
-          const response = attempt.answers[index][fieldIndex];
-          if (field.grade) return field.grade(response);
-          return checkAlgebraField(field, response) ? field.points : 0;
-        });
+        if (attempt.exam || attempt.grades[index]) return;
+        attempt.grades[index] = gradeStage(attempt.stages[index], attempt.answers[index]);
         showStage(index, false);
         feedback.focus();
       });
       prev.addEventListener("click", () => showStage(attempt.index - 1));
       next.addEventListener("click", () => {
         if (attempt.index === attempt.stages.length - 1) {
+          if (attempt.exam) return;
           attempt.finished = true;
           showResults();
         } else showStage(attempt.index + 1);
@@ -2510,6 +2564,16 @@
         open(set);
       });
 
+      examBlocks[mode] = {
+        newAttempt: pack => newAttempt(pack, true), open,
+        score(_pack, state) {
+          state.grades = state.stages.map((stage, index) => gradeStage(stage, state.answers[index]));
+          return {
+            points: sumPoints(state.grades.map(sumPoints)),
+            maximum: sumPoints(state.stages.map(maximum))
+          };
+        }
+      };
       return selectedEdition => {
         if (edition === selectedEdition) return;
         edition = selectedEdition;
@@ -2541,7 +2605,260 @@
       selectCoordinateEdition(curricula[index]);
       selectConstructionEdition(curricula[index]);
       selectApplicationEdition(curricula[index]);
+      selectExamEdition(curricula[index]);
     }
+
+
+    function prepareExamStages(mode, stages) {
+      if (mode === "algebra") {
+        stages[1].formula = stages[0].formula;
+        stages[1].fields[0] = pick("Hogyan helyettesítesz az egyszerűsített kifejezésbe?",
+          ["Az a² és b² helyére a megadott számok négyzete kerül.",
+            "Az a² és b² helyére a megadott számok kétszerese kerül."], 0);
+        stages[1].fields[1].label = "Az a²b²-es tag értéke előjellel";
+        stages[1].fields[2].label = "Az ab³-as tag értéke előjellel";
+        stages[3].fields[1] = pick("Melyik előjel áll a második számláló zárójele előtt?",
+          ["Plusz", "Mínusz"], 1);
+        for (const stage of stages.slice(3)) stage.formula = stages[2].formula;
+        stages[5].prompt = "Helyettesítsd be a kapott megoldást az eredeti egyenlet mindkét oldalába!";
+      }
+      if (mode === "coordinates") {
+        // The figure on paper is shared by tasks 4/a–f. The student adds the reflected line.
+        for (const stage of stages.slice(3, 6)) {
+          stage.solvedBoard = stage.board;
+          stage.board = "original";
+        }
+        stages[5].prompt = "A PQRS négyszög átlói a tengelyekre esnek. Ahol szükséges, kerekíts két tizedesjegyre!";
+        for (const field of stages[5].fields) field.label = field.label.replace(/rombusz/g, "négyszög");
+      }
+      if (mode === "application") {
+        const equation = stages[4].fields[0].answer;
+        const [left, right] = equation.split("=");
+        const same = (answer, value) => checkAlgebraField({ answer }, value);
+        stages[4].fields[0] = {
+          ...mark("Írj egy egyenletet az öt életkor összegére!", equation),
+          grade(value) {
+            const parts = value.split("=");
+            return parts.length === 2 && (
+              (same(left, parts[0]) && same(right, parts[1])) ||
+              (same(left, parts[1]) && same(right, parts[0]))
+            ) ? 1 : 0;
+          }
+        };
+        stages[4].prompt = stages[4].prompt.split(". ")[0] + ".";
+        stages[5].formula = [];
+      }
+    }
+
+    function setupExam() {
+      const node = name => document.getElementById("exam-" + name);
+      const groups = [
+        ["mixed", "1. Vegyes teszt"], ["algebra", "2–3. Algebra"],
+        ["coordinates", "4. Koordinátageometria"], ["construction", "5. Szerkesztés"],
+        ["application", "6. Alkalmazások"]
+      ];
+      const partGroups = [[0, 1], [2, 3, 4]];
+      const examMinutes = 45;
+      const attempts = new Map();
+      let edition;
+      let active = null;
+      let interval;
+      let isReview = false;
+
+      function newExam(index) {
+        const packs = groups.map(([mode]) => mode === "mixed" ? edition.mixed.sets[index] : edition[mode][index]);
+        const states = packs.map((pack, i) => {
+          const state = examBlocks[groups[i][0]].newAttempt(pack);
+          state.exam = true;
+          return state;
+        });
+        return {
+          title: index === 0 ? "Próbavizsga · Eredeti feladatok" : "Próbavizsga · Gyakorlósor A",
+          packs, states, index: 0, part: 0, phase: "running", expired: false,
+          rubric: edition.mixed.pointsByErrors,
+          deadline: Date.now() + examMinutes * 60_000
+        };
+      }
+
+      function exit() {
+        active = null;
+        clearInterval(interval);
+        isReview = false;
+      }
+
+      function menu() {
+        exit();
+        const packs = edition.mixed?.sets ?? [];
+        node("packs").replaceChildren(...packs.filter((_, index) =>
+          groups.slice(1).every(([mode]) => edition[mode]?.[index])
+        ).map((pack, index) => {
+          const card = document.createElement("article");
+          card.className = "test-card";
+          const attempt = attempts.get(pack);
+          const caption = index === 0 ? "A 2026-os vizsga" : "Gyakorlósor A";
+          const button = textElement("button", "chip primary", attempt?.phase === "finished" ?
+            "Eredmény" : attempt ? "Folytatás" : "Indítás");
+          button.type = "button";
+          button.setAttribute("aria-label", button.textContent + " · " + caption);
+          button.addEventListener("click", () => {
+            if (!attempts.has(pack)) attempts.set(pack, newExam(index));
+            resume(attempts.get(pack));
+          });
+          card.append(textElement("h3", "", caption),
+            textElement("p", "", index === 0 ? "A február 4-i feladatsor digitális változata." :
+              "Azonos feladatszerkezet új adatokkal és kérdésekkel."),
+            button);
+          return card;
+        }));
+        showPracticeView("menu");
+      }
+
+      function tick() {
+        if (active?.phase !== "running") return false;
+        const seconds = Math.max(0, Math.ceil((active.deadline - Date.now()) / 1000));
+        const timer = node("clock");
+        timer.textContent = Math.floor(seconds / 60) + ":" + String(seconds % 60).padStart(2, "0");
+        if (seconds > 0) return false;
+        handIn(true);
+        return true;
+      }
+
+      function activatePart(part) {
+        active.part = part;
+        active.index = partGroups[part][0];
+        active.phase = "running";
+        active.deadline = Date.now() + examMinutes * 60_000;
+        resume(active);
+      }
+
+      function handIn(timedOut) {
+        clearInterval(interval);
+        active.expired = timedOut;
+        if (active.part === 0) {
+          active.phase = "break";
+        } else {
+          active.phase = "finished";
+          active.scores = active.packs.map((pack, i) => {
+            const state = active.states[i];
+            state.stages?.forEach(stage => {
+              if (stage.solvedBoard) stage.board = stage.solvedBoard;
+            });
+            return examBlocks[groups[i][0]].score(pack, state, active.rubric);
+          });
+        }
+        draw();
+        node("title").focus();
+      }
+
+      function resume(attempt) {
+        clearInterval(interval);
+        active = attempt;
+        isReview = false;
+        if (tick()) return;
+        draw();
+        if (active.phase === "running") interval = setInterval(tick, 250);
+        else node("title").focus();
+      }
+
+      function draw() {
+        const { phase, title, part, expired, scores } = active;
+        const working = phase === "running" || isReview;
+        const showScores = phase === "finished" && !isReview;
+        const partLabel = part === 0 ? "I." : "II.";
+        if (working) {
+          const index = active.index;
+          const mode = groups[index][0];
+          examBlocks[mode].open(active.packs[index], active.states[index]);
+        } else showPracticeView("exam");
+        node("panel").hidden = false;
+        node("title").textContent = title;
+        node("clock").hidden = phase !== "running";
+        node("action").hidden = showScores;
+        node("action").textContent = isReview ? "Vissza az eredményhez" :
+          phase === "break" ? "II. rész indítása" : partLabel + " rész beadása";
+        node("status").textContent = isReview ? "A beadott válaszok és javításuk." :
+          phase === "break" ? (expired ? "Az I. rész ideje lejárt. " : "Az I. részt beadtad. ") +
+            "A II. rész 45 perce akkor indul, amikor megnyomod a gombot." :
+          showScores ? (expired ? "A II. rész ideje lejárt. " : "") + "Mindkét vizsgarészt lezártad." :
+          partLabel + " rész · " + (part === 0 ? "48" : "52") + " pont. A rész feladatai között szabadon mozoghatsz.";
+        const nav = node("nav");
+        nav.hidden = !working;
+        if (working) {
+          const indices = isReview ? groups.map((_, index) => index) : partGroups[part];
+          nav.replaceChildren(...indices.map(index => {
+            const button = textElement("button", "chip", groups[index][1]);
+            button.type = "button";
+            if (index === active.index) button.setAttribute("aria-current", "true");
+            button.addEventListener("click", () => {
+              if (tick()) return;
+              active.index = index;
+              draw();
+            });
+            return button;
+          }));
+        }
+        node("results").hidden = !showScores;
+        if (showScores) {
+          const sum = (key, indices) => indices.reduce((total, index) => total + scores[index][key], 0);
+          const total = indices => mathNumber(sum("points", indices)) + " / " + sum("maximum", indices) + " pont";
+          node("points").textContent = total([0, 1, 2, 3, 4]);
+          const rows = [
+            ["I. rész", total(partGroups[0])], ["II. rész", total(partGroups[1])],
+            ...groups.map(([, caption], index) => [caption, total([index])])
+          ];
+          node("scores").replaceChildren(...rows.map(([caption, value]) => {
+            const row = document.createElement("li");
+            row.append(textElement("span", "", caption), textElement("strong", "", value));
+            return row;
+          }));
+        }
+      }
+
+      node("back").addEventListener("click", () => {
+        menu();
+        node("menu-title").focus();
+      });
+      node("action").addEventListener("click", () => {
+        if (!active || tick()) return;
+        if (isReview) {
+          isReview = false;
+          draw();
+        } else if (active.phase === "break") activatePart(1);
+        else if (active.phase === "running" && window.confirm("Beadod és lezárod ezt a vizsgarészt?")) {
+          handIn(Date.now() >= active.deadline);
+        }
+      });
+      node("review").addEventListener("click", () => {
+        active.index = 0;
+        isReview = true;
+        draw();
+      });
+      node("restart").addEventListener("click", () => {
+        const pack = active.packs[0];
+        menu();
+        const index = edition.mixed.sets.indexOf(pack);
+        attempts.set(pack, newExam(index));
+        resume(attempts.get(pack));
+      });
+
+      // Inputs are rejected if the deadline passed before a background tab can refresh the clock.
+      for (const type of ["click", "input", "change", "keydown", "submit"]) {
+        yearContent.addEventListener(type, event => {
+          if (tick()) {
+            event.preventDefault();
+            event.stopImmediatePropagation();
+          }
+        }, true);
+      }
+
+      return nextEdition => {
+        if (edition === nextEdition) return;
+        edition = nextEdition;
+        menu();
+      };
+    }
+
+    const selectExamEdition = setupExam();
 
     window.addEventListener("hashchange", render);
     render();

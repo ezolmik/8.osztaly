@@ -46,6 +46,64 @@
     h3 { font-size: 1.08rem; line-height: 1.35; }
     .intro, .empty p { color: var(--muted); }
 
+
+    .view-nav { margin-top: 20px; }
+    .home-year {
+      display: flex;
+      align-items: baseline;
+      flex-wrap: wrap;
+      gap: 4px 14px;
+      margin-top: 22px;
+      padding: 10px 14px;
+      border-radius: 10px;
+      background: var(--accent-soft);
+      color: #10594f;
+    }
+    .home-year p { font-size: .88rem; }
+    .home-actions {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 12px;
+      margin-top: 12px;
+    }
+    .home-card, .archive-year {
+      padding: 15px 16px;
+      border: 1px solid var(--line);
+      border-radius: 14px;
+      background: var(--paper);
+    }
+    .home-card { display: grid; grid-template-rows: auto 1fr auto; gap: 8px; }
+    .home-card h2 { font-size: 1.16rem; line-height: 1.3; }
+    .home-card p { color: var(--muted); font-size: .9rem; }
+    .home-card a { justify-self: start; }
+    .archive-year {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: space-between;
+      align-items: center;
+      gap: 8px 16px;
+      margin-bottom: 8px;
+    }
+    .topic-tags { margin: 7px 0 0 28px; }
+    .tag-link {
+      cursor: pointer;
+      font-family: inherit;
+      display: inline-block;
+      padding: 3px 7px;
+      border: 1px solid #b9d4d0;
+      border-radius: 6px;
+      background: var(--accent-soft);
+      color: #10594f;
+      font-size: .82rem;
+      text-decoration: none;
+    }
+    .tag-link:hover { border-color: var(--accent); text-decoration: underline; }
+    #bank-results .bank-tags li { padding: 0; background: none; }
+    .solution-field p + p { margin-top: 4px; }
+    @media (max-width: 760px) {
+      .home-actions { grid-template-columns: 1fr; }
+    }
+
     .year-bar {
       display: flex;
       align-items: center;
@@ -396,20 +454,55 @@
     <header>
       <a href="../../index.html">← Nyolcadikos játékok</a>
       <h1>8.-os Vizsga Guru</h1>
-      <p class="intro">A Radnóti nyolcadikos matematikavizsgájának témái tanévenként.</p>
+      <p class="intro">Felkészülés a Radnóti nyolcadikos matematikavizsgájára.</p>
     </header>
 
-    <div class="year-bar">
+    <nav class="controls view-nav" id="view-nav" aria-label="Vizsga Guru" hidden>
+      <a href="#kezdolap" class="chip">← Kezdőlap</a>
+      <a href="#tematika" id="nav-syllabus" class="chip">Tematika</a>
+      <a href="#feladatbank" id="nav-bank" class="chip">Feladatbank</a>
+      <a href="#probavizsga" id="nav-exam" class="chip">Próbavizsga</a>
+      <a href="#megoldasok" id="nav-solutions" class="chip">Megoldások</a>
+    </nav>
+
+    <section id="home-panel">
+      <div class="home-year">
+        <strong id="home-year-label"></strong>
+        <p id="home-year-status"></p>
+      </div>
+      <div class="home-actions">
+        <article class="home-card">
+          <h2>Mit kell tudnom?</h2>
+          <p>Nézd meg a vizsgatémákat, és válassz témát a gyakorláshoz.</p>
+          <a id="home-syllabus" href="#tematika" class="chip primary">Idei tematika</a>
+        </article>
+        <article class="home-card">
+          <h2>Miben gyakoroljak?</h2>
+          <p>Válogass témacímke szerint vizsgafeladatok és gyakorlófeladatok között.</p>
+          <a href="#feladatbank" class="chip primary">Feladatbank</a>
+        </article>
+        <article class="home-card">
+          <h2>Készen állok a vizsgára?</h2>
+          <p>Próbálj ki egy teljes feladatsort időre.</p>
+          <a href="#probavizsga" class="chip primary">Próbavizsgák</a>
+        </article>
+      </div>
+      <section aria-labelledby="archive-title">
+        <div class="section-heading"><h2 id="archive-title">Korábbi évek</h2></div>
+        <div id="archive-years"></div>
+      </section>
+    </section>
+
+    <div class="year-bar" id="year-bar" hidden>
       <nav class="controls" id="year-choices" aria-label="Vizsga tanéve">
         <span class="controls-label">Tanév</span>
       </nav>
       <p id="year-summary" role="status"></p>
-      <button id="bank-open" type="button" class="chip primary">Feladatbank</button>
     </div>
     <section id="bank-panel" aria-labelledby="bank-title" hidden>
       <div class="section-heading">
         <h2 id="bank-title" tabindex="-1">Feladatbank</h2>
-        <button id="bank-back" type="button" class="chip">← Áttekintés</button>
+        <a id="bank-packs" href="#gyakorlosorok" class="chip">Témakörös gyakorlósorok</a>
       </div>
       <div class="bank-filters">
         <label>Tanév <select id="bank-year"></select></label>
@@ -421,17 +514,24 @@
       <div id="bank-results" class="bank-results grid"></div>
     </section>
 
+    <section id="solutions-menu" aria-labelledby="solutions-title" hidden>
+      <div class="section-heading"><h2 id="solutions-title" tabindex="-1">Megoldások</h2></div>
+      <p id="solutions-empty" class="quiz-intro" hidden>Ehhez a tanévhez még nincsenek vizsgamegoldások.</p>
+      <div id="solutions-items" class="grid"></div>
+    </section>
+
     <div id="year-content">
 
       <section id="exam-menu" aria-labelledby="exam-menu-title" hidden>
         <div class="section-heading"><h2 id="exam-menu-title" tabindex="-1">Próbavizsga</h2></div>
         <p class="quiz-intro">Két 45 perces rész, összesen 100 pont. Számológép mindkét részben használható. Pontszám és megoldások a teljes vizsga beadása után.</p>
         <div id="exam-packs" class="grid" style="margin-top: 10px"></div>
+        <p id="exam-empty" class="quiz-intro" hidden>Ehhez a tanévhez még nincs próbavizsga.</p>
       </section>
 
       <section id="exam-panel" class="quiz-panel" aria-labelledby="exam-title" hidden>
         <div class="quiz-toolbar">
-          <button id="exam-back" class="chip" type="button">← Gyakorlók</button>
+          <button id="exam-back" class="chip" type="button">← Próbavizsgák</button>
           <div class="quiz-actions" style="margin: 0">
             <span id="exam-clock" role="timer" aria-label="Hátralévő idő" style="font-variant-numeric: tabular-nums"></span>
             <button id="exam-action" class="chip primary" type="button"></button>
@@ -701,14 +801,14 @@
       </section>
 
       <section id="topics-panel" aria-labelledby="topics-title">
-        <div class="section-heading"><h2 id="topics-title">Vizsgatémák</h2></div>
+        <div class="section-heading"><h2 id="topics-title" tabindex="-1">Vizsgatémák</h2></div>
         <div class="grid" id="topic-groups"></div>
       </section>
     </div>
 
     <section class="empty" id="empty-year" aria-labelledby="empty-year-title" hidden>
       <h2 id="empty-year-title">Ehhez a tanévhez még nincs tematika</h2>
-      <p>A korábbi tematikákat a tanévválasztóval nyithatod meg.</p>
+      <p><a id="latest-syllabus" href="#tematika">A legutóbbi elérhető tematika</a></p>
     </section>
   </main>
 
@@ -1016,6 +1116,8 @@
     const emptyYear = document.querySelector("#empty-year");
     const yearContent = document.querySelector("#year-content");
     let currentEdition;
+    let currentPage = "kezdolap";
+    let renderedHash;
 
     function textElement(tag, className, text) {
       const element = document.createElement(tag);
@@ -1026,21 +1128,29 @@
 
     function showPracticeView(view) {
       const menu = view === "menu";
-      const isBank = view === "bank";
-      const empty = !currentEdition?.groups.length;
-      yearContent.hidden = isBank || (menu && empty);
-      emptyYear.hidden = !menu || !empty;
-      document.getElementById("bank-open").hidden = !menu;
-      document.getElementById("bank-panel").hidden = !isBank;
+      const atHome = menu && currentPage === "kezdolap";
+      const syllabus = menu && currentPage === "tematika";
+      const practice = menu && currentPage === "gyakorlosorok";
+      const exams = menu && currentPage === "probavizsga";
+      const solutions = menu && currentPage === "megoldasok";
+      const bank = view === "bank";
+      const node = id => document.getElementById(id);
+      node("home-panel").hidden = !atHome;
+      node("view-nav").hidden = atHome;
+      node("year-bar").hidden = !(syllabus || practice || exams || solutions);
+      yearContent.hidden = atHome || bank || solutions;
+      emptyYear.hidden = !syllabus || Boolean(currentEdition?.groups.length);
+      node("bank-panel").hidden = !bank;
+      node("solutions-menu").hidden = !solutions;
       for (const [mode, packs] of [["mixed", "mixed-test-packs"], ["algebra", "algebra-packs"],
         ["coordinates", "coordinates-packs"], ["construction", "construction-packs"], ["application", "application-packs"]]) {
-        document.getElementById(`${mode}-quiz`).hidden = view !== mode;
-        document.getElementById(`${mode}-tests`).hidden = view !== "menu" || !document.getElementById(packs).children.length;
+        node(mode + "-quiz").hidden = view !== mode;
+        node(mode + "-tests").hidden = !practice || !node(packs).children.length;
       }
-      document.getElementById("topics-panel").hidden = view !== "menu";
-      const examMenu = document.getElementById("exam-menu");
-      examMenu.hidden = view !== "menu" || !document.getElementById("exam-packs").children.length;
-      document.getElementById("exam-panel").hidden = true;
+      node("topics-panel").hidden = !syllabus || !currentEdition?.groups.length;
+      node("exam-menu").hidden = !exams;
+      node("exam-empty").hidden = Boolean(node("exam-packs").children.length);
+      node("exam-panel").hidden = true;
     }
 
     const mathNumber = value => String(value).replace("-", "−").replace(".", ",");
@@ -2027,7 +2137,7 @@
 
     const yearLinks = curricula.map(({ year }) => {
       const link = textElement("a", "chip", year.replace("-", "–"));
-      link.setAttribute("href", `#vizsga-${year}`);
+      link.setAttribute("href", "#tematika/" + year);
       yearChoices.append(link);
       return link;
     });
@@ -2051,6 +2161,12 @@
           const title = textElement("p", "topic-name", "");
           title.append(textElement("span", "topic-code", code), document.createTextNode(name));
           item.append(title);
+          const tags = topicBankTags[code] ?? [];
+          if (tags.length) {
+            const links = textElement("div", "controls topic-tags", "");
+            links.append(...tags.map(tag => pageLink(tag, "feladatbank", tag, "tag-link")));
+            item.append(links);
+          }
           list.append(item);
         }
         details.append(label, list);
@@ -2120,12 +2236,12 @@
         showPracticeView("menu");
       }
 
-      function openTest(set, examAttempt) {
+      function openTest(set, providedAttempt) {
         test = set;
-        attempt = examAttempt ?? attempts.get(set) ?? newAttempt(set);
-        if (!examAttempt) attempts.set(set, attempt);
-        node("quiz-back").hidden = Boolean(examAttempt);
-        node("quiz-back").textContent = set.bank ? "← Feladatbank" : "← Tesztek";
+        attempt = providedAttempt ?? attempts.get(set) ?? newAttempt(set);
+        if (!providedAttempt) attempts.set(set, attempt);
+        node("quiz-back").hidden = Boolean(attempt.exam);
+        node("quiz-back").textContent = attempt.solutionOnly ? "← Megoldások" : set.bank ? "← Feladatbank" : "← Tesztek";
         showPracticeView("mixed");
         title.textContent = set.title;
         const rules = pointsByErrors().map((points, errors) => `${errors} hibánál ${points} pont`);
@@ -2138,7 +2254,7 @@
           return button;
         });
         nav.replaceChildren(...navButtons);
-        if (attempt.submitted && !examAttempt) showResults();
+        if (attempt.submitted && !providedAttempt) showResults();
         else {
           showQuestion(attempt.index, false);
           title.focus();
@@ -2165,7 +2281,7 @@
         const locked = attempt.checked.has(index);
         questionPane.hidden = false;
         result.hidden = true;
-        finish.hidden = Boolean(attempt.exam);
+        finish.hidden = Boolean(attempt.exam || attempt.solutionOnly);
         finish.textContent = attempt.submitted ? "Eredmény" : "Beadás és eredmény";
         node("quiz-position").textContent = `${labelOf(index)}. feladat` + (test.bank ? "" : ` · ${index + 1} / ${test.questions.length}`);
         prompt.textContent = question.prompt;
@@ -2202,10 +2318,10 @@
         next.disabled = index === test.questions.length - 1;
         if (locked) {
           const { points, errors, omitted, extra } = grade(index);
-          node("quiz-points").textContent = `${points} / ${maxPerQuestion()} pont · ${errors} hiba`;
+          node("quiz-points").textContent = attempt.solutionOnly ? `Megoldás · ${maxPerQuestion()} pont` : `${points} / ${maxPerQuestion()} pont · ${errors} hiba`;
           const letters = [...question.answers].map(letter => letter + ")").join(", ");
           node("quiz-key").textContent = `Helyes jelölések · ${letters}` +
-            (errors ? ` · Kihagyott helyes ${omitted} · Tévesen jelölt ${extra}` : "");
+            (!attempt.solutionOnly && errors ? ` · Kihagyott helyes ${omitted} · Tévesen jelölt ${extra}` : "");
           node("quiz-explanation").textContent = question.explanation;
         }
         updateNav();
@@ -2242,6 +2358,7 @@
       }
 
       node("quiz-back").addEventListener("click", () => {
+        if (attempt.solutionOnly) return showSolutions();
         if (test.bank) return showTaskBank();
         showMenu();
         node("mixed-title").focus();
@@ -2255,7 +2372,7 @@
         review.focus();
       });
       finish.addEventListener("click", () => {
-        if (attempt.exam) return;
+        if (attempt.exam || attempt.solutionOnly) return;
         test.questions.forEach((_, index) => attempt.checked.add(index));
         attempt.submitted = true;
         showResults();
@@ -2268,6 +2385,15 @@
 
       examBlocks.mixed = {
         newAttempt, open: openTest, list: pack => pack.questions,
+        openSolution(pack) {
+          const state = newAttempt(pack);
+          state.solutionOnly = true;
+          pack.questions.forEach((question, index) => {
+            state.checked.add(index);
+            state.answers[index] = new Set(question.answers);
+          });
+          openTest(pack, state);
+        },
         score(set, state, rubric) {
           set.questions.forEach((_, index) => state.checked.add(index));
           const points = set.questions.reduce((total, question, index) =>
@@ -2458,12 +2584,12 @@
         });
       }
 
-      function open(pack, examAttempt) {
+      function open(pack, providedAttempt) {
         set = pack;
-        attempt = examAttempt ?? attempts.get(pack) ?? newAttempt(pack);
-        if (!examAttempt) attempts.set(pack, attempt);
-        node("back-menu").hidden = Boolean(examAttempt);
-        node("back-menu").textContent = pack.bank ? "← Feladatbank" : "← Gyakorlók";
+        attempt = providedAttempt ?? attempts.get(pack) ?? newAttempt(pack);
+        if (!providedAttempt) attempts.set(pack, attempt);
+        node("back-menu").hidden = Boolean(attempt.exam);
+        node("back-menu").textContent = attempt.solutionOnly ? "← Megoldások" : pack.bank ? "← Feladatbank" : "← Gyakorlók";
         title.textContent = pack.title;
         showPracticeView(mode);
         if (attempt.finished) showResults();
@@ -2492,6 +2618,13 @@
         answerFields.hidden = stage.fields.every(field => field.draw);
         answerFields.replaceChildren(...stage.fields.flatMap((field, fieldIndex) => {
           if (field.draw) return [];
+          if (attempt.solutionOnly) {
+            const box = textElement("div", "algebra-field solution-field", "");
+            const answer = typeof field.answer === "number" ? mathNumber(field.answer) :
+              Array.isArray(field.answer) ? field.answer.join(", ") : field.answer;
+            box.append(textElement("p", "", field.label), textElement("strong", "", answer));
+            return [box];
+          }
           const response = responses[fieldIndex];
           const box = document.createElement("fieldset");
           box.className = "algebra-field";
@@ -2552,14 +2685,14 @@
         feedback.hidden = !grades;
         check.hidden = Boolean(grades) || attempt.exam;
         const lastStage = index === attempt.stages.length - 1;
-        next.hidden = attempt.exam ? lastStage : !grades;
+        next.hidden = attempt.exam || attempt.solutionOnly ? lastStage : !grades;
         next.textContent = lastStage ? "Eredmény" : "Következő →";
         prev.disabled = index === 0;
         if (grades) {
           const score = sumPoints(grades);
           const full = maximum(stage);
           const status = stage.fields[0].draw && score === full ? "Helyes! · " : "";
-          node("points").textContent = `${status}${mathNumber(score)} / ${full} pont`;
+          node("points").textContent = attempt.solutionOnly ? `Megoldás · ${full} pont` : `${status}${mathNumber(score)} / ${full} pont`;
           formula(node("solution"), stage.solution);
           const credit = set.bank ? creditLine(set.bank.paper) : "";
           node("explanation").textContent = stage.explanation + (credit ? " (" + credit + ")" : "");
@@ -2589,6 +2722,7 @@
       }
 
       node("back-menu").addEventListener("click", () => {
+        if (attempt.solutionOnly) return showSolutions();
         if (set.bank) return showTaskBank();
         showMenu();
         node("menu-title").focus();
@@ -2604,7 +2738,7 @@
       prev.addEventListener("click", () => showStage(attempt.index - 1));
       next.addEventListener("click", () => {
         if (attempt.index === attempt.stages.length - 1) {
-          if (attempt.exam) return;
+          if (attempt.exam || attempt.solutionOnly) return;
           attempt.finished = true;
           showResults();
         } else showStage(attempt.index + 1);
@@ -2617,6 +2751,12 @@
 
       examBlocks[mode] = {
         newAttempt: pack => newAttempt(pack, true), open, list: createStages,
+        openSolution(pack) {
+          const state = newAttempt(pack);
+          state.solutionOnly = true;
+          state.grades = state.stages.map(stage => stage.fields.map(() => 0));
+          open(pack, state);
+        },
         score(_pack, state) {
           state.grades = state.stages.map((stage, index) => gradeStage(stage, state.answers[index]));
           return {
@@ -2636,29 +2776,6 @@
     const selectCoordinateEdition = setupGuidedQuiz("coordinates", createCoordinateStages, "7 részfeladat · 20 pont", setupCoordinateBoard());
     const selectConstructionEdition = setupGuidedQuiz("construction", createConstructionStages, "2 részfeladat · 10 pont", setupConstructionBoard());
     const selectApplicationEdition = setupGuidedQuiz("application", createApplicationStages, "4 részfeladat · 22 pont", setupApplicationBoard());
-
-    function render() {
-      const index = Math.max(0, yearLinks.findIndex(link => link.hash === location.hash));
-      const selected = yearLinks[index];
-      currentEdition = curricula[index];
-      const { groups } = currentEdition;
-      for (const link of yearLinks) {
-        if (link === selected) link.setAttribute("aria-current", "true");
-        else link.removeAttribute("aria-current");
-      }
-      summary.textContent = groups.length
-        ? `${groups.reduce((total, group) => total + group.topics.length, 0)} vizsgatéma`
-        : "";
-      if (groups.length) renderTopics(groups);
-      selectMixedEdition(curricula[index]);
-      selectAlgebraEdition(curricula[index]);
-      selectCoordinateEdition(curricula[index]);
-      selectConstructionEdition(curricula[index]);
-      selectApplicationEdition(curricula[index]);
-      selectExamEdition(curricula[index]);
-      showPracticeView("menu");
-    }
-
 
     function prepareExamStages(mode, stages) {
       if (mode === "algebra") {
@@ -2897,8 +3014,8 @@
         }, true);
       }
 
-      return nextEdition => {
-        if (edition === nextEdition) return;
+      return (nextEdition, refresh = false) => {
+        if (edition === nextEdition && !refresh) return;
         edition = nextEdition;
         menu();
       };
@@ -3158,38 +3275,169 @@
           card.className = "test-card";
           const chips = document.createElement("ul");
           chips.className = "bank-tags";
-          chips.append(...item.tags.map(value => textElement("li", "", value)));
+          chips.append(...item.tags.map(value => {
+            const chip = textElement("li", "", "");
+            const filter = textElement("button", "tag-link", value);
+            filter.type = "button";
+            filter.setAttribute("aria-label", "Szűrés · " + value);
+            filter.addEventListener("click", () => {
+              tag.value = value;
+              renderBank();
+              tag.focus();
+            });
+            chip.append(filter);
+            return chip;
+          }));
           const button = textElement("button", "chip primary", "Megoldom");
           button.type = "button";
           button.setAttribute("aria-label", "Megoldom · " + item.title);
           button.addEventListener("click", () => examBlocks[item.mode].open(item.pack));
-          card.append(textElement("p", "", item.edition.year.replace("-", "–") + " · " +
-            bankKinds[item.paper.kind] + " · " + item.ref + " · " + item.points + " pont"),
+          card.append(textElement("p", "", bankKinds[item.paper.kind] + " · " + yearLabel(item.edition.year) +
+            " · " + item.paper.title + " · " + item.ref + " · " + item.points + " pont"),
             textElement("h3", "", item.title));
-          if (item.paper.solutionOrigin) card.append(textElement("p", "", item.paper.title + " · " + creditLine(item.paper)));
+          if (item.paper.solutionOrigin) card.append(textElement("p", "", creditLine(item.paper)));
           card.append(chips, button);
           return card;
         }));
       }
       [year, tag, kind].forEach(control => control.addEventListener("change", renderBank));
-      const show = () => {
+      const show = initialTag => {
+        if (initialTag !== undefined) {
+          year.value = "";
+          tag.value = initialTag;
+          if (!tag.value) tag.value = "";
+          kind.value = "";
+        }
         showPracticeView("bank");
         renderBank();
         node("title").focus();
       };
-      node("open").addEventListener("click", () => {
-        year.value = currentEdition.year;
-        show();
-      });
-      node("back").addEventListener("click", () => {
-        showPracticeView("menu");
-        node("open").focus();
-      });
       return show;
     }
 
     const showTaskBank = setupTaskBank();
 
+
+    const topicBankTags = {
+      "1.1": ["Halmazok"], "1.3": ["Kombinatorika", "Sorbarendezés", "Leszámlálás"],
+      "2.1": ["Mértékegységváltás"], "2.2": ["Oszthatóság", "Maradék", "Legkisebb közös többszörös"],
+      "2.3": ["Arányosság", "Százalékszámítás"], "2.4": ["Egyenletek"], "2.5": ["Szöveges feladat"],
+      "2.6": ["Algebrai kifejezések", "Egyszerűsítés", "Helyettesítés"],
+      "3.1": ["Koordinátageometria"], "3.2": ["Grafikon", "Tengelymetszet"],
+      "3.3": ["Lineáris függvény"], "3.4": ["Lineáris függvény", "Meredekség"],
+      "4.1": ["Szerkesztés", "Oldalfelezés"], "4.2": ["Szimmetria", "Középpontos tükrözés"],
+      "4.3": ["Háromszögek", "Nevezetes vonalak", "Pitagorasz-tétel"], "4.4": ["Négyszögek"],
+      "4.5": ["Köréírt kör", "Kerület", "Terület"], "4.6": ["Hasáb", "Henger", "Térfogat"]
+    };
+
+    const pageNames = {
+      tematika: "Tematika", gyakorlosorok: "Gyakorlósorok", probavizsga: "Próbavizsgák", megoldasok: "Megoldások"
+    };
+    const yearLabel = year => year.slice(0, 4) + "/" + year.slice(-2);
+    const pageHash = (page, value = "") => "#" + page + (value ? "/" + encodeURIComponent(value) : "");
+    const pageLink = (label, page, value, className = "chip") => {
+      const link = textElement("a", className, label);
+      link.setAttribute("href", pageHash(page, value));
+      return link;
+    };
+    const findArchivedTasks = edition => filterBank(taskBank.records, edition.year, "", "original");
+
+    function setupHome() {
+      const current = curricula.at(-1);
+      const archived = curricula.slice(0, -1).reverse().filter(edition =>
+        edition.groups.length || taskBank.papers.get(edition).length || findArchivedTasks(edition).length);
+      const node = id => document.getElementById(id);
+      node("home-year-label").textContent = yearLabel(current.year) + " · Aktuális tanév";
+      node("home-year-status").textContent = current.groups.length ? "Elérhető az idei tematika." : "Az idei tematika még készül.";
+      node("archive-title").hidden = !archived.length;
+      node("archive-years").replaceChildren(...archived.map(edition => {
+        const row = textElement("article", "archive-year", "");
+        const links = textElement("div", "controls", "");
+        if (edition.groups.length) links.append(pageLink("Tematika", "tematika", edition.year));
+        if (taskBank.papers.get(edition).length) links.append(pageLink("Próbavizsga", "probavizsga", edition.year));
+        if (findArchivedTasks(edition).length) links.append(pageLink("Megoldások", "megoldasok", edition.year));
+        row.append(textElement("h3", "", yearLabel(edition.year)), links);
+        return row;
+      }));
+    }
+
+    function showSolutions(focus = true) {
+      const node = id => document.getElementById(id);
+      const items = findArchivedTasks(currentEdition);
+      node("solutions-empty").hidden = Boolean(items.length);
+      node("solutions-items").replaceChildren(...items.map(item => {
+        const card = textElement("article", "test-card", "");
+        const button = textElement("button", "chip primary", "Megoldás");
+        button.type = "button";
+        button.setAttribute("aria-label", "Megoldás · " + item.ref + " · " + item.title);
+        button.addEventListener("click", () => examBlocks[item.mode].openSolution(item.pack));
+        card.append(textElement("p", "", item.ref + ". feladat · " + item.points + " pont"),
+          textElement("h3", "", item.title), button);
+        return card;
+      }));
+      showPracticeView("menu");
+      if (focus) node("solutions-title").focus();
+    }
+
+    function render() {
+      const hash = location.hash;
+      if (renderedHash === hash) return;
+      const focus = renderedHash !== undefined;
+      renderedHash = hash;
+      const [slug, rawValue] = hash.slice(1).split("/");
+      const legacy = /^vizsga-(\d{4}-\d{4})$/.exec(slug);
+      let value = legacy?.[1] ?? "";
+      try { if (rawValue) value = decodeURIComponent(rawValue); } catch { value = ""; }
+      currentPage = legacy ? "tematika" :
+        slug === "feladatbank" || Object.hasOwn(pageNames, slug) ? slug : "kezdolap";
+      const fallback = currentPage === "probavizsga" ? curricula.findLast(edition => taskBank.papers.get(edition).length) :
+        currentPage === "megoldasok" ? curricula.findLast(edition => findArchivedTasks(edition).length) :
+        currentPage === "gyakorlosorok" ? curricula.findLast(edition => edition.groups.length) : curricula.at(-1);
+      currentEdition = (currentPage !== "feladatbank" && curricula.find(edition => edition.year === value)) ||
+        fallback || curricula.at(-1);
+
+      const node = id => document.getElementById(id);
+      for (const [i, link] of yearLinks.entries()) {
+        const edition = curricula[i];
+        link.textContent = yearLabel(edition.year);
+        link.setAttribute("href", pageHash(currentPage, edition.year));
+        if (edition === currentEdition) link.setAttribute("aria-current", "true");
+        else link.removeAttribute("aria-current");
+      }
+      for (const [id, page] of [["nav-syllabus", "tematika"], ["nav-bank", "feladatbank"],
+        ["nav-exam", "probavizsga"], ["nav-solutions", "megoldasok"]]) {
+        if (currentPage === page) node(id).setAttribute("aria-current", "true");
+        else node(id).removeAttribute("aria-current");
+      }
+      const { groups, year } = currentEdition;
+      summary.textContent = pageNames[currentPage] ? yearLabel(year) + " · " + pageNames[currentPage] : "";
+      const latest = curricula.findLast(edition => edition.groups.length);
+      node("latest-syllabus").hidden = !latest;
+      if (latest) {
+        node("latest-syllabus").textContent = yearLabel(latest.year) + " tematikája";
+        node("latest-syllabus").setAttribute("href", pageHash("tematika", latest.year));
+      }
+      node("topics-title").textContent = yearLabel(year) + " · Tematika";
+      node("exam-menu-title").textContent = yearLabel(year) + " · Próbavizsgák";
+      node("solutions-title").textContent = yearLabel(year) + " · Megoldások";
+      if (currentPage === "tematika" && groups.length) renderTopics(groups);
+      selectMixedEdition(currentEdition);
+      selectAlgebraEdition(currentEdition);
+      selectCoordinateEdition(currentEdition);
+      selectConstructionEdition(currentEdition);
+      selectApplicationEdition(currentEdition);
+      selectExamEdition(currentEdition, true);
+      if (currentPage === "feladatbank") showTaskBank(value);
+      else if (currentPage === "megoldasok") showSolutions(focus);
+      else {
+        showPracticeView("menu");
+        const target = currentPage === "tematika" ? groups.length ? "topics-title" : "latest-syllabus" :
+          currentPage === "probavizsga" ? "exam-menu-title" : currentPage === "kezdolap" ? "home-syllabus" : "mixed-title";
+        if (focus) node(target).focus();
+      }
+    }
+
+    setupHome();
     window.addEventListener("hashchange", render);
     render();
   </script>
